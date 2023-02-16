@@ -68,14 +68,6 @@ springfox:
 liquibase:
   enabled: true
   change-log: classpath:sql/changelog-master.xml
-flink:
-  flink_home_path: /opt/test/flink/
-  flink_jar_path: /opt/test/cloud/api-rule.jar
-  remote_flag: false
-  remote_ip: 192.168.120.201
-  remote_user: root
-  slots: 100
-  solt_allot: 3
 
 es:
   shardCount: 5
@@ -83,9 +75,9 @@ es:
 
 
 
-#jasypt:
-#  encryptor:
-#    password: salt
+jasypt:
+  encryptor:
+    password: salt
 
 
 vap:
