@@ -68,48 +68,10 @@ springfox:
 liquibase:
   enabled: true
   change-log: classpath:sql/changelog-master.xml
-flink:
-  flink_home_path: /opt/test/flink/
-  flink_jar_path: /opt/test/cloud/api-rule.jar
-  remote_flag: false
-  remote_ip: 192.168.120.201
-  remote_user: root
-  slots: 100
-  solt_allot: 3
 
 es:
   shardCount: 5
   repliceCount: 0
-
-
-
-#jasypt:
-#  encryptor:
-#    password: salt
-
-
-vap:
-  flume:
-    enable: true
-    channel-type: memory
-    capacity: 200000
-    sink-type: database
-    databases:
-      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
-        username: ${MYSQL_USER:root}
-        password: ${MYSQL_PASSWORD:mysql}
-      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
-        username: ${MYSQL_USER:root}
-        password: ${MYSQL_PASSWORD:mysql}
-    driver: ${DATABASE_DRIVER:com.mysql.jdbc.Driver}
-    insert-sql: insert into sys_log (id, request_ip,type, user_id, user_name, organization_name, description, request_url, request_time, request_method, method_name, bean_name, params_value, response_result, login_type, role_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  swagger:
-    enabled: true
-    title: api-alarmdeal接口文档
-    description: api-接口文档
-    base-package: com.vrv.vap.alarmdeal
-    version: 2.5.4
-
 
 #打开所有 Actuator 服务
 management:
