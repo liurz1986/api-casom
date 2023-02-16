@@ -1,0 +1,172 @@
+spring:
+  datasource:
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:mysql}
+    url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+    filters: stat
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+    loginUsername: vap
+    loginPassword: vap
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  main:
+    show-banner: false
+  data:
+    elasticsearch:
+      cluster-name: ${ES_CLUSTER_NAME:elasticsearch-cluster}
+      cluster-client-nodes: ${ES_CLUSTER_HOST:192.168.120.201}:${ES_CLUSTER_PORT:9200}
+      http:
+        username: ${ES_CLUSTER_UNAME:admin}
+        password: ${ES_CLUSTER_PWD:vrv@12345}
+        maxConnectNum: 100
+        maxConnectPerRoute: 100
+  session:
+    store-type: redis
+  redis:
+    database: 0
+    host: ${REDIS_HOST:192.168.120.201}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PWD:vrv@1234}
+    pool:
+      max-active: -1 # 连接池最大连接数（使用负值表示没有限制）
+      max-wait: 10000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-idle:  50 # 连接池中的最大空闲连接
+      min-idle: 0 # 连接池中的最小空闲连接
+    timeout: 10000  # 连接超时时间（毫秒）
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 500MB
+      max-request-size: 500MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+dataflag: es
+version: chutian
+ribbon:
+  okhttp:
+    enabled: true
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+springfox:
+  name: 北信源武汉分公司
+  title: 中科院运维等模块
+  description: casom相关接口文档
+liquibase:
+  enabled: true
+  change-log: classpath:sql/changelog-master.xml
+flink:
+  flink_home_path: /opt/test/flink/
+  flink_jar_path: /opt/test/cloud/api-rule.jar
+  remote_flag: false
+  remote_ip: 192.168.120.201
+  remote_user: root
+  slots: 100
+  solt_allot: 3
+
+es:
+  shardCount: 5
+  repliceCount: 0
+
+
+
+
+jasypt:
+  encryptor:
+    password: salt
+
+vap:
+  flume:
+    enable: true
+    channel-type: memory
+    capacity: 200000
+    sink-type: database
+    databases:
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+        username: ${MYSQL_USER:root}
+        password: ${MYSQL_PASSWORD:mysql}
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+        username: ${MYSQL_USER:root}
+        password: ${MYSQL_PASSWORD:mysql}
+    driver: ${DATABASE_DRIVER:com.mysql.jdbc.Driver}
+    insert-sql: insert into sys_log (id, request_ip,type, user_id, user_name, organization_name, description, request_url, request_time, request_method, method_name, bean_name, params_value, response_result, login_type, role_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  swagger:
+    enabled: true
+    title: api-alarmdeal接口文档
+    description: api-接口文档
+    base-package: com.vrv.vap.alarmdeal
+    version: 2.5.4
+
+
+#打开所有 Actuator 服务
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    jmx:
+      exposure:
+        include: '*'
+  # include: health,inf
+  endpoint:
+    health:
+      show-details: always
+  # 名称定义
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  security:
+cliperType: "AES"
+
+# 自动配置
+debug: true
+
+feign:
+  okhttp:
+    enabled: true
+  client:
+    config:
+      default:                          # 服务名，填写 default 为所有服务，或者指定某服务，例如：annoroad-beta
+        connectTimeout: 10000           # 连接超时，10秒
+        readTimeout: 20000              # 读取超时，20秒
+  httpclient:
+    enabled: false
+    max-connections: 1000               # 连接池连接最大闲置数，缺省值是 200
+    connection-timeout: 3000            # 连接超时，单位为毫秒，缺省值是 3000毫秒（3秒）
+    time-to-live: 900                   # 连接最大闲置时间，单位为秒，缺省值是 900秒（15分钟）
+    max-connections-per-route: 100
+  compression:
+    request:
+      mime-types: text/xml,application/xml,application/json
+      min-request-size: 2048
+      enabled: true
+    response:
+      enabled: true
+  hystrix:
+    enabled: true
+
+
+
+
+logging:
+  level:
+    com.vrv.apicasom: warn
+    root: warn
+    org:
+      elasticsearch:
+        client:
+          RestClient: error
+

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name:  api-casom
+  profiles:
+    active: es
+  main:
+    allow-bean-definition-overriding: true
