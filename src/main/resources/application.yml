@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username: root
-    password: mysql
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:mysql}
     url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
     filters: stat
     maxActive: 20
@@ -83,10 +83,10 @@ es:
 
 
 
+#jasypt:
+#  encryptor:
+#    password: salt
 
-jasypt:
-  encryptor:
-    password: salt
 
 vap:
   flume:
