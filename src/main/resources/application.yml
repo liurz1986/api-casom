@@ -83,9 +83,9 @@ es:
 
 
 
-#jasypt:
-#  encryptor:
-#    password: salt
+jasypt:
+  encryptor:
+    password: salt
 
 
 vap:

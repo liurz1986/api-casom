@@ -59,7 +59,7 @@ hystrix:
             timeoutInMilliseconds: 10000
 logging:
   level:
-    com.vrv: info
+    com.vrv.vap: info
     root: info
     org.springframework.cloud.sleuth: DEBUG
 log4j2:

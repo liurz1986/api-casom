@@ -201,6 +201,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>1.15</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.vrv.vap</groupId>
             <artifactId>vap-export</artifactId>
             <version>1.1.7</version>
@@ -255,6 +261,8 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
+
+
     </dependencies>
 
 
