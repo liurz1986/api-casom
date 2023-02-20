@@ -82,11 +82,9 @@ vap:
     base-package: com.vrv.vap.alarmdeal
     version: 2.5.4
 
-#时长分段、参会人数分段配置
-metting:
-  config:
-    numbersubsection: 2-5,6-10,11-20,21-30,31-40，40-
-    timesubsection: 0-60,60-90,90-120,120-150,150-180,180-
+#文件路径配置
+file:
+  filePath: /usr/local/vap/cloud
 
 #打开所有 Actuator 服务
 management:
