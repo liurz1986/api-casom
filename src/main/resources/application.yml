@@ -133,7 +133,9 @@ feign:
   hystrix:
     enabled: true
 
-
+hw:
+  meeting:
+    url: http://192.168.118.228:9888
 
 
 logging:

@@ -1,6 +1,9 @@
 package com.vrv.vap.apicasom.frameworks.util;
 
 
+import com.vrv.vap.apicasom.business.task.bean.MeetingQueueVo;
+
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
 
@@ -12,18 +15,18 @@ public class QueueUtil {
     /**
      * 初始化有界队列队列
      */
-    private static final SynchronousQueue<Map<String,String>> LINKED_BLOCKING_QUEUE = new SynchronousQueue<Map<String,String>>();
+    private static final SynchronousQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new SynchronousQueue<MeetingQueueVo>();
 
-    public static void put(Map<String,String> warnResultLogTmpVO) {
+    public static void put(MeetingQueueVo meetingSyncVo) {
         try {
-            LINKED_BLOCKING_QUEUE.put(warnResultLogTmpVO);
+            LINKED_BLOCKING_QUEUE.put(meetingSyncVo);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public static Map<String,String> poll() {
-        Map<String,String> warnResultLogTmpVO = LINKED_BLOCKING_QUEUE.poll();
-        return warnResultLogTmpVO;
+    public static MeetingQueueVo poll() {
+        MeetingQueueVo meetingSyncVo = LINKED_BLOCKING_QUEUE.poll();
+        return meetingSyncVo;
     }
 }
