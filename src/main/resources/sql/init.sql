@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_info` (
        `attendee_count` int(10) DEFAULT NULL COMMENT '会议人数',
        `participant_count` int(10) DEFAULT NULL COMMENT '参会节点数',
        `participant_unity` varchar(255) DEFAULT NULL COMMENT '参会节点',
-       `out_service` varchar(2) DEFAULT NULL COMMENT '是否对外服务',
        PRIMARY KEY (`meeting_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议详情';
 
@@ -49,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_participant` (
       `schedule_end_time` datetime DEFAULT NULL COMMENT '会议结束时间',
       `terminal_type` varchar(10) DEFAULT NULL COMMENT '设备型号',
       `stage` varchar(10) DEFAULT NULL COMMENT '会议类型',
+      `out_service` varchar(2) DEFAULT NULL COMMENT '是否对外服务',
       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议节点（接入点）';
 

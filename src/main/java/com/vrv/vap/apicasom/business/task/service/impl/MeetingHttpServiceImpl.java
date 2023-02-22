@@ -222,7 +222,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         hwMeetingInfo.setAttendeeCount(meetingInfo.getAttendees() == null ? 0 : meetingInfo.getAttendees().size());
         hwMeetingInfo.setParticipantCount(meetingInfo.getParticipants() == null ? 0 : meetingInfo.getParticipants().size());
         hwMeetingInfo.setStage("OFFLINE");
-        hwMeetingInfo.setOutService(pointIsOutService(meetingInfo));
         hwMeetingInfoService.save(hwMeetingInfo);
     }
 
@@ -232,15 +231,18 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      * @return
      */
     public String pointIsOutService(MeetingInfo meetingInfo){
-        String pointName = meetingInfo.getOrganizationName();
+        List<ParticipantRsp> participantRsps = meetingInfo.getParticipants();
         List<AttendeeRsp> attendees = meetingInfo.getAttendees();
         if(CollectionUtils.isNotEmpty(attendees)){
-            List<String> attendeesNames = attendees.stream().map(AttendeeRsp::getOrganizationName).collect(Collectors.toList());
-            for(String organizationName : attendeesNames){
-                if(!organizationName.equals(pointName)){
+            if(CollectionUtils.isNotEmpty(participantRsps)){
+                List<String> attendeesNames = attendees.stream().map(AttendeeRsp::getOrganizationName).collect(Collectors.toList());
+                List<String> participantName = participantRsps.stream().map(ParticipantRsp::getOrganizationName).collect(Collectors.toList());
+                List<String> cj= attendeesNames.stream().filter(item -> !participantName.contains(item)).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(cj)){
                     return "1";
                 }
             }
+
         }
         return "0";
     }
@@ -296,6 +298,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 participant.setScheduleEndTime(CronUtil.utcToLocal(meetingInfo.getScheduleEndTime()));
                 participant.setScheduleStartTime(CronUtil.utcToLocal(meetingInfo.getScheduleStartTime()));
                 participant.setTerminalType(participantRsp.getTerminalType());
+                participant.setOutService(pointIsOutService(meetingInfo));
                 list.add(participant);
             }
             hwMeetingParticipantService.save(list);
@@ -405,7 +408,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             hwMeetingInfo.setScheduleStartTime(CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
             hwMeetingInfo.setDuration(conferenceRsp.getDuration());
             hwMeetingInfo.setOrganizationName(conferenceRsp.getOrganizationName());
-            hwMeetingInfo.setOutService("0");
             hwMeetingInfoService.save(hwMeetingInfo);
             logger.warn("保存现有会议信息成功！会议ID={}", id);
             getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
@@ -453,6 +455,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                         hwMeetingParticipant.setOrganizationName(organizationName);
                         hwMeetingParticipant.setDuration(duration);
                         hwMeetingParticipant.setScheduleStartTime(scheduleStartTime);
+                        hwMeetingParticipant.setOutService("0");
                         hwMeetingParticipants.add(hwMeetingParticipant);
                     }
                 }

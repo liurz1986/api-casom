@@ -55,7 +55,4 @@ public class HwMeetingInfo {
     @Column(name="participant_unity")
     @ApiModelProperty(value = "会议节点")
     private String participantUnity;
-
-    @Column(name="out_service") //是否对外服务
-    private String outService;
 }

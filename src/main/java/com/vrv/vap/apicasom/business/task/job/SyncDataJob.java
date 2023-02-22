@@ -53,7 +53,7 @@ public class SyncDataJob implements SchedulingConfigurer {
     public void SyncMeetingData(){
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
-        String sql = "select job_cron from process_job where job_name = 'HwMeetingSync'";
+        String sql = "select job_cron from process_job where status = 1 and job_name = 'HwMeetingSync'";
         List<Map<String,Object>> list = jdbcTemplate.queryForList(sql);
         Map<String,Object> map1 = list.get(0);
         String cron = String.valueOf(map1.get("job_cron"));

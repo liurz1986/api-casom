@@ -62,4 +62,7 @@ public class HwMeetingParticipant {
     @Column(name="stage")
     @ApiModelProperty(value = "会议类型")
     private String stage;
+
+    @Column(name="out_service") //是否对外服务
+    private String outService;
 }
