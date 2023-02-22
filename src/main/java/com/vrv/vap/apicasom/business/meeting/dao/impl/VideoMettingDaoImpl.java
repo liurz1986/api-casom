@@ -168,7 +168,13 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         }
         // 时间范围
         if(null != videoMettingSearchVO.getStartTime() && null != videoMettingSearchVO.getEndTime()){
-            sql = sql+" and schedule_start_time BETWEEN '" +  DateUtil.format(videoMettingSearchVO.getStartTime()) + "' and '"+ DateUtil.format( videoMettingSearchVO.getEndTime())+"'";
+            sql = sql+" and date_format(schedule_start_time,'%Y-%m-%d') BETWEEN '" +  DateUtil.format(videoMettingSearchVO.getStartTime(),"yyyy-MM-dd") + "' and '"+ DateUtil.format( videoMettingSearchVO.getEndTime(),"yyyy-MM-dd")+"'";
+        }
+        if(null != videoMettingSearchVO.getStartTime() && null == videoMettingSearchVO.getEndTime()){
+            sql = sql+" and date_format(schedule_start_time,'%Y-%m-%d') >= '" +  DateUtil.format(videoMettingSearchVO.getStartTime(),"yyyy-MM-dd") +"'";
+        }
+        if(null == videoMettingSearchVO.getStartTime() && null != videoMettingSearchVO.getEndTime()){
+            sql = sql+" and date_format(schedule_start_time,'%Y-%m-%d') <= '" +  DateUtil.format(videoMettingSearchVO.getEndTime(),"yyyy-MM-dd") +"'";
         }
         sql = sql+" and stage='OFFLINE' order by schedule_start_time desc" ;
         return sql;
