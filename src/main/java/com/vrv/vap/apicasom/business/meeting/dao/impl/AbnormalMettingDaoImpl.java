@@ -91,7 +91,16 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 filterSql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(alarm_time)";
                 break;
             case "none":
-                filterSql="date_format(alarm_time,'%Y-%m-%d') >= '"+ DateUtil.format(statisticSearchVO.getStartDate(),"yyyy-MM-dd") +"' and date_format(alarm_time,'%Y-%m-%d') <='"+DateUtil.format(statisticSearchVO.getEndDate(),"yyyy-MM-dd")+"'";
+                // 时间范围
+                if(null != statisticSearchVO.getStartDate() && null != statisticSearchVO.getEndDate()){
+                    filterSql="date_format(alarm_time,'%Y-%m-%d') >= '"+ DateUtil.format(statisticSearchVO.getStartDate(),"yyyy-MM-dd") +"' and date_format(alarm_time,'%Y-%m-%d') <='"+DateUtil.format(statisticSearchVO.getEndDate(),"yyyy-MM-dd")+"'";
+                }
+                if(null != statisticSearchVO.getStartDate() && null == statisticSearchVO.getEndDate()){
+                    filterSql="date_format(alarm_time,'%Y-%m-%d') >= '"+ DateUtil.format(statisticSearchVO.getStartDate(),"yyyy-MM-dd") +"'";
+                }
+                if(null == statisticSearchVO.getStartDate() && null != statisticSearchVO.getEndDate()){
+                    filterSql="date_format(alarm_time,'%Y-%m-%d') <= '"+ DateUtil.format(statisticSearchVO.getEndDate(),"yyyy-MM-dd") +"'";
+                }
                 break;
             default:
                 break;
@@ -176,13 +185,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             detail.setStartTime(rs.getDate("alarm_time"));
             Date startTime = rs.getDate("alarm_time");
             Date endTime = rs.getDate("cleared_time");
-            // 开始时间与结束时间计算时长
+            // 开始时间与结束时间计算时长,保留两位小数
             if(null == endTime|| null == startTime){
                 detail.setAbnormalTime("");
             }else{
                 long result = (endTime.getTime()-startTime.getTime())/(1000*60*60);
                 DecimalFormat format = new DecimalFormat("#.00");
-                String resultTime = format.format(result);
+                String resultTime = result == 0?"0.00": format.format(result);
                 detail.setAbnormalTime(resultTime);
             }
             return detail;
