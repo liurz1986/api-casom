@@ -182,9 +182,9 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             String grade = rs.getString("severity");
             String gradeName = MettingCommonUtil.getRangeName(grade);
             detail.setGrade(gradeName);
-            detail.setStartTime(rs.getDate("alarm_time"));
-            Date startTime = rs.getDate("alarm_time");
-            Date endTime = rs.getDate("cleared_time");
+            Date startTime = rs.getTimestamp("alarm_time");
+            detail.setStartTime(startTime);
+            Date endTime = rs.getTimestamp("cleared_time");
             // 开始时间与结束时间计算时长,保留两位小数
             if(null == endTime|| null == startTime){
                 detail.setAbnormalTime("");
@@ -251,8 +251,8 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         @Override
         public AbnormalMettingExportExcelVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingExportExcelVO data = new AbnormalMettingExportExcelVO();
-            Date startTime = rs.getDate("alarm_time");
-            Date endTime = rs.getDate("cleared_time");
+            Date startTime = rs.getTimestamp("alarm_time");
+            Date endTime = rs.getTimestamp("cleared_time");
             // 开始时间与结束时间计算时长
             if(null == endTime|| null == startTime){
                 data.setAbnormalTime("");
@@ -262,7 +262,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 String resultTime = format.format(result);
                 data.setAbnormalTime(resultTime);
             }
-            data.setStartTime(rs.getDate("alarm_time"));
+            data.setStartTime(startTime);
             // 严重等级转换处理
             String grade = rs.getString("severity");
             String gradeName = MettingCommonUtil.getRangeName(grade);
