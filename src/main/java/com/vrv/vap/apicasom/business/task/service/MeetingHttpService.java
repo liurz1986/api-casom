@@ -17,7 +17,7 @@ public interface MeetingHttpService {
      * 获取token
      * @return
      */
-    public String getToken();
+    public String getToken(Integer errorNum);
 
     /**
      * 更新token
@@ -28,29 +28,29 @@ public interface MeetingHttpService {
     /**
      * 查询会议列表
      */
-    public List<String> getHistoryMeetingList(String startTime, String endTime);
+    public List<String> getHistoryMeetingList(String startTime, String endTime,Integer errorNum);
 
     /**
      * 查询历史会议详情
      */
-    public void getHistoryMeetingInfo(String id);
+    public void getHistoryMeetingInfo(String id,Integer errorNum);
 
     /**
      * 查询历史会议告警
      * @param id
      */
-    public void getHistoryMeetingAlarm(String id);
+    public void getHistoryMeetingAlarm(String id,Integer errorNum);
 
     /**
      * 查询预约会议列表
      */
-    public List<String> getNowMeetingList(String startTime, String endTime);
+    public List<String> getNowMeetingList(String startTime, String endTime,Integer errorNum);
 
     /**
      * 查询预约会议详情
      * @param id
      */
-    public void getNowMeetingInfo(String id);
+    public void getNowMeetingInfo(String id,Integer errorNum);
 
     public void getNowMeetingParticipants(String id,String organizationName,int duration, Date scheduleStartTime);
 

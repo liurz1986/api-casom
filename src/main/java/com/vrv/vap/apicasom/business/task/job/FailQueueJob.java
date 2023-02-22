@@ -1,14 +1,22 @@
 package com.vrv.vap.apicasom.business.task.job;
 
 import com.alibaba.fastjson.JSONObject;
+import com.vrv.vap.apicasom.business.task.bean.HwSyncErrorLog;
 import com.vrv.vap.apicasom.business.task.bean.MeetingQueueVo;
+import com.vrv.vap.apicasom.business.task.service.HwSyncErrorLogService;
+import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
+import com.vrv.vap.apicasom.business.task.service.impl.MeetingHttpServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
+import com.vrv.vap.jpa.common.UUIDUtils;
 import com.vrv.vap.jpa.spring.SpringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,6 +26,13 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class FailQueueJob implements CommandLineRunner {
+
+    // 日志
+    private Logger logger = LoggerFactory.getLogger(FailQueueJob.class);
+
+    @Autowired
+    private HwSyncErrorLogService hwSyncErrorLogService;
+
     @Override
     public void run(String... args) throws Exception {
         new Thread(new Runnable() {
@@ -28,48 +43,53 @@ public class FailQueueJob implements CommandLineRunner {
         }).start();
     }
 
-    public void failQueue(){
-        while (true){
+    public void failQueue() {
+        while (true) {
             MeetingQueueVo meetingQueueVo = QueueUtil.poll();
-            if(meetingQueueVo == null){
-                // 执行一个休息10分钟
-                try {
-                    TimeUnit.MINUTES.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (meetingQueueVo == null) {
                 continue;
             }
-            int failNum = meetingQueueVo.getFailNum();
-            if(failNum<3){
-                failNum++;
-                String method = meetingQueueVo.getMethod();
-                String param = meetingQueueVo.getParam();
+            String method = meetingQueueVo.getMethod();
+            String param = meetingQueueVo.getParam();
+            int errorNum = meetingQueueVo.getErrorNum();
+            if(errorNum<3){
                 try {
-                    Class cls = SpringUtil.getBean("MeetingHttpServiceImpl").getClass();
-                    Method m = cls.getDeclaredMethod(method, String.class);
-                    if(method.contains("List")){
+                    Class cls = SpringUtil.getBean(MeetingHttpService.class).getClass();
+                    if (method.contains("List")) {
+                        Method m = cls.getDeclaredMethod(method, String.class, String.class,Integer.class);
                         JSONObject json = JSONObject.parseObject(param);
                         String startTime = json.getString("startTime");
                         String endTime = json.getString("endTime");
-                        Object invoke = m.invoke(SpringUtil.getBean("MeetingHttpServiceImpl"), startTime,endTime);
-                    }else{
+                        m.invoke(SpringUtil.getBean(MeetingHttpService.class), startTime, endTime,(errorNum+1));
+                    } else if ("getToken".equals(method)) {
+                        Method m = cls.getDeclaredMethod(method,Integer.class);
+                        m.invoke(SpringUtil.getBean(MeetingHttpService.class),(errorNum+1));
+                    } else {
+                        Method m = cls.getDeclaredMethod(method, String.class,Integer.class);
                         JSONObject json = JSONObject.parseObject(param);
                         String id = json.getString("id");
-                        Object invoke = m.invoke(SpringUtil.getBean("MeetingHttpServiceImpl"), id);
+                        m.invoke(SpringUtil.getBean(MeetingHttpService.class), id,(errorNum+1));
                     }
-                }catch (Exception exception){
-                    exception.printStackTrace();
+                } catch (Exception ex) {
+                    logger.error("接口{}，调用失败！失败次数={}", method, (errorNum+1));
                 }
-            }else{
-                // 记录问题日志
+            }
+            if (errorNum == 3) {
+                // 记录错误日志（表）
+                HwSyncErrorLog hwSyncErrorLog = new HwSyncErrorLog();
+                hwSyncErrorLog.setId(UUIDUtils.get32UUID());
+                hwSyncErrorLog.setErrorMethod(meetingQueueVo.getMethod());
+                hwSyncErrorLog.setErrorParam(meetingQueueVo.getParam());
+                hwSyncErrorLog.setErrorMsg(meetingQueueVo.getErrorMsg());
+                hwSyncErrorLog.setErrorTime(new Date());
+                hwSyncErrorLogService.save(hwSyncErrorLog);
             }
             // 执行一个休息10分钟
-            try {
-                TimeUnit.MINUTES.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                TimeUnit.MINUTES.sleep(10);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 }

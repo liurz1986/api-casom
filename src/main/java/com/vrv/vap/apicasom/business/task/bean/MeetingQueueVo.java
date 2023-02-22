@@ -9,7 +9,10 @@ import lombok.Data;
  */
 @Data
 public class MeetingQueueVo {
+    private String id;
     private String method;
     private String param;
-    private int failNum;
+    private String errorMsg;
+    private int errorNum;
+
 }

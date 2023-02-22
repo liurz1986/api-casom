@@ -43,7 +43,7 @@ public class InitTokenJob{
 
     @Scheduled(cron = "59 59 23 * * ?")
     public void getToken(){
-        token = meetingHttpService.getToken();
+        token = meetingHttpService.getToken(0);
         meetingHttpService.updateToken(token);
         updateCity();
     }

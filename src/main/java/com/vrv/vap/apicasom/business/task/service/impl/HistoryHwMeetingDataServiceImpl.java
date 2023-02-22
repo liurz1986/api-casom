@@ -21,22 +21,16 @@ public class HistoryHwMeetingDataServiceImpl implements HwMeetingDataService {
     @Autowired
     private MeetingHttpService meetingHttpService;
 
-    private Executor infoExecutor = ExecutorConfig.asyncServiceExecutor();
-
-    private Executor alarmExecutor = ExecutorConfig.historyAlarmMeetingExecutor();
-
     @Override
     public List<String> queryMeetingIds(String startTime, String endTime) {
-        List<String> ids = meetingHttpService.getHistoryMeetingList(startTime,endTime);
+        List<String> ids = meetingHttpService.getHistoryMeetingList(startTime,endTime,0);
         return ids;
     }
 
     @Override
     public void handleMeetingInfo(List<String> ids) {
         for(String id : ids){
-//            infoExecutor.execute(()->{
-                meetingHttpService.getHistoryMeetingInfo(id);
-//            });
+                meetingHttpService.getHistoryMeetingInfo(id,0);
         }
     }
 
@@ -44,7 +38,7 @@ public class HistoryHwMeetingDataServiceImpl implements HwMeetingDataService {
     public void handleMeetingAlarm(List<String> ids) {
         for(String id: ids){
 //            alarmExecutor.execute(()->{
-                meetingHttpService.getHistoryMeetingAlarm(id);
+                meetingHttpService.getHistoryMeetingAlarm(id,0);
 //            });
         }
     }

@@ -5,6 +5,7 @@ import com.vrv.vap.apicasom.business.task.bean.MeetingQueueVo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -15,14 +16,10 @@ public class QueueUtil {
     /**
      * 初始化有界队列队列
      */
-    private static final SynchronousQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new SynchronousQueue<MeetingQueueVo>();
+    private static final ConcurrentLinkedQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new ConcurrentLinkedQueue<MeetingQueueVo>();
 
     public static void put(MeetingQueueVo meetingSyncVo) {
-        try {
-            LINKED_BLOCKING_QUEUE.put(meetingSyncVo);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            boolean flag = LINKED_BLOCKING_QUEUE.add(meetingSyncVo);
     }
 
     public static MeetingQueueVo poll() {
