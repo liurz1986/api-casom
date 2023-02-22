@@ -10,6 +10,7 @@ import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
+import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -41,15 +42,24 @@ public class InitTokenJob{
     @Autowired
     private ZkyUnitService zkyUnitService;
 
+    @Autowired
+    private RedisUtils redisUtils;
+
     @Scheduled(cron = "59 59 23 * * ?")
     public void getToken(){
         token = meetingHttpService.getToken(0);
         meetingHttpService.updateToken(token);
         updateCity();
+        initMeetingRooms();
     }
 
     public void updateCity(){
         Map<String,ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
         meetingHttpService.updateCity(zkyUnitBeanMap);
+    }
+
+    public void initMeetingRooms(){
+        int total = meetingHttpService.initMeetingRooms();
+        redisUtils.set("MeetingRooms",total);
     }
 }

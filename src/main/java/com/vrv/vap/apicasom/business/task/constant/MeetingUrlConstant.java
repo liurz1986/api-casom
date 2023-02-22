@@ -26,4 +26,7 @@ public class MeetingUrlConstant {
 
     // 预约会议会场
     public static String NOW_PARTICIPANT_URL="/online/conferences/{0}/participants/conditions";
+
+    // 会议室
+    public static String MEETING_ROOMS_URL = "/meetingrooms/condition";
 }
