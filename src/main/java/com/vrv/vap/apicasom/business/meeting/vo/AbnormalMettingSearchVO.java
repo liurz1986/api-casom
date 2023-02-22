@@ -18,7 +18,7 @@ public class AbnormalMettingSearchVO {
     /**
      * 异常类型
      */
-    private String type;
+    private String abnormalType;
     /**
      * 严重等级
      */
@@ -27,7 +27,7 @@ public class AbnormalMettingSearchVO {
     /**
      * month(近一个月)、halfyear(半年)、year(一年)、none表示手动输入(startDate、endDate)
      */
-    private String timeType;
+    private String type;
     /**
      * 开始时间
      */

@@ -20,7 +20,7 @@ public class AbnormalMettingExportExcelVO {
      * 异常类型
      */
     @ExcelField(title = "异常类型", order = 1)
-    private String type;
+    private String abnormalType;
     /**
      * 严重等级
      */

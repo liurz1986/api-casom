@@ -17,7 +17,7 @@ public class AbnormalMettingVO {
     /**
      * 异常类型
      */
-    private String type;
+    private String abnormalType;
     /**
      * 严重等级
      */
