@@ -474,6 +474,19 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
     }
 
+    @Override
+    public int initMeetingRooms(){
+        Map<String,String> header = getHeader();
+        String roomUrl = url+MeetingUrlConstant.MEETING_ROOMS_URL;
+        String res = HttpClientUtils.doPost(roomUrl, null, header);
+        if(StringUtils.isNotBlank(res)){
+            MeetingRoomsRes meetingRoomsRes = gson.fromJson(res,MeetingRoomsRes.class);
+            int total = meetingRoomsRes.getTotalElements();
+            return total;
+        }
+        return 0;
+    }
+
     /**
      * 清除历史数据
      *

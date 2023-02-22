@@ -60,5 +60,10 @@ public interface MeetingHttpService {
      */
     public void updateCity(Map<String, ZkyUnitBean> map);
 
+    /**
+     * 初始会议室信息
+     * @return
+     */
+    public int initMeetingRooms();
 
 }
