@@ -20,14 +20,14 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
 
     @Override
     public List<String> queryMeetingIds(String startTime, String endTime) {
-        List<String> ids = meetingHttpService.getNowMeetingList(startTime,endTime);
+        List<String> ids = meetingHttpService.getNowMeetingList(startTime,endTime,0);
         return ids;
     }
 
     @Override
     public void handleMeetingInfo(List<String> ids) {
         for(String id:ids){
-            meetingHttpService.getNowMeetingInfo(id);
+            meetingHttpService.getNowMeetingInfo(id,0);
         }
     }
 

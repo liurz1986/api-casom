@@ -11,7 +11,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableRedisHttpSession
 @EnableDiscoveryClient
 @SpringBootApplication
-@ComponentScan({"com.vrv.vap.apicasom","com.vrv.vap.jpa.mapper","com.vrv.vap.common","com.vrv.vap.swagger2","com.vrv.vap.jpa.req","com.vrv.vap.jpa.http","com.vrv.vap.syslog.*","com.vrv.vap.jpa.req"})
+@ComponentScan({"com.vrv.vap.apicasom","com.vrv.vap.jpa.mapper","com.vrv.vap.common","com.vrv.vap.swagger2","com.vrv.vap.jpa.req","com.vrv.vap.jpa.http","com.vrv.vap.syslog.*","com.vrv.vap.jpa.req","com.vrv.vap.jpa.spring"})
 public class ApiCasomApplication {
 
     public static void main(String[] args) {
