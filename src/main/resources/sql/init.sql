@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 -- changeset lianggl:20230222-alarmdeal-001 labels:"华为会议同步"
-CREATE TABLE `hw_meeting_alarm` (
+CREATE TABLE IF NOT EXISTS `hw_meeting_alarm` (
         `id` varchar(125) NOT NULL COMMENT '记录ID',
         `meeting_id` varchar(125) DEFAULT NULL COMMENT '会议ID',
         `alarm_no` varchar(48) DEFAULT NULL COMMENT '告警标识',
@@ -12,7 +12,7 @@ CREATE TABLE `hw_meeting_alarm` (
         PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='会议告警';
 
-CREATE TABLE `hw_meeting_attendee` (
+CREATE TABLE IF NOT EXISTS `hw_meeting_attendee` (
        `id` varchar(125) NOT NULL COMMENT '记录ID',
        `meeting_id` varchar(125) DEFAULT NULL COMMENT '会议ID',
        `participant_name` varchar(255) DEFAULT NULL COMMENT '节点名称(会场名称)',
@@ -23,7 +23,7 @@ CREATE TABLE `hw_meeting_attendee` (
        PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议会与人';
 
-CREATE TABLE `hw_meeting_info` (
+CREATE TABLE IF NOT EXISTS `hw_meeting_info` (
        `meeting_id` varchar(125) NOT NULL COMMENT '会议ID',
        `duration` int(48) DEFAULT NULL COMMENT '会议时长',
        `schedule_start_time` datetime DEFAULT NULL COMMENT '会议开始时间',
@@ -37,7 +37,7 @@ CREATE TABLE `hw_meeting_info` (
        PRIMARY KEY (`meeting_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议详情';
 
-CREATE TABLE `hw_meeting_participant` (
+CREATE TABLE IF NOT EXISTS `hw_meeting_participant` (
       `id` varchar(128) NOT NULL COMMENT '记录ID',
       `meeting_id` varchar(128) DEFAULT NULL COMMENT '会议ID',
       `name` varchar(128) DEFAULT NULL COMMENT '节点名称',
@@ -52,7 +52,7 @@ CREATE TABLE `hw_meeting_participant` (
       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议节点（接入点）';
 
-CREATE TABLE `hw_sync_error_log` (
+CREATE TABLE IF NOT EXISTS `hw_sync_error_log` (
      `id` varchar(125) NOT NULL COMMENT '记录ID',
      `error_method` varchar(255) DEFAULT NULL COMMENT '错误方法',
      `error_param` varchar(255) DEFAULT NULL COMMENT '错误参数',
