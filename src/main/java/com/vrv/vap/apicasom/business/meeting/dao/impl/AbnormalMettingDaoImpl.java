@@ -168,7 +168,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         public AbnormalMettingVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingVO detail = new AbnormalMettingVO();
             detail.setName(rs.getString("name"));
-            detail.setType(rs.getString("alarm_type"));
+            detail.setAbnormalType(rs.getString("alarm_type"));
             // 严重等级转换处理
             String grade = rs.getString("severity");
             String gradeName = MettingCommonUtil.getRangeName(grade);
@@ -195,8 +195,8 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             sql = sql+" and name like '%" +abnormalMettingSearchVO.getName()+"%'";
         }
         // 异常类型
-        if(StringUtils.isNotEmpty(abnormalMettingSearchVO.getTimeType())){
-            sql = sql+" and alarm_type ='"+abnormalMettingSearchVO.getTimeType()+"'";
+        if(StringUtils.isNotEmpty(abnormalMettingSearchVO.getAbnormalType())){
+            sql = sql+" and alarm_type ='"+abnormalMettingSearchVO.getAbnormalType()+"'";
         }
         // 严重等级
         if(StringUtils.isNotEmpty(abnormalMettingSearchVO.getGrade())){
@@ -259,7 +259,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             String gradeName = MettingCommonUtil.getRangeName(grade);
             data.setGrade(gradeName);
             data.setName(rs.getString("name"));
-            data.setType(rs.getString("alarm_type"));
+            data.setAbnormalType(rs.getString("alarm_type"));
             return data;
         }
     }
