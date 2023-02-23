@@ -73,14 +73,16 @@ public class InitDataJob implements CommandLineRunner {
                 continue;
             }
             String configValue = systemConfigService.getSysConfigById("meeting_time_conf");
-                // 存在配置，且配置开启
-            try {
-                TimeBean time = gson.fromJson(configValue,TimeBean.class);
-                handleData(time);
-                updateJobStatus();
-            }catch (Exception ex){
-                logger.error("时间格式配置错误，tb_conf配置项，meeting_time_conf 配置错误");
+            // 存在配置，且配置开启
+            TimeBean time = null;
+            if(StringUtils.isNotBlank(configValue)){
+                time = new TimeBean();
+                logger.error("时间格式配置错误，tb_conf配置项，meeting_time_conf 未配置");
+            }else{
+                time = gson.fromJson(configValue,TimeBean.class);
             }
+            handleData(time);
+            updateJobStatus();
             try {
                 TimeUnit.MINUTES.sleep(10);
             } catch (InterruptedException e) {
@@ -90,7 +92,7 @@ public class InitDataJob implements CommandLineRunner {
     }
 
     public void updateJobStatus(){
-        String sql = "update process_job set status = 0;";
+        String sql = "update process_job set status = 0 where process_job = 'InitHwMeetingJob';";
         jdbcTemplate.execute(sql);
     }
 
