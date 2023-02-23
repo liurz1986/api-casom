@@ -186,16 +186,15 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             String gradeName = MettingCommonUtil.getRangeName(grade);
             detail.setGrade(gradeName);
             Date startTime = rs.getTimestamp("alarm_time");
-            detail.setStartTime(DateUtil.parseDate(DateUtil.format(startTime),DateUtil.DEFAULT_DATE_PATTERN));
+            detail.setStartTime(startTime == null?null: DateUtil.parseDate(DateUtil.format(startTime),DateUtil.DEFAULT_DATE_PATTERN));
             Date endTime = rs.getTimestamp("cleared_time");
             // 开始时间与结束时间计算时长,保留两位小数,分种
             if(null == endTime|| null == startTime){
                 detail.setAbnormalTime("");
             }else{
                 long result = endTime.getTime()-startTime.getTime();
-                BigDecimal data = new BigDecimal(result).divide(new BigDecimal(1000*60));
-                String abnormalTime = data.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue()+"";
-                detail.setAbnormalTime(abnormalTime);
+                double bigdata = new BigDecimal(result/1000*60).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+                detail.setAbnormalTime(bigdata+"");
             }
             return detail;
         }
@@ -263,11 +262,10 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 data.setAbnormalTime("");
             }else{
                 long result = endTime.getTime()-startTime.getTime();
-                BigDecimal bigdata = new BigDecimal(result).divide(new BigDecimal(1000*60));
-                String abnormalTime = bigdata.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue()+"";
-                data.setAbnormalTime(abnormalTime);
+                double bigdata = new BigDecimal(result/1000*60).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+                data.setAbnormalTime(bigdata+"");
             }
-            data.setStartTime(DateUtil.format(startTime));
+            data.setStartTime(startTime == null?null: DateUtil.format(startTime));
             // 严重等级转换处理
             String grade = rs.getString("severity");
             String gradeName = MettingCommonUtil.getRangeName(grade);
@@ -278,6 +276,15 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         }
     }
 
+    public static void main(String[] args){
+        double data1 = 182;
+        double data2= 60;
+        double result = (double) data1/data2;
+        double result1 = new BigDecimal(result).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+        System.out.println(result);
+        System.out.println(result1);
+
+    }
     /**
      * 获取存在异常会议的城市
      * @param type
