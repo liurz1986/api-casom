@@ -84,7 +84,7 @@ public class LargeScreenController {
      * type:quarter(季)，halfyear(半年)、year(一年)
      * @return Result
      */
-    @PostMapping(value = "/queryCityDetail/{type}")
+    @PostMapping(value = "/queryCityDetail")
     @ApiOperation(value = "地图城市详情", notes = "")
     @SysRequestLog(description = "地图城市详情", actionType = ActionType.SELECT)
     public Result<LargeMapDetailVO> queryCityDetail(@RequestBody CommonSearchVO commonSearchVO) {
