@@ -14,6 +14,8 @@ public class MettingCommonUtil {
 
     private static List<String> timeTypes = new ArrayList<>();
 
+    private static List<String> largeTimeTypes = new ArrayList<>();
+
     /**
      * 时间段为手动输入
      */
@@ -30,6 +32,10 @@ public class MettingCommonUtil {
           timeTypes.add("halfyear");
           timeTypes.add("year");
           timeTypes.add("none");
+
+          largeTimeTypes.add("quarter");
+          largeTimeTypes.add("halfyear");
+          largeTimeTypes.add("year");
       }
 
     /**
@@ -58,6 +64,14 @@ public class MettingCommonUtil {
         return  timeTypes.contains(timeType);
     }
 
+    /**
+     * 大屏时间段统计类型判断
+     * @param timeType
+     * @return
+     */
+    public static boolean isExistLargeTimeType(String timeType){
+        return  largeTimeTypes.contains(timeType);
+    }
     /**
      * 判断开始时间与结束时间之间是否大于24小时
      * @param endDate

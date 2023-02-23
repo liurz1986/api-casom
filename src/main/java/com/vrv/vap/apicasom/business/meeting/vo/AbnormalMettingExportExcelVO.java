@@ -30,7 +30,7 @@ public class AbnormalMettingExportExcelVO {
      * 故障开始时间
      */
     @ExcelField(title = "故障开始时间", order = 1)
-    private Date startTime;
+    private String startTime;
     /**
      * 故障持续时间长度
      */

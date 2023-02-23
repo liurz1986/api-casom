@@ -4,6 +4,7 @@ import com.vrv.vap.apicasom.business.meeting.dao.AbnormalMettingDao;
 import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 import com.vrv.vap.jpa.common.DateUtil;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -173,6 +175,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
 
 
     public class AbnormalMettingVOMapper implements RowMapper<AbnormalMettingVO> {
+        @SneakyThrows
         @Override
         public AbnormalMettingVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingVO detail = new AbnormalMettingVO();
@@ -183,16 +186,16 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             String gradeName = MettingCommonUtil.getRangeName(grade);
             detail.setGrade(gradeName);
             Date startTime = rs.getTimestamp("alarm_time");
-            detail.setStartTime(startTime);
+            detail.setStartTime(DateUtil.parseDate(DateUtil.format(startTime),DateUtil.DEFAULT_DATE_PATTERN));
             Date endTime = rs.getTimestamp("cleared_time");
-            // 开始时间与结束时间计算时长,保留两位小数
+            // 开始时间与结束时间计算时长,保留两位小数,分种
             if(null == endTime|| null == startTime){
                 detail.setAbnormalTime("");
             }else{
-                long result = (endTime.getTime()-startTime.getTime())/(1000*60*60);
-                DecimalFormat format = new DecimalFormat("#.00");
-                String resultTime = result == 0?"0.00": format.format(result);
-                detail.setAbnormalTime(resultTime);
+                long result = endTime.getTime()-startTime.getTime();
+                BigDecimal data = new BigDecimal(result).divide(new BigDecimal(1000*60));
+                String abnormalTime = data.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue()+"";
+                detail.setAbnormalTime(abnormalTime);
             }
             return detail;
         }
@@ -247,22 +250,24 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         return details;
     }
 
+
+
     public class AbnormalMettingExportExcelVOMapper implements RowMapper<AbnormalMettingExportExcelVO> {
         @Override
         public AbnormalMettingExportExcelVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingExportExcelVO data = new AbnormalMettingExportExcelVO();
             Date startTime = rs.getTimestamp("alarm_time");
             Date endTime = rs.getTimestamp("cleared_time");
-            // 开始时间与结束时间计算时长
+            // 开始时间与结束时间计算时长 换算成分钟
             if(null == endTime|| null == startTime){
                 data.setAbnormalTime("");
             }else{
-                long result = (endTime.getTime()-startTime.getTime())/(1000*60*60);
-                DecimalFormat format = new DecimalFormat("#.00");
-                String resultTime = format.format(result);
-                data.setAbnormalTime(resultTime);
+                long result = endTime.getTime()-startTime.getTime();
+                BigDecimal bigdata = new BigDecimal(result).divide(new BigDecimal(1000*60));
+                String abnormalTime = bigdata.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue()+"";
+                data.setAbnormalTime(abnormalTime);
             }
-            data.setStartTime(startTime);
+            data.setStartTime(DateUtil.format(startTime));
             // 严重等级转换处理
             String grade = rs.getString("severity");
             String gradeName = MettingCommonUtil.getRangeName(grade);
@@ -271,5 +276,32 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             data.setAbnormalType(rs.getString("alarm_type"));
             return data;
         }
+    }
+
+    /**
+     * 获取存在异常会议的城市
+     * @param type
+     * @return
+     */
+    @Override
+    public List<String> getAbnormalMettingCitys(String type) {
+        String sql ="select DISTINCT node.city from hw_meeting_participant as node inner join  " +
+                " (select meeting_id from hw_meeting_info where meeting_id in (select meeting_id from hw_meeting_alarm)" ;
+        switch (type) {
+            case "quarter":
+                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
+                break;
+            case "halfyear":
+                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
+                break;
+            case "year":
+                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
+                break;
+            default:
+                break;
+        }
+        sql = sql+ ") meeting on node.meeting_id=meeting.meeting_id";
+        List<String> list = jdbcTemplate.queryForList(sql,String.class);
+        return list;
     }
 }

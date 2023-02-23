@@ -55,7 +55,7 @@ public class VideoMettingController {
 
     /**
      * 参会人数分布统计
-     * {"type":"halfyear"}
+     *
      */
     @PostMapping("participantsStatistics")
     @SysRequestLog(description="参会人数分布统计", actionType = ActionType.SELECT,manually = false)

@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -206,4 +207,97 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
             return excelVO;
         }
     }
+    /**
+     * 当前节点在线总数
+     * @return
+     */
+    @Override
+    public int getOnLineNodes() {
+        String sql="select sum(participant_count) as number from hw_meeting_info where stage='ONLINE'";
+        Map<String, Object> runNodes = jdbcTemplate.queryForMap(sql);
+        if (null == runNodes || runNodes.size() == 0) {
+            return 0;
+        }
+        return runNodes.get("number")==null?0:Integer.parseInt(String.valueOf(runNodes.get("number")));
+    }
+
+
+
+    /**
+     * 举办会议次数 :状态为offline总数
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * @return
+     */
+    @Override
+    public int getOffLineMettingTotal(String type) {
+        String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+    }
+
+    /**
+     * 参会总人数:状态为OFFLINE
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * @return
+     */
+    @Override
+    public int getOfflineMettingUserCount(String type) {
+        String sql = "select sum(attendee_count) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+    }
+
+    /**
+     * 会议总时长: 状态为OFFLINE
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * @param type
+     * @return
+     */
+    @Override
+    public int getOfflineMeetingTimeTotal(String type) {
+        String sql = "select sum(duration) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        long durations = result.get("number")==null?0:Long.parseLong(String.valueOf(result.get("number")));
+        // 换算成小时：取整，四舍五入
+        return divideUP(String.valueOf(durations),String.valueOf(60));
+    }
+
+    /**
+     *
+     * @param data1
+     * @param data2
+     * @return
+     */
+    public int divideUP(String data1, String data2) {
+        BigDecimal data = new BigDecimal(data1).divide(new BigDecimal(data2));
+        return data.setScale(0,BigDecimal.ROUND_HALF_UP).intValue();
+    }
+
+    private String largeScreenCommonSql(String type){
+        String sql ="";
+        switch (type) {
+            case "quarter":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
+                break;
+            case "halfyear":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
+                break;
+            case "year":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
+                break;
+            default:
+                break;
+        }
+        return sql;
+    }
+
 }

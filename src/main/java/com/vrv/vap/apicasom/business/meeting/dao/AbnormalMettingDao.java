@@ -17,4 +17,6 @@ public interface AbnormalMettingDao {
     public List<AbnormalMettingVO> getPageList(AbnormalMettingSearchVO abnormalMettingSearchVO);
 
     public List<AbnormalMettingExportExcelVO> exportData(AbnormalMettingSearchVO abnormalMettingSearchVO);
+
+    public List<String> getAbnormalMettingCitys(String type);
 }
