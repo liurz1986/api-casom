@@ -52,7 +52,21 @@ public interface MeetingHttpService {
      */
     public void getNowMeetingInfo(String id,Integer errorNum);
 
+    /**
+     * 预约会议节点
+     * @param id
+     * @param organizationName
+     * @param duration
+     * @param scheduleStartTime
+     */
     public void getNowMeetingParticipants(String id,String organizationName,int duration, Date scheduleStartTime);
+
+    /**
+     * 预约会议告警
+     * @param id
+     * @param errorNum
+     */
+    public void getNowMeetingAlarm(String id,Integer errorNum);
 
     /**
      * 更新城市信息

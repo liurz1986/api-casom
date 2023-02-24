@@ -52,4 +52,8 @@ public class HwMeetingAlarm {
     @ApiModelProperty(value = "告警确认或恢复时间")
     private Date clearedTime;
 
+    @Column(name="alarm_status")
+    @ApiModelProperty(value = "告警状态")
+    private String alarmStatus;
+
 }

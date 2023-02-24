@@ -1,5 +1,7 @@
 package com.vrv.vap.apicasom.frameworks.util;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -9,6 +11,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -17,11 +21,16 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,12 +43,17 @@ import java.util.Map;
  */
 public class HttpClientUtils {
 
-    public static String doGet(String url, Map<String, String> param,Map<String,String> header){
+    /**
+     * gson对象
+     */
+    private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+
+    public static String doGet(String url, Map<String, Object> param,Map<String,String> header){
         // 创建Httpclient对象
-        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpClient httpclient =wrapClient();
 
         String resultString = "";
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
         try {
             // 创建uri
 //            URIBuilder builder = new URIBuilder(url);
@@ -49,7 +63,17 @@ public class HttpClientUtils {
 //                }
 //            }
 //            URI uri = builder.build();
-
+            if(param!=null){
+                String paramStr = "?";
+                List<String> paramList = new ArrayList<>();
+                for(Map.Entry<String,Object> entry: param.entrySet()){
+                    paramList.add(entry.getKey()+"="+entry.getValue());
+                }
+                if(!paramList.isEmpty()){
+                    paramStr += String.join("&",paramList);
+                    url = url+paramStr;
+                }
+            }
             // 创建http GET请求
             HttpGet httpGet = new HttpGet(url);
             if(header != null){
@@ -65,20 +89,11 @@ public class HttpClientUtils {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                if (response != null) {
-                    response.close();
-                }
-                httpclient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return resultString;
     }
 
-    public static String doGet(String url, Map<String, String> param) {
+    public static String doGet(String url, Map<String, Object> param) {
         return doGet(url,param,null);
     }
 
@@ -86,10 +101,10 @@ public class HttpClientUtils {
         return doGet(url, null);
     }
 
-    public static String doPost(String url, Map<String, String> param,Map<String,String> header){
+    public static String doPost(String url, Map<String, Object> param,Map<String,String> header){
         // 创建Httpclient对象
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = null;
+        HttpClient httpClient = wrapClient();
+        HttpResponse response = null;
         String resultString = "";
         try {
             // 创建Http Post请求
@@ -101,12 +116,16 @@ public class HttpClientUtils {
             }
             // 创建参数列表
             if (param != null) {
-                List<NameValuePair> paramList = new ArrayList<>();
-                for (String key : param.keySet()) {
-                    paramList.add(new BasicNameValuePair(key, param.get(key)));
-                }
+//                List<NameValuePair> paramList = new ArrayList<>();
+//                for (String key : param.keySet()) {
+//                    paramList.add(new BasicNameValuePair(key, param.get(key)));
+//                }
+//                // 模拟表单
+//                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList,"utf-8");
+//                httpPost.setEntity(entity);
                 // 模拟表单
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList,"utf-8");
+                String body = gson.toJson(param);
+                StringEntity entity = new StringEntity(body,"utf-8");
                 httpPost.setEntity(entity);
             }
             // 执行http请求
@@ -114,20 +133,13 @@ public class HttpClientUtils {
             resultString = EntityUtils.toString(response.getEntity(), "utf-8");
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                response.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
         return resultString;
     }
 
-    public static String doPost(String url, Map<String, String> param) {
-        return doPost(url,param);
+    public static String doPost(String url, Map<String, Object> param) {
+        return doPost(url,param,null);
     }
 
     public static String doPost(String url) {
@@ -136,8 +148,8 @@ public class HttpClientUtils {
 
     public static String doPostJson(String url, String json) {
         // 创建Httpclient对象
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = null;
+        HttpClient httpClient = wrapClient();
+        HttpResponse response = null;
         String resultString = "";
         try {
             // 创建Http Post请求
@@ -150,15 +162,38 @@ public class HttpClientUtils {
             resultString = EntityUtils.toString(response.getEntity(), "utf-8");
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                response.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
 
         return resultString;
+    }
+
+    public static HttpClient wrapClient() {
+        try {
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            X509TrustManager tm = new X509TrustManager() {
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] arg0,
+                                               String arg1) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] arg0,
+                                               String arg1) throws CertificateException {
+                }
+            };
+            ctx.init(null, new TrustManager[] { tm }, null);
+            SSLConnectionSocketFactory ssf = new SSLConnectionSocketFactory(
+                    ctx, NoopHostnameVerifier.INSTANCE);
+            CloseableHttpClient httpclient = HttpClients.custom()
+                    .setSSLSocketFactory(ssf).build();
+            return httpclient;
+        } catch (Exception e) {
+            return HttpClients.createDefault();
+        }
     }
 }

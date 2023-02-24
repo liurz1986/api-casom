@@ -33,5 +33,8 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
 
     @Override
     public void handleMeetingAlarm(List<String> ids) {
+        for(String id:ids){
+            meetingHttpService.getNowMeetingAlarm(id,0);
+        }
     }
 }

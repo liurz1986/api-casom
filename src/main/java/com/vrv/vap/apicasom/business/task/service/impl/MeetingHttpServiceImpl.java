@@ -6,8 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.vrv.vap.apicasom.business.task.bean.*;
 import com.vrv.vap.apicasom.business.task.bean.hwmeetingbean.*;
 import com.vrv.vap.apicasom.business.task.constant.MeetingUrlConstant;
-import com.vrv.vap.apicasom.business.task.job.FailQueueJob;
-import com.vrv.vap.apicasom.business.task.job.InitTokenJob;
 import com.vrv.vap.apicasom.business.task.service.*;
 import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
@@ -16,7 +14,6 @@ import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
 
     @Value("${hw.meeting.url}")
     private String url;
+
+    @Value("${hw.meeting.organizationId}")
+    private String organizationId;
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -86,6 +86,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             token = getToken(0);
         }
         header.put("token", token);
+        header.put("Content-type","application/json;charset=UTF-8");
         return header;
     }
 
@@ -99,7 +100,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         JSONObject jsonObject = JSONObject.parseObject(configValue);
         String username = jsonObject.getString("username");
         String password = jsonObject.getString("password");
-        String tokenUrl = url + MeetingUrlConstant.TOKEN_URL;
+        String tokenUrl = url +"/conf-portal" + MeetingUrlConstant.TOKEN_URL;
         Map<String, String> header = new HashMap<>();
         String encode = Base64Utils.encodeBase64(username + ":" + password);
         logger.warn("get token base64 encode={}", encode);
@@ -133,10 +134,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public List<String> getHistoryMeetingList(String startTime, String endTime, Integer errorNum) {
         List<String> result = new ArrayList<>();
         Map<String, String> header = getHeader();
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("startTime", startTime);
         param.put("endTime", endTime);
-        String urlStr = url + MeetingUrlConstant.HISTORY_LIST_URL;
+        String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
         try {
             String res = HttpClientUtils.doPost(urlStr, param, header);
             HistoryList historyList = gson.fromJson(res, HistoryList.class);
@@ -171,7 +172,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Override
     public void getHistoryMeetingInfo(String id, Integer errorNum) {
         Map<String, String> header = getHeader();
-        String infoUrl = url + MeetingUrlConstant.HISTORY_INFO_URL;
+        String infoUrl = url+"/conf-portal" + MeetingUrlConstant.HISTORY_INFO_URL;
         infoUrl = infoUrl.replace("{0}", id);
         try {
             String infoStr = HttpClientUtils.doGet(infoUrl, null, header);
@@ -314,10 +315,11 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Override
     public void getHistoryMeetingAlarm(String id, Integer errorNum) {
         Map<String, String> header = getHeader();
-        String urlStr = url + MeetingUrlConstant.HISTORY_ALARM_URL;
+        String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_ALARM_URL;
         urlStr = urlStr.replace("{0}", id);
         try {
-            String res = HttpClientUtils.doPost(urlStr, null, header);
+            Map<String,Object> param = new HashMap<>();
+            String res = HttpClientUtils.doPost(urlStr, param, header);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
             List<HwMeetingAlarm> alarms = new ArrayList<>();
@@ -332,6 +334,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 alarm.setAlarmType(content.getAlarmType());
                 alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
                 alarm.setSeverity(content.getSeverity());
+                alarm.setAlarmStatus("history");
                 alarms.add(alarm);
             }
             hwMeetingAlarmService.save(alarms);
@@ -356,11 +359,11 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public List<String> getNowMeetingList(String startTime, String endTime, Integer errorNum) {
         List<String> ids = new ArrayList<>();
         Map<String, String> header = getHeader();
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("startTime", startTime);
         param.put("endTime", endTime);
-
-        String nowMeetingUrl = url + MeetingUrlConstant.NOW_LIST_URL + "";
+        param.put("active",true);
+        String nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
         try {
             String res = HttpClientUtils.doPost(nowMeetingUrl, param, header);
             NowMeetingList meetingList = gson.fromJson(res, NowMeetingList.class);
@@ -395,9 +398,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public void getNowMeetingInfo(String id, Integer errorNum) {
         HwMeetingInfo hwMeetingInfo = new HwMeetingInfo();
         Map<String, String> header = getHeader();
-        Map<String, Object> param = new HashMap<>();
-        param.put("active", true);
-        String nowMeetingInfoUrl = url + MeetingUrlConstant.NOW_INFO_URL;
+        String nowMeetingInfoUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_INFO_URL;
         nowMeetingInfoUrl = nowMeetingInfoUrl.replace("{0}", id);
         try {
             String res = HttpClientUtils.doGet(nowMeetingInfoUrl, null, header);
@@ -433,7 +434,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public void getNowMeetingParticipants(String id, String organizationName, int duration, Date scheduleStartTime) {
         clearHistoryData("hw_meeting_participant", id);
         Map<String, String> header = getHeader();
-        String nowMeetingParticipant = url + MeetingUrlConstant.NOW_PARTICIPANT_URL;
+        String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);
 
         try {
@@ -470,6 +471,46 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     }
 
     @Override
+    public void getNowMeetingAlarm(String id, Integer errorNum) {
+        Map<String, String> header = getHeader();
+        String urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
+        urlStr = urlStr.replace("{0}", id);
+        try {
+            Map<String,Object> param = new HashMap<>();
+            String res = HttpClientUtils.doPost(urlStr, param, header);
+            AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
+            List<AlarmVo> contentList = alarmResBean.getContent();
+            List<HwMeetingAlarm> alarms = new ArrayList<>();
+
+            for (AlarmVo content : contentList) {
+                HwMeetingAlarm alarm = new HwMeetingAlarm();
+                alarm.setId(UUIDUtils.get32UUID());
+                alarm.setMeetingId(id);
+                alarm.setName(content.getName());
+                alarm.setAlarmNo(content.getAlarmNo());
+                alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
+                alarm.setAlarmType(content.getAlarmType());
+                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
+                alarm.setSeverity(content.getSeverity());
+                alarm.setAlarmStatus("current");
+                alarms.add(alarm);
+            }
+            hwMeetingAlarmService.save(alarms);
+        } catch (Exception ex) {
+            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex.getLocalizedMessage());
+            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
+            meetingQueueVo.setId(UUIDUtils.get32UUID());
+            meetingQueueVo.setMethod("getHistoryMeetingAlarm");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", id);
+            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
+            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
+            meetingQueueVo.setErrorNum(errorNum);
+            QueueUtil.put(meetingQueueVo);
+        }
+    }
+
+    @Override
     public void updateCity(Map<String, ZkyUnitBean> map) {
         zkyUnitBeanMap.clear();
         for (Map.Entry<String, ZkyUnitBean> entry : map.entrySet()) {
@@ -479,15 +520,41 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
 
     @Override
     public int initMeetingRooms(){
-        Map<String,String> header = getHeader();
-        String roomUrl = url+MeetingUrlConstant.MEETING_ROOMS_URL;
-        String res = HttpClientUtils.doPost(roomUrl, null, header);
+        if(StringUtils.isBlank(organizationId)){
+            return 0;
+        }
+        String token = getSysToken();
+        Map<String,String> header = new HashMap<>();
+        header.put("token",token);
+        Map<String,Object> param = new HashMap<>();
+        param.put("organizationId",organizationId);
+        param.put("searchtree",false);
+        String roomUrl = url+"/sys-portal"+MeetingUrlConstant.MEETING_ROOMS_URL;
+        String res = HttpClientUtils.doPost(roomUrl, param, header);
         if(StringUtils.isNotBlank(res)){
             MeetingRoomsRes meetingRoomsRes = gson.fromJson(res,MeetingRoomsRes.class);
             int total = meetingRoomsRes.getTotalElements();
             return total;
         }
         return 0;
+    }
+
+    public String getSysToken(){
+        String tokenRes = "";
+        String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
+        Map<String, String> header = new HashMap<>();
+        String encode = Base64Utils.encodeBase64("admin:admin@1234");
+        logger.warn("get sys token base64 encode={}", encode);
+        header.put("Authorization", "Basic " + encode);
+        try {
+            String result = HttpClientUtils.doGet(tokenUrl, null, header);
+            Token token = gson.fromJson(result, Token.class);
+            tokenRes = token.getUuid();
+        } catch (Exception ex) {
+            logger.error("get token error,msg={}", ex.getLocalizedMessage());
+        }
+
+        return tokenRes;
     }
 
     /**

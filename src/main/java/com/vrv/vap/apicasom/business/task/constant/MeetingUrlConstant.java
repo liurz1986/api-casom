@@ -24,6 +24,9 @@ public class MeetingUrlConstant {
     // 预约会议详情
     public static String NOW_INFO_URL="/conferences/{0}";
 
+    // 预约会议告警
+    public static String NOW_ALARM_URL="/conferences/{0}/currentalarms";
+
     // 预约会议会场
     public static String NOW_PARTICIPANT_URL="/online/conferences/{0}/participants/conditions";
 

@@ -60,6 +60,7 @@ public class SyncDataJob implements SchedulingConfigurer {
         String startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
         List<String> ids = reservationHwMeetingDataService.queryMeetingIds(startTime,endTime);
         reservationHwMeetingDataService.handleMeetingInfo(ids);
+        reservationHwMeetingDataService.handleMeetingAlarm(ids);
     }
 
     public String getProcessJob(String jobName){

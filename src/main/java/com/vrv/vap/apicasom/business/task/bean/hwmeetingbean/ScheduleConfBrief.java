@@ -13,7 +13,7 @@ public class ScheduleConfBrief {
     private String subject;
     private String scheduleStartTime;
     private int duration;
-    private String stage;
+    private boolean active;
     private String organizationName;
     private String type;
 }

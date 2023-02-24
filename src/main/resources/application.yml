@@ -135,6 +135,8 @@ feign:
 
 hw:
   meeting:
+    organizationId:
+    token: 0 */10 * * * ?
     url: http://192.168.118.228:9888
 
 

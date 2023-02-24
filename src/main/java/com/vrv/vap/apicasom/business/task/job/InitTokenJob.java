@@ -45,8 +45,7 @@ public class InitTokenJob{
     @Autowired
     private RedisUtils redisUtils;
 
-//    @Scheduled(cron = "59 59 23 * * ?")
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "${hw.meeting.token}")
     public void getToken(){
         token = meetingHttpService.getToken(0);
         meetingHttpService.updateToken(token);

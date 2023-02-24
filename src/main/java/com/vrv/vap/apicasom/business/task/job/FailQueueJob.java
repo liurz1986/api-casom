@@ -52,6 +52,7 @@ public class FailQueueJob implements CommandLineRunner {
             String method = meetingQueueVo.getMethod();
             String param = meetingQueueVo.getParam();
             int errorNum = meetingQueueVo.getErrorNum();
+            logger.error("接口{}，调用失败！失败次数={}", method, (errorNum+1));
             if(errorNum<3){
                 try {
                     Class cls = SpringUtil.getBean(MeetingHttpService.class).getClass();
@@ -85,11 +86,11 @@ public class FailQueueJob implements CommandLineRunner {
                 hwSyncErrorLogService.save(hwSyncErrorLog);
             }
             // 执行一个休息10分钟
-//            try {
-//                TimeUnit.MINUTES.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                TimeUnit.MINUTES.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
