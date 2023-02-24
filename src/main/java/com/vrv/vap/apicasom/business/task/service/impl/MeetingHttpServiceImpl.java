@@ -436,9 +436,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         Map<String, String> header = getHeader();
         String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);
-
+        Map<String,Object> param = new HashMap<>();
         try {
-            String res = HttpClientUtils.doPost(nowMeetingParticipant, null, header);
+            String res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
             OnlineConferencesRes onlineConferencesRes = gson.fromJson(res, OnlineConferencesRes.class);
             List<ParticipantDetail> content = onlineConferencesRes.getContent();
             if (CollectionUtils.isNotEmpty(content)) {
