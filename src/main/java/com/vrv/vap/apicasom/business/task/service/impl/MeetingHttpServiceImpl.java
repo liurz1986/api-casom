@@ -476,8 +476,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
         urlStr = urlStr.replace("{0}", id);
         try {
-            Map<String,Object> param = new HashMap<>();
-            String res = HttpClientUtils.doPost(urlStr, param, header);
+            String res = HttpClientUtils.doGet(urlStr, null, header);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
             List<HwMeetingAlarm> alarms = new ArrayList<>();
