@@ -9,7 +9,11 @@ import com.vrv.vap.jpa.web.page.PageRes;
 import org.springframework.web.bind.annotation.PathVariable;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-
+/**
+ * 视屏会议
+ *
+ * @author liurz
+ */
 public interface VideoMettingService {
 
     /**

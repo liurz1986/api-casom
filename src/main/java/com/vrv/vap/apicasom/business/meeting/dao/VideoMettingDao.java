@@ -24,5 +24,7 @@ public interface VideoMettingDao {
 
     public int getOfflineMeetingTimeTotal(String type);
 
+    public  int getPointToPoint(String type);
 
+    public int getManyPoint(String type);
 }

@@ -3,7 +3,6 @@ package com.vrv.vap.apicasom.business.meeting.dao;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 
 import java.util.List;
-import java.util.Map;
 
 public interface AccessNodeDao {
 
@@ -13,8 +12,6 @@ public interface AccessNodeDao {
 
     public List<AccessNodeExportExcelVO> exportData(AccessNodeSearchVO accessNodeSearchVO);
 
-    public int getOnLineNodes(String status);
-
     public List<CommonQueryVO> queryNodesGroupByCity(String type);
 
     public List<String> getRunMettingCitys(String type);
@@ -22,4 +19,14 @@ public interface AccessNodeDao {
     public  List<CommonQueryVO> queryNodeNamesByCity(String type, String cityName);
 
     public  List<NodeVO> queryRunNodesByCity(String type, String cityName);
+
+    public List<LargeBranchStatisticsVO> queryBranchStatistics(String type);
+
+    public List<LargeDeatailVO> getUseStatisticsByBranch(String type);
+
+    public int getUseStatisticsTotalCount(String type);
+
+    public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type);
+
+    public List<LargeDeatailVO> queryOutServiceStatistics(String type);
 }

@@ -8,6 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.List;
 
+/**
+ * 异常会议
+ *
+ * @author liurz
+ */
 public interface AbnormalMettingService {
 
    public List<DistributionStatisticsVO> typeStatistics(StatisticSearchVO statisticSearchVO);

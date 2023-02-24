@@ -107,27 +107,13 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     }
 
     /**
-     * 获取在线节点总数
-     * @return
-     */
-    @Override
-    public int getOnLineNodes(String status) {
-        String sql = "select count(*) as number from hw_meeting_participant where stage='"+status+"'";
-        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
-        if (null == result || result.size() == 0) {
-            return 0;
-        }
-        return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
-    }
-
-    /**
-     * 按城市、节点分组
+     * 按城市、组织机构、节点分组
      * @param type
      * @return
      */
     @Override
     public List<CommonQueryVO> queryNodesGroupByCity(String type) {
-        String sql ="select city as keyName,name from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
+        String sql ="select city as keyName,organization_name ,name from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
     }
@@ -136,28 +122,29 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         public CommonQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             CommonQueryVO data = new CommonQueryVO();
             data.setKey(rs.getString("keyName"));
-            data.setValue(rs.getString("name"));
+            data.setValue(rs.getString("organization_name"));
+            data.setExtend(rs.getString("name"));
             return data;
         }
     }
     /**
-     * 获取不存在存在异常会议并且正在开会的城市
+     * 获取正在开会的城市
      * @param type
      * @return
      */
     @Override
     public List<String> getRunMettingCitys(String type) {
-        String sql="select DISTINCT city from hw_meeting_participant where meeting_id not in(select  meeting_id from hw_meeting_alarm)"  +
-                "and stage='ONLINE'";
+        String sql="select DISTINCT city from hw_meeting_participant  where meeting_id in(select meeting_id from hw_meeting_info  where stage='ONLINE'";
         if(StringUtils.isNotEmpty(type)){
             sql = sql+ largeScreenCommonSql(type);
         }
+        sql = sql+")";
         List<String> list = jdbcTemplate.queryForList(sql,String.class);
         return list;
     }
 
 
-    private String largeScreenCommonSql(String type){
+    private String  largeScreenCommonSql(String type){
         String sql ="";
         switch (type) {
             case "quarter":
@@ -188,6 +175,20 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         return details;
     }
 
+
+
+    /**
+     * 当前城市正在开会的节点信息
+     * @param type
+     * @param cityName
+     * @return
+     */
+    @Override
+    public List<NodeVO> queryRunNodesByCity(String type, String cityName) {
+        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'" +largeScreenCommonSql(type);
+        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVOMapper());
+        return details;
+    }
     public class NodeVOMapper implements RowMapper<NodeVO> {
         @Override
         public NodeVO mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -202,16 +203,103 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     }
 
     /**
-     * 当前城市正在开会的节点信息
+     * 各地区系统使用统计
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * 1. 节点接入表和节点人数统计表 关联查询：hw_meeting_attendee、hw_meeting_participant
+     * 2. 节点接入表状态为离线：OFFLINE
+     * @return Result
+     */
+    @Override
+    public List<LargeBranchStatisticsVO> queryBranchStatistics(String type) {
+        String sql = "select a.branch,sum(a.user_count) as userCont,sum(a.duration) as durationTotal,count(a.name) as meetingCount from( " +
+                " select node.name,node.branch,detail.user_count,detail.duration from hw_meeting_participant as node " +
+                " left join " +
+                " hw_meeting_attendee as detail on node.name=detail.participant_name and node.meeting_id=detail.meeting_id " +
+                " where node.stage='OFFLINE'" + largeScreenCommonSql(type)+" )a group by a.branch ";
+        List<LargeBranchStatisticsVO> details = jdbcTemplate.query(sql,new BranchStatisticsVOMapper());
+        return details;
+    }
+
+
+
+    public class BranchStatisticsVOMapper implements RowMapper<LargeBranchStatisticsVO> {
+        @Override
+        public LargeBranchStatisticsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            LargeBranchStatisticsVO data = new LargeBranchStatisticsVO();
+            data.setName(rs.getString("branch"));
+            data.setUserNum(rs.getString("userCont")==null?0:Integer.parseInt(rs.getString("userCont")));
+            data.setMeetingDur(rs.getString("durationTotal")==null?0:Integer.parseInt(rs.getString("durationTotal")));
+            data.setMeetingTimes(rs.getString("meetingCount")==null?0:Integer.parseInt(rs.getString("meetingCount")));
+            return data;
+        }
+    }
+
+    /**
+     *  各地区使用占比,历史数据
+     *  1. 按分院统计开会的次数
+     *  2. 会议为历史会议
+     *  3. 查询开会次数前5天记录(开始次数降序)
      * @param type
-     * @param cityName
      * @return
      */
     @Override
-    public List<NodeVO> queryRunNodesByCity(String type, String cityName) {
-        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'" +largeScreenCommonSql(type);
-        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVOMapper());
+    public List<LargeDeatailVO> getUseStatisticsByBranch(String type) {
+        String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" group by branch)a order by a.num desc limit 0,5 ";
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
         return details;
     }
+
+
+
+    public class LargeBranchStatisticsVOMapper implements RowMapper<LargeDeatailVO> {
+        @Override
+        public LargeDeatailVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            LargeDeatailVO data = new LargeDeatailVO();
+            data.setName(rs.getString("name"));
+            data.setCount(rs.getString("num")==null?0:Integer.parseInt(rs.getString("num")));
+            return data;
+        }
+    }
+
+    /**
+     * 统计节点数：节点会议总次数
+     * @param type
+     * @return
+     */
+    @Override
+    public int getUseStatisticsTotalCount(String type) {
+        String sql="select count(*)as num from hw_meeting_participant where stage='OFFLINE'"+largeScreenCommonSql(type);
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        int number = result.get("num")==null?0:Integer.parseInt(String.valueOf(result.get("num")));
+        return number;
+    }
+
+    /**
+     * 开会次数
+     * @param type
+     * @return
+     */
+    @Override
+    public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
+        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        return details;
+    }
+
+    /**
+     * 对外提供服务
+     * @param type
+     * @return
+     */
+    @Override
+    public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
+        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE'  and out_service='1' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        return details;
+    }
+
 
 }

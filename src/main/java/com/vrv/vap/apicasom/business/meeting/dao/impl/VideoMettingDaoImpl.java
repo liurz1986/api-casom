@@ -1,6 +1,7 @@
 package com.vrv.vap.apicasom.business.meeting.dao.impl;
 
 import com.vrv.vap.apicasom.business.meeting.dao.VideoMettingDao;
+import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 import com.vrv.vap.jpa.common.DateUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -268,19 +269,9 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         }
         long durations = result.get("number")==null?0:Long.parseLong(String.valueOf(result.get("number")));
         // 换算成小时：取整，四舍五入
-        return divideUP(String.valueOf(durations),String.valueOf(60));
+        return MettingCommonUtil.divideUP(durations,60,0).intValue();
     }
 
-    /**
-     *
-     * @param data1
-     * @param data2
-     * @return
-     */
-    public int divideUP(String data1, String data2) {
-        BigDecimal data = new BigDecimal(data1).divide(new BigDecimal(data2));
-        return data.setScale(0,BigDecimal.ROUND_HALF_UP).intValue();
-    }
 
     private String largeScreenCommonSql(String type){
         String sql ="";
@@ -298,6 +289,38 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
                 break;
         }
         return sql;
+    }
+
+    /**
+     * 点对点会议次数: 会议记录表中参会节点数小于等于2,历史会议状态为OFFLINE
+     * @param type
+     * @return
+     */
+    @Override
+    public int getPointToPoint(String type) {
+        String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and participant_count<= 2 and stage='OFFLINE'";
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        int number = result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+        return number;
+    }
+
+    /**
+     * 多点会议次数: 会议记录表中参会节点数大于2,历史会议状态为OFFLINE
+     * @param type
+     * @return
+     */
+    @Override
+    public int getManyPoint(String type) {
+        String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and participant_count > 2 and stage='OFFLINE'";
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        int number = result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+        return number;
     }
 
 }

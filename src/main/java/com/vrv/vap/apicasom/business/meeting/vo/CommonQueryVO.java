@@ -11,4 +11,6 @@ public class CommonQueryVO {
     private String key;
 
     private String value;
+
+    private String extend;
 }

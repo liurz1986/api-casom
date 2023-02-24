@@ -2,10 +2,14 @@ package com.vrv.vap.apicasom.business.meeting.util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * @author liurz
+ */
 public class MettingCommonUtil {
     /**
      * 告警级别
@@ -214,5 +218,51 @@ public class MettingCommonUtil {
             startTimes = startTimes+1000 * 60 * 60;
         }
         return dataXS;
+    }
+    /**
+     * 毫秒转成分钟：秒  xx:xx
+     * @param millisecond
+     * @return
+     */
+    public static String transferMinutesAndSeconds(long millisecond){
+        if(millisecond <= 0){
+            return "0:00";
+        }
+        // 转成秒
+        long seconds = millisecond/(1000);
+        if(seconds <= 0){
+            return "0:00";
+        }
+        if(seconds < 10){
+            return "0:0"+seconds;
+        }
+        if(seconds < 60){
+            return "0:"+seconds;
+        }
+        long mnutes = seconds/60;
+        String resultStr ="";
+        long data1 =mnutes*60;
+        long resultH = seconds - data1;
+        if( 10>mnutes  && resultH > 0){
+            resultStr = mnutes+":0"+resultH;
+        }
+        if( 10 < resultH ){
+            resultStr = mnutes+":"+resultH;
+        }
+        return  resultStr;
+    }
+
+    /**
+     * 相除，四舍五入，保留几位小数
+     * @param data1
+     * @param data2
+     * @param newScale : 保留小数位数
+     * @return
+     */
+    public static BigDecimal divideUP(long data1, long data2,int newScale) {
+        BigDecimal bigDecimal1 = new BigDecimal(data1);
+        BigDecimal bigDecimal2 = new BigDecimal(data2);
+        BigDecimal reslut = bigDecimal1.divide(bigDecimal2,newScale,BigDecimal.ROUND_HALF_UP);
+        return reslut;
     }
 }

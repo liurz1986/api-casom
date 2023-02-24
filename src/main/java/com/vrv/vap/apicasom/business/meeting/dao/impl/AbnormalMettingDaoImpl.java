@@ -12,11 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +38,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public List<DistributionStatisticsVO> typeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
-        String sql ="select * from (select count(*) as number ,name from hw_meeting_alarm where "+filterSql +" group by name)a ORDER BY a.name desc ";
+        String sql ="select * from (select count(*) as number ,name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by name)a ORDER BY a.name desc ";
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVOMapper());
         return details;
     }
@@ -55,7 +52,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public List<DistributionStatisticsVO> gradeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
-        String sql="select a.severity as name,a.number as number  from (select count(*) as number, severity  from hw_meeting_alarm where "+filterSql +" group by severity)a ORDER BY a.severity desc ";
+        String sql="select a.severity as name,a.number as number  from (select count(*) as number, severity  from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by severity)a ORDER BY a.severity desc ";
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionSeverityVoMapper());
         return details;
     }
@@ -126,11 +123,11 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         String sql ="";
         switch (type) {
             case "month":
-                sql = "select date_format(alarm_time,'%Y-%m-%d') as dataX ,count(*) as dataY from hw_meeting_alarm where "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d')";
+                sql = "select date_format(alarm_time,'%Y-%m-%d') as dataX ,count(*) as dataY from hw_meeting_alarm where alarm_status='history' and "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d')";
                 break;
             case "halfyear":
             case "year":
-                sql = "select date_format(alarm_time,'%Y-%m') as dataX ,count(*) as dataY from hw_meeting_alarm where "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m')";
+                sql = "select date_format(alarm_time,'%Y-%m') as dataX ,count(*) as dataY from hw_meeting_alarm where alarm_status='history' and "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m')";
                 break;
             case "none":
                 sql = getNoneSql(statisticSearchVO);
@@ -193,14 +190,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 detail.setAbnormalTime("");
             }else{
                 long result = endTime.getTime()-startTime.getTime();
-                double bigdata = new BigDecimal(result/1000*60).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
-                detail.setAbnormalTime(bigdata+"");
+                detail.setAbnormalTime(MettingCommonUtil.transferMinutesAndSeconds(result));
             }
             return detail;
         }
     }
     private String getPageSql(AbnormalMettingSearchVO abnormalMettingSearchVO){
-        String sql="select name,alarm_type,severity,alarm_time,cleared_time from hw_meeting_alarm where  1=1 ";
+        String sql="select name,alarm_type,severity,alarm_time,cleared_time from hw_meeting_alarm where  alarm_status='history'  ";
         // 异常名称
         if(StringUtils.isNotEmpty(abnormalMettingSearchVO.getName())){
             sql = sql+" and name like '%" +abnormalMettingSearchVO.getName()+"%'";
@@ -230,10 +226,10 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     private String getNoneSql(StatisticSearchVO statisticSearchVO) {
          // 相差大于24H，按天统计
          if(MettingCommonUtil.isDay(statisticSearchVO.getEndDate(),statisticSearchVO.getStartDate())){
-            return "select date_format(alarm_time,'%Y-%m-%d') as dataX ,count(*) as dataY from hw_meeting_alarm where "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d')";
+            return "select date_format(alarm_time,'%Y-%m-%d') as dataX ,count(*) as dataY from hw_meeting_alarm where alarm_status='history' and "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d')";
          }
          // 相差小于于24H，按小于统计
-        return "select date_format(alarm_time,'%Y-%m-%d %H') as dataX ,count(*) as dataY from hw_meeting_alarm where "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d %H')";
+        return "select date_format(alarm_time,'%Y-%m-%d %H') as dataX ,count(*) as dataY from hw_meeting_alarm where alarm_status='history' and "+getFilterSql(statisticSearchVO)+"group by date_format(alarm_time,'%Y-%m-%d %H')";
     }
 
     /**
@@ -262,8 +258,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 data.setAbnormalTime("");
             }else{
                 long result = endTime.getTime()-startTime.getTime();
-                double bigdata = new BigDecimal(result/1000*60).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
-                data.setAbnormalTime(bigdata+"");
+                data.setAbnormalTime(MettingCommonUtil.transferMinutesAndSeconds(result));
             }
             data.setStartTime(startTime == null?null: DateUtil.format(startTime));
             // 严重等级转换处理
@@ -276,24 +271,15 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         }
     }
 
-    public static void main(String[] args){
-        double data1 = 182;
-        double data2= 60;
-        double result = (double) data1/data2;
-        double result1 = new BigDecimal(result).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
-        System.out.println(result);
-        System.out.println(result1);
-
-    }
     /**
-     * 获取存在异常会议的城市
+     * 获取存在异常会议的城市：告警状态为current,进行中的告警
      * @param type
      * @return
      */
     @Override
-    public List<String> getAbnormalMettingCitys(String type) {
-        String sql ="select DISTINCT node.city from hw_meeting_participant as node inner join  " +
-                " (select meeting_id from hw_meeting_info where meeting_id in (select meeting_id from hw_meeting_alarm)" ;
+    public List<CommonQueryVO> getAbnormalMettingCitys(String type) {
+        String sql ="select node.city,node.organization_name,node.name from hw_meeting_participant as node inner join  " +
+                " (select meeting_id from hw_meeting_info where meeting_id in (select meeting_id from hw_meeting_alarm where alarm_status='current' )" ;
         switch (type) {
             case "quarter":
                 sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
@@ -307,8 +293,77 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             default:
                 break;
         }
-        sql = sql+ ") meeting on node.meeting_id=meeting.meeting_id";
-        List<String> list = jdbcTemplate.queryForList(sql,String.class);
-        return list;
+        sql = sql+ ") meeting on node.meeting_id=meeting.meeting_id group by node.city,node.organization_name,node.name";
+        List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
+        return details;
     }
+    public class CommonQueryVoMapper implements RowMapper<CommonQueryVO> {
+        @Override
+        public CommonQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            CommonQueryVO data = new CommonQueryVO();
+            data.setKey(rs.getString("city"));
+            data.setValue(rs.getString("organization_name"));
+            data.setExtend(rs.getString("name"));
+            return data;
+        }
+    }
+
+    /**
+     * 异常名称分组，次数前五的数据，历史告警
+     * @param type
+     * @return
+     */
+    @Override
+    public List<LargeDeatailVO> getStatisticsByName(String type) {
+        String sql ="select * from(select name,count(*) as num from hw_meeting_alarm where alarm_status='history' "+largeScreenCommonSql(type)+" group by name)a order by a.num desc limit 0,5 ";
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        return details;
+    }
+
+
+
+    public class LargeBranchStatisticsVOMapper implements RowMapper<LargeDeatailVO> {
+        @Override
+        public LargeDeatailVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            LargeDeatailVO data = new LargeDeatailVO();
+            data.setName(rs.getString("name"));
+            data.setCount(rs.getString("num")==null?0:Integer.parseInt(rs.getString("num")));
+            return data;
+        }
+    }
+
+    private String largeScreenCommonSql(String type){
+        String sql ="";
+        switch (type) {
+            case "quarter":
+                sql =" and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(alarm_time)";
+                break;
+            case "halfyear":
+                sql ="and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(alarm_time)";
+                break;
+            case "year":
+                sql ="and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(alarm_time)";
+                break;
+            default:
+                break;
+        }
+        return sql;
+    }
+
+    /**
+     * 获取历史异常总数
+     * @param type
+     * @return
+     */
+    @Override
+    public int getHistoryTotalCount(String type) {
+        String sql = "select count(*)as num from hw_meeting_alarm where alarm_status='history'" + largeScreenCommonSql(type);
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        int number = result.get("num") == null ? 0 : Integer.parseInt(String.valueOf(result.get("num")));
+        return number;
+    }
+
 }

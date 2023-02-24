@@ -6,7 +6,11 @@ import com.vrv.vap.jpa.web.Result;
 import com.vrv.vap.jpa.web.page.PageRes;
 
 import javax.servlet.http.HttpServletResponse;
-
+/**
+ * 接入节点
+ *
+ * @author liurz
+ */
 public interface AccessNodeService {
 
     public PageRes<AccessNodeVO> getPage(AccessNodeSearchVO accessNodeSearchVO);

@@ -6,6 +6,7 @@ import com.vrv.vap.apicasom.business.meeting.dao.AccessNodeDao;
 import com.vrv.vap.apicasom.business.meeting.dao.VideoMettingDao;
 import com.vrv.vap.apicasom.business.meeting.service.LargeScreenService;
 import com.vrv.vap.apicasom.business.meeting.util.MeetingConstrant;
+import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.common.DateUtil;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,26 +87,32 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     @Override
     public List<LargeMapVO> queryMapMesage(String type) {
         List<LargeMapVO> result = new ArrayList<>();
-        // 城市、节点分组统计
+        // 城市、组织机构、节点分组统计
         List<CommonQueryVO> groupByCitys = accessNodeDao.queryNodesGroupByCity(type);
         if(CollectionUtils.isEmpty(groupByCitys)){
             return result;
         }
-        logger.debug("城市、节点分组统计:"+JSON.toJSONString(groupByCitys));
-        // 获取存在异常会议的城市
-        List<String> abnormalCitys = abnormalMettingDao.getAbnormalMettingCitys(type);
+        logger.debug("城市、组织机构、节点分组统计:"+JSON.toJSONString(groupByCitys));
+        // 获取存在异常会议的城市、组织机构、节点
+        List<CommonQueryVO> abnormalCitys = abnormalMettingDao.getAbnormalMettingCitys(type);
         logger.debug("获取存在异常会议的城市:"+JSON.toJSONString(abnormalCitys));
-        // 获取不存在存在异常会议并且正在开会的城市
+        // 获取正在开会的城市
         List<String> runCitys = accessNodeDao.getRunMettingCitys(type);
-        logger.debug("获取不存在存在异常会议并且正在开会的城市:"+JSON.toJSONString(runCitys));
+        logger.debug("获取正在开会的城市:"+JSON.toJSONString(runCitys));
         // 数据组合处理
         result = dataHandle(groupByCitys,abnormalCitys,runCitys);
         return result;
     }
 
 
-
-    private List<LargeMapVO> dataHandle(List<CommonQueryVO> groupByCitys, List<String> abnormalCitys, List<String> runCitys) {
+    /**
+     * 数据处理
+     * @param groupByCitys
+     * @param abnormalCitys
+     * @param runCitys
+     * @return
+     */
+    private List<LargeMapVO> dataHandle(List<CommonQueryVO> groupByCitys, List<CommonQueryVO> abnormalCitys, List<String> runCitys) {
         List<LargeMapVO> result = new ArrayList<>();
         // 按城市分组
         Map<String,List<CommonQueryVO>> groupLists= groupByCitys.stream().collect(Collectors.groupingBy(CommonQueryVO::getKey));
@@ -125,13 +131,15 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         return result;
     }
 
-    private void statusHandle(LargeMapVO largeMapVO, String city, List<String> abnormalCitys, List<String> runCitys) {
-        boolean isAbnormal = isExist(city,abnormalCitys);
-        if(isAbnormal){
+    private void statusHandle(LargeMapVO largeMapVO, String city, List<CommonQueryVO> abnormalCitys, List<String> runCitys) {
+        CommonQueryVO abnormal = isExistAbnormal(city,abnormalCitys);
+        if(null != abnormal){
             // 存在异常
             largeMapVO.setStatus(MeetingConstrant.CITY_STATUS_ABNORMAL);
+            // 异常信息描述：组织机构+节点名称+“"异常告警！”
+            largeMapVO.setAbnormalMessge(abnormal.getValue()+abnormal.getExtend()+"异常告警！");
         }else{
-            boolean isRun = isExist(city,runCitys);
+            boolean isRun = isExistRun(city,runCitys);
             if(isRun){
                 // 运行中
                 largeMapVO.setStatus(MeetingConstrant.CITY_STATUS_RUN);
@@ -142,7 +150,31 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         }
     }
 
-    private boolean isExist(String city, List<String> abnormalCitys) {
+    /**
+     * 异常会议确认
+     * @param city
+     * @param abnormalCitys
+     * @return
+     */
+    private CommonQueryVO isExistAbnormal(String city, List<CommonQueryVO> abnormalCitys) {
+        if(CollectionUtils.isEmpty(abnormalCitys)){
+            return null;
+        }
+        for(CommonQueryVO abnormalCity : abnormalCitys){
+            if(city.equals(abnormalCity.getKey())){
+                return abnormalCity;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 进行中会议
+     * @param city
+     * @param abnormalCitys
+     * @return
+     */
+    private boolean isExistRun(String city, List<String> abnormalCitys) {
         if(CollectionUtils.isEmpty(abnormalCitys)){
             return false;
         }
@@ -179,6 +211,8 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         cityDetailHandle(nodeNames,runNodeVos,largeMapDetailVO);
         return largeMapDetailVO;
     }
+
+
 
     private void cityDetailHandle(List<CommonQueryVO> nodeNames,List<NodeVO> runNodeVos, LargeMapDetailVO largeMapDetailVO) {
         List<LargeOrgVO> orgs = new ArrayList<>();
@@ -238,6 +272,110 @@ public class LargeScreenServiceImpl implements LargeScreenService {
             }
         }
         return null;
+    }
+    /**
+     * 各地区系统使用统计
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * 1. hw_meeting_attendee、hw_meeting_participant关联查询
+     * @return Result
+     */
+    @Override
+    public List<LargeBranchStatisticsVO> queryBranchStatistics(String type) {
+        return accessNodeDao.queryBranchStatistics(type);
+    }
+
+    /**
+     * 点对点会议次数、各地区使用占比
+     * 各地区使用占比 展示前5的数据，还剩的用其他统计
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * @return Result
+     */
+    @Override
+    public LargeBranchUseScaleStatisticsVO queryBranchScaleStatistics(String type) {
+        LargeBranchUseScaleStatisticsVO largeBranchUseScaleStatisticsVO = new LargeBranchUseScaleStatisticsVO();
+        // 点对点会议次数，历史数据
+        int count = videoMettingDao.getPointToPoint(type);
+        largeBranchUseScaleStatisticsVO.setPointNum(count);
+        // 各地区使用占比,历史数据
+        // 地区分组，次数前五的数据,
+        List<LargeDeatailVO> list = accessNodeDao.getUseStatisticsByBranch(type);
+        if(CollectionUtils.isEmpty(list)){
+            largeBranchUseScaleStatisticsVO.setDetail(new ArrayList<>());
+            return largeBranchUseScaleStatisticsVO;
+        }
+        // 节点会议总次数
+        int totalCount = accessNodeDao.getUseStatisticsTotalCount(type);
+        // 占比处理
+        percentHandle(list,totalCount);
+        largeBranchUseScaleStatisticsVO.setDetail(list);
+        return largeBranchUseScaleStatisticsVO;
+    }
+
+
+
+    private void percentHandle(List<LargeDeatailVO> list, int totalCount) {
+        int sum =0;
+        for(LargeDeatailVO data : list){
+            sum = sum+ data.getCount();
+            double result = MettingCommonUtil.divideUP(data.getCount(),totalCount,2).doubleValue();
+            data.setPercent(result+"%");
+            data.setCount(0);
+        }
+        int other=  totalCount - sum;
+        if(other <= 0){
+            return;
+        }
+        LargeDeatailVO otherDate = new LargeDeatailVO();
+        otherDate.setName("其他");
+        double otherResult = MettingCommonUtil.divideUP(other,totalCount,2).doubleValue();
+        otherDate.setPercent(otherResult+"%");
+        list.add(otherDate);
+    }
+
+    /**
+     * 多点会议次数、异常及故障情况分析
+     * 异常及故障情况分析 展示前5的数据，还剩的用其他统计
+     * @param type
+     * @return
+     */
+    @Override
+    public LargeBranchUseScaleStatisticsVO queryBranchAbnormalStatistics(String type) {
+        LargeBranchUseScaleStatisticsVO largeBranchUseScaleStatisticsVO = new LargeBranchUseScaleStatisticsVO();
+        // 多点会议次数，历史数据
+        int count = videoMettingDao.getManyPoint(type);
+        largeBranchUseScaleStatisticsVO.setPointNum(count);
+        // 异常及故障情况分析:异常
+        // 异常名称分组，次数前五的数据
+        List<LargeDeatailVO> list = abnormalMettingDao.getStatisticsByName(type);
+        if(CollectionUtils.isEmpty(list)){
+            largeBranchUseScaleStatisticsVO.setDetail(new ArrayList<>());
+            return largeBranchUseScaleStatisticsVO;
+        }
+        // 异常总数
+        int totalCount = abnormalMettingDao.getHistoryTotalCount(type);
+        // 占比处理
+        percentHandle(list,totalCount);
+        largeBranchUseScaleStatisticsVO.setDetail(list);
+        return largeBranchUseScaleStatisticsVO;
+    }
+
+    /**
+     * 开会次数
+     * @param type
+     * @return
+     */
+    @Override
+    public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
+        return accessNodeDao.queryNodeMeetingCountStatistics(type);
+    }
+    /**
+     * 对外提供服务
+     * @param type
+     * @return
+     */
+    @Override
+    public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
+        return accessNodeDao.queryOutServiceStatistics(type);
     }
 
 }
