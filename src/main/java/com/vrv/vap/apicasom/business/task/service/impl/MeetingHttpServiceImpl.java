@@ -489,8 +489,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 alarm.setAlarmNo(content.getAlarmNo());
                 alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
                 alarm.setAlarmType(content.getAlarmType());
-                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
-                alarm.setSeverity(content.getSeverity());
+//                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
+//                alarm.setSeverity(content.getSeverity());
                 alarm.setAlarmStatus("current");
                 alarms.add(alarm);
             }
