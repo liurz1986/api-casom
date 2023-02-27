@@ -22,9 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -213,7 +211,12 @@ public class AbnormalMettingServiceImpl implements AbnormalMettingService {
         logger.info("fileName: "+uuid);
         filePath=filePath+ File.separator+uuid;
         try{
-            ExcelUtils.getInstance().exportObjects2Excel(lists, AbnormalMettingExportExcelVO.class, true, filePath);
+            String templatePath= this.getClass().getClassLoader().getResource("").getPath();
+            templatePath = templatePath+"templates/abnoraml_metting_template.xlsx";
+            logger.info("会议异常记录模板路径: "+templatePath);
+            Map<String, String> extenddata = new HashMap<>();
+            extenddata.put("title", "会议异常");
+            ExcelUtils.getInstance().exportObjects2Excel(templatePath,lists,extenddata, AbnormalMettingExportExcelVO.class, false, filePath);
         }catch(Exception e){
             logger.error("生成会议异常记录导出文件导出失败",e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成会议异常记录导出文件导出失败");

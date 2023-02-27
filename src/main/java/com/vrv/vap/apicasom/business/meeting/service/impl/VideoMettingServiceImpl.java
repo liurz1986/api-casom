@@ -18,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *视屏会议处理
@@ -86,7 +89,12 @@ public class VideoMettingServiceImpl implements VideoMettingService {
         logger.info("fileName: "+uuid);
         filePath=filePath+ File.separator+uuid;
         try{
-            ExcelUtils.getInstance().exportObjects2Excel(lists, VideoMettingExportExcelVO.class, true, filePath);
+            String templatePath= this.getClass().getClassLoader().getResource("").getPath();
+            templatePath = templatePath+"templates/history_metting_template.xlsx";
+            logger.info("历史会议列表模板路径: "+templatePath);
+            Map<String, String> extenddata = new HashMap<>();
+            extenddata.put("title", "历史会议");
+            ExcelUtils.getInstance().exportObjects2Excel(templatePath,lists,extenddata, VideoMettingExportExcelVO.class, false, filePath);
         }catch(Exception e){
             logger.error("生成历史会议列表数据导出文件导出失败",e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成历史会议列表数据导出文件导出失败");
