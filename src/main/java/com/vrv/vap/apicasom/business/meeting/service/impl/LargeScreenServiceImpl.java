@@ -311,15 +311,10 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         return largeBranchUseScaleStatisticsVO;
     }
 
-
-
     private void percentHandle(List<LargeDeatailVO> list, int totalCount) {
         int sum =0;
         for(LargeDeatailVO data : list){
             sum = sum+ data.getCount();
-            double result = MettingCommonUtil.divideUP(data.getCount(),totalCount,2).doubleValue();
-            data.setPercent(result+"%");
-            data.setCount(0);
         }
         int other=  totalCount - sum;
         if(other <= 0){
@@ -327,36 +322,29 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         }
         LargeDeatailVO otherDate = new LargeDeatailVO();
         otherDate.setName("其他");
-        double otherResult = MettingCommonUtil.divideUP(other,totalCount,2).doubleValue();
-        otherDate.setPercent(otherResult+"%");
+        otherDate.setCount(other);
         list.add(otherDate);
     }
 
     /**
-     * 多点会议次数、异常及故障情况分析
+     * 异常及故障情况分析
      * 异常及故障情况分析 展示前5的数据，还剩的用其他统计
      * @param type
      * @return
      */
     @Override
-    public LargeBranchUseScaleStatisticsVO queryBranchAbnormalStatistics(String type) {
-        LargeBranchUseScaleStatisticsVO largeBranchUseScaleStatisticsVO = new LargeBranchUseScaleStatisticsVO();
-        // 多点会议次数，历史数据
-        int count = videoMettingDao.getManyPoint(type);
-        largeBranchUseScaleStatisticsVO.setPointNum(count);
+    public List<LargeDeatailVO> queryBranchAbnormalStatistics(String type) {
         // 异常及故障情况分析:异常
         // 异常名称分组，次数前五的数据
         List<LargeDeatailVO> list = abnormalMettingDao.getStatisticsByName(type);
         if(CollectionUtils.isEmpty(list)){
-            largeBranchUseScaleStatisticsVO.setDetail(new ArrayList<>());
-            return largeBranchUseScaleStatisticsVO;
+            return  new ArrayList<>();
         }
         // 异常总数
         int totalCount = abnormalMettingDao.getHistoryTotalCount(type);
         // 占比处理
         percentHandle(list,totalCount);
-        largeBranchUseScaleStatisticsVO.setDetail(list);
-        return largeBranchUseScaleStatisticsVO;
+        return list;
     }
 
     /**
@@ -376,6 +364,18 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     @Override
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
         return accessNodeDao.queryOutServiceStatistics(type);
+    }
+
+    /**
+     * 多点会议次数
+     * @param type
+     * @return
+     */
+    @Override
+    public int getManyPoint(String type) {
+        // 多点会议次数，历史数据
+        int count = videoMettingDao.getManyPoint(type);
+        return count;
     }
 
 }

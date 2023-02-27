@@ -148,17 +148,16 @@ public class LargeScreenController {
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "点对点会议次数、各地区使用占比统计异常");
         }
     }
-
     /**
-     * 多点会议次数、异常及故障情况分析
-     *  1. 异常及故障情况分析 展示前5的数据，还剩的用其他统计
+     * 多点会议次数
+     *
      * type:quarter(季)，halfyear(半年)、year(一年)
      * @return Result
      */
-    @GetMapping(value = "/queryBranchAbnormalStatistics/{type}")
-    @ApiOperation(value = "多点会议次数、故障情况分析", notes = "")
-    @SysRequestLog(description = "多点会议次数、故障情况分析", actionType = ActionType.SELECT)
-    public Result<LargeBranchUseScaleStatisticsVO> queryBranchAbnormalStatistics(@PathVariable("type") String type) {
+    @GetMapping(value = "/getManyPoint/{type}")
+    @ApiOperation(value = "多点会议次数", notes = "")
+    @SysRequestLog(description = "多点会议次数", actionType = ActionType.SELECT)
+    public Result<Integer> getManyPoint(@PathVariable("type") String type) {
         try {
             if(StringUtils.isEmpty(type)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type的值不能为空");
@@ -166,10 +165,33 @@ public class LargeScreenController {
             if(!MettingCommonUtil.isExistLargeTimeType(type)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
             }
-            return ResultUtil.success(largeScreenService.queryBranchAbnormalStatistics(type));
+            return ResultUtil.success(largeScreenService.getManyPoint(type));
         } catch (Exception e) {
-            logger.error("多点会议次数、故障情况分析异常,{}", e);
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "多点会议次数、故障情况分析异常");
+            logger.error("多点会议次数异常,{}", e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "多点会议次数异常");
+        }
+    }
+    /**
+     * 异常及故障情况分析
+     *  1. 异常及故障情况分析 展示前5的数据，还剩的用其他统计
+     * type:quarter(季)，halfyear(半年)、year(一年)
+     * @return Result
+     */
+    @GetMapping(value = "/queryBranchAbnormalStatistics/{type}")
+    @ApiOperation(value = "异常及故障情况分析", notes = "")
+    @SysRequestLog(description = "异常及故障情况分析", actionType = ActionType.SELECT)
+    public Result<List<LargeDeatailVO>> queryBranchAbnormalStatistics(@PathVariable("type") String type) {
+        try {
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type的值不能为空");
+            }
+            if(!MettingCommonUtil.isExistLargeTimeType(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
+            }
+            return ResultUtil.successList(largeScreenService.queryBranchAbnormalStatistics(type));
+        } catch (Exception e) {
+            logger.error("异常及故障情况分析异常,{}", e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "异常及故障情况分析异常");
         }
     }
     /**

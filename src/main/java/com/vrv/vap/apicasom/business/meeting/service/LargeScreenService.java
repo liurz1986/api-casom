@@ -21,9 +21,11 @@ public interface LargeScreenService {
 
     public LargeBranchUseScaleStatisticsVO queryBranchScaleStatistics(String type);
 
-    public LargeBranchUseScaleStatisticsVO queryBranchAbnormalStatistics(String type);
+    public List<LargeDeatailVO> queryBranchAbnormalStatistics(String type);
 
     public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type);
 
     public List<LargeDeatailVO> queryOutServiceStatistics(String type);
+
+    public int getManyPoint(String type);
 }
