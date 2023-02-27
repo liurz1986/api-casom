@@ -99,6 +99,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String tokenRes = null;
         String configValue = systemConfigService.getSysConfigById("hw_meeting_use");
         JSONObject jsonObject = JSONObject.parseObject(configValue);
+        if(jsonObject == null){
+            logger.warn("配置项hw_meeting_use未配置！");
+            return tokenRes;
+        }
         String username = jsonObject.getString("username");
         String password = jsonObject.getString("password");
         String tokenUrl = url +"/conf-portal" + MeetingUrlConstant.TOKEN_URL;
