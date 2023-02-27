@@ -14,6 +14,12 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @ConfigurationProperties(prefix="file")
 public class FileConfiguration {
-
-	private String filePath; //文件路径
+	/**
+	 * 文件路径
+	 */
+	private String filePath;
+	/**
+	 * 导出模板路径
+	 */
+	private String templatePath;
 }

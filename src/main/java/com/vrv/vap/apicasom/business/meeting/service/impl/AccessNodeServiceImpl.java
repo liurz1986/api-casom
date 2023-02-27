@@ -70,12 +70,11 @@ public class AccessNodeServiceImpl implements AccessNodeService {
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="接入节点列表"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
+        String uuid="接入节点"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
         logger.info("fileName: "+uuid);
         filePath=filePath+ File.separator+uuid;
         try{
-            String templatePath= this.getClass().getClassLoader().getResource("").getPath();
-            templatePath = templatePath+"templates/abnoraml_metting_template.xlsx";
+            String templatePath= fileConfiguration.getTemplatePath()+"/node_template.xlsx";
             logger.info("接入节点列表模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<>();
             extenddata.put("title", "接入节点");

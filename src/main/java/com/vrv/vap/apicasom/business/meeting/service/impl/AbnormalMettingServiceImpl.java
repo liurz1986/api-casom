@@ -211,11 +211,10 @@ public class AbnormalMettingServiceImpl implements AbnormalMettingService {
         logger.info("fileName: "+uuid);
         filePath=filePath+ File.separator+uuid;
         try{
-            String templatePath= this.getClass().getClassLoader().getResource("").getPath();
-            templatePath = templatePath+"templates/abnoraml_metting_template.xlsx";
+            String templatePath= fileConfiguration.getTemplatePath()+"/abnoraml_metting_template.xlsx";
             logger.info("会议异常记录模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<>();
-            extenddata.put("title", "会议异常");
+            extenddata.put("title", "会议异常记录");
             ExcelUtils.getInstance().exportObjects2Excel(templatePath,lists,extenddata, AbnormalMettingExportExcelVO.class, false, filePath);
         }catch(Exception e){
             logger.error("生成会议异常记录导出文件导出失败",e);

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,26 +79,25 @@ public class VideoMettingServiceImpl implements VideoMettingService {
 
     @Override
     public Result<String> exportData(VideoMettingSearchVO videoMettingSearchVO) {
-        logger.debug("历史会议导出请求参数："+ JSON.toJSONString(videoMettingSearchVO));
+        logger.debug("视屏会议导出请求参数："+ JSON.toJSONString(videoMettingSearchVO));
         String filePath = fileConfiguration.getFilePath();
         List<VideoMettingExportExcelVO> lists = videoMettingDao.exportData(videoMettingSearchVO);
         File newFile= new File(filePath);
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="历史会议列表"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
+        String uuid="视屏会议"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
         logger.info("fileName: "+uuid);
         filePath=filePath+ File.separator+uuid;
         try{
-            String templatePath= this.getClass().getClassLoader().getResource("").getPath();
-            templatePath = templatePath+"templates/history_metting_template.xlsx";
-            logger.info("历史会议列表模板路径: "+templatePath);
+            String templatePath=fileConfiguration.getTemplatePath()+"/history_metting_template.xlsx";
+            logger.info("视屏会议列表模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<>();
-            extenddata.put("title", "历史会议");
+            extenddata.put("title", "视屏会议");
             ExcelUtils.getInstance().exportObjects2Excel(templatePath,lists,extenddata, VideoMettingExportExcelVO.class, false, filePath);
         }catch(Exception e){
-            logger.error("生成历史会议列表数据导出文件导出失败",e);
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成历史会议列表数据导出文件导出失败");
+            logger.error("视屏会议列表数据导出文件导出失败",e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"视屏会议列表数据导出文件导出失败");
         }
         return ResultUtil.success(uuid);
     }

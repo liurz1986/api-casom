@@ -85,6 +85,7 @@ vap:
 #文件路径配置
 file:
   filePath: /usr/local/vap/cloud
+  templatePath: /opt/test/cloud/templates
 
 #打开所有 Actuator 服务
 management:
