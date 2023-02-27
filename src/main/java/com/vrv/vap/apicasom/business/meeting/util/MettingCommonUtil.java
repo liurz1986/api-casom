@@ -30,7 +30,7 @@ public class MettingCommonUtil {
       static{
           ranges.put("MAJOR","重要");
           ranges.put("MINOR","次要");
-          ranges.put("NONE","无告警，用于设备级别的汇总告警状态");
+          ranges.put("NONE","无告警");
 
           timeTypes.add("month");
           timeTypes.add("halfyear");
