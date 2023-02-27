@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -215,6 +213,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getOnLineNodes() {
         String sql="select sum(participant_count) as number from hw_meeting_info where stage='ONLINE'";
+        logger.debug("当前节点在线总数查询sql:"+sql);
         Map<String, Object> runNodes = jdbcTemplate.queryForMap(sql);
         if (null == runNodes || runNodes.size() == 0) {
             return 0;
@@ -232,6 +231,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getOffLineMettingTotal(String type) {
         String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        logger.debug("举办会议次数 :状态为offline总数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
@@ -247,6 +247,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getOfflineMettingUserCount(String type) {
         String sql = "select sum(attendee_count) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        logger.debug("参会总人数:状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
@@ -263,6 +264,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getOfflineMeetingTimeTotal(String type) {
         String sql = "select sum(duration) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and stage='OFFLINE'";
+        logger.debug("会议总时长: 状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
@@ -299,6 +301,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getPointToPoint(String type) {
         String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and participant_count<= 2 and stage='OFFLINE'";
+        logger.debug("点对点会议次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
@@ -315,6 +318,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public int getManyPoint(String type) {
         String sql = "select count(*) as number from hw_meeting_info where "+largeScreenCommonSql(type)+" and participant_count > 2 and stage='OFFLINE'";
+        logger.debug("多点会议次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;

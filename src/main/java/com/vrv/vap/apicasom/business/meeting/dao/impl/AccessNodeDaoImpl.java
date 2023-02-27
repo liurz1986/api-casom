@@ -114,6 +114,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<CommonQueryVO> queryNodesGroupByCity(String type) {
         String sql ="select city as keyName,organization_name ,name from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
+        logger.debug("按城市、组织机构、节点分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
     }
@@ -139,6 +140,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
             sql = sql+ largeScreenCommonSql(type);
         }
         sql = sql+")";
+        logger.debug("获取正在开会的城市查询sql:"+sql);
         List<String> list = jdbcTemplate.queryForList(sql,String.class);
         return list;
     }
@@ -171,6 +173,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<CommonQueryVO> queryNodeNamesByCity(String type, String cityName) {
         String sql ="select organization_name as keyName, name from hw_meeting_participant where city='"+cityName+"'" +largeScreenCommonSql(type)+" GROUP BY organization_name,name";
+        logger.debug("城市所有节点名称查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
     }
@@ -186,6 +189,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<NodeVO> queryRunNodesByCity(String type, String cityName) {
         String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'" +largeScreenCommonSql(type);
+        logger.debug("当前城市正在开会的节点信息查询sql:"+sql);
         List<NodeVO> details = jdbcTemplate.query(sql,new NodeVOMapper());
         return details;
     }
@@ -216,6 +220,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
                 " left join " +
                 " hw_meeting_attendee as detail on node.name=detail.participant_name and node.meeting_id=detail.meeting_id " +
                 " where node.stage='OFFLINE'" + largeScreenCommonSql(type)+" )a group by a.branch ";
+        logger.debug("各地区系统使用统计查询sql:"+sql);
         List<LargeBranchStatisticsVO> details = jdbcTemplate.query(sql,new BranchStatisticsVOMapper());
         return details;
     }
@@ -245,6 +250,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<LargeDeatailVO> getUseStatisticsByBranch(String type) {
         String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" group by branch)a order by a.num desc limit 0,5 ";
+        logger.debug("各地区使用占比,历史数据查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
         return details;
     }
@@ -269,6 +275,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public int getUseStatisticsTotalCount(String type) {
         String sql="select count(*)as num from hw_meeting_participant where stage='OFFLINE'"+largeScreenCommonSql(type);
+        logger.debug("节点会议总次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
@@ -285,6 +292,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
         String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        logger.debug("开会次数查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
         return details;
     }
@@ -297,6 +305,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
         String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE'  and out_service='1' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        logger.debug("对外提供服务查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
         return details;
     }

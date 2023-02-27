@@ -240,7 +240,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public List<AbnormalMettingExportExcelVO> exportData(AbnormalMettingSearchVO abnormalMettingSearchVO) {
         String sql= getPageSql(abnormalMettingSearchVO);
-        logger.debug("分页查询获取数据查询sql:"+sql);
+        logger.debug("异常记录导出查询sql:"+sql);
         List<AbnormalMettingExportExcelVO> details = jdbcTemplate.query(sql,new AbnormalMettingExportExcelVOMapper());
         return details;
     }
@@ -317,6 +317,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     public List<LargeDeatailVO> getStatisticsByName(String type) {
         String sql ="select * from(select name,count(*) as num from hw_meeting_alarm where alarm_status='history' "+largeScreenCommonSql(type)+" group by name)a order by a.num desc limit 0,5 ";
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        logger.debug("异常名称分组，次数前五的数据，历史告警查询sql:"+sql);
         return details;
     }
 
@@ -358,6 +359,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public int getHistoryTotalCount(String type) {
         String sql = "select count(*)as num from hw_meeting_alarm where alarm_status='history'" + largeScreenCommonSql(type);
+        logger.debug("获取历史异常总数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
             return 0;
