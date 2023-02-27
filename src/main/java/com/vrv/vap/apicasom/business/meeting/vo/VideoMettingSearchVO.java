@@ -34,4 +34,13 @@ public class VideoMettingSearchVO {
      * 参会节点
      */
     private String nodeName;
+    /**
+     * 排序字段名称
+     */
+    private String order_;
+
+    /**
+     * 升序(asc)、降序(desc)
+     */
+    private String by_;
 }

@@ -176,7 +176,19 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         if(null == videoMettingSearchVO.getStartTime() && null != videoMettingSearchVO.getEndTime()){
             sql = sql+" and date_format(schedule_start_time,'%Y-%m-%d') <= '" +  DateUtil.format(videoMettingSearchVO.getEndTime(),"yyyy-MM-dd") +"'";
         }
-        sql = sql+" and stage='OFFLINE' order by schedule_start_time desc" ;
+        // 排序处理：
+        String by= videoMettingSearchVO.getBy_();
+        String order = videoMettingSearchVO.getOrder_();
+        String defaultOrder = "schedule_start_time" ;
+        String defaultBy="desc";
+        // 目前只按会议日期schedule_start_time
+        if("meetingDate".equals(order)){
+            defaultOrder = "schedule_start_time" ;
+        }
+        if(StringUtils.isNotEmpty(by)){
+            defaultBy= by;
+        }
+        sql = sql+" and stage='OFFLINE' order by "+ defaultOrder +" " + defaultBy;
         return sql;
     }
 

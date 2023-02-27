@@ -219,6 +219,35 @@ public class MettingCommonUtil {
         }
         return dataXS;
     }
+
+    /**
+     * 分钟转化成小时：分钟
+     * @param minutes
+     */
+    public static String transferHourAndMinutes(long minutes){
+        if(minutes <= 0){
+            return "0";
+        }
+        if(minutes >= 10 && minutes < 60  ){
+            return "0:"+minutes;
+        }
+        if(minutes < 10){
+            return "0:0"+minutes;
+        }
+        // 转成小时
+        long hour =  minutes/60;
+        long result = minutes - hour*60;
+        if(result == 0){
+            return hour+"";
+        }
+        if(result >= 10){
+            return hour+":"+result;
+        }
+        if(result < 10){
+            return hour+":0"+result;
+        }
+        return "";
+    }
     /**
      * 毫秒转成分钟：秒  xx:xx
      * @param millisecond
@@ -236,7 +265,7 @@ public class MettingCommonUtil {
         if(seconds < 10){
             return "0:0"+seconds;
         }
-        if(seconds < 60){
+        if(seconds < 60 && seconds >= 10){
             return "0:"+seconds;
         }
         long mnutes = seconds/60;
@@ -245,11 +274,13 @@ public class MettingCommonUtil {
         long resultH = seconds - data1;
         if( 10 > resultH  && resultH >= 0){
             resultStr = mnutes+":0"+resultH;
+            return resultStr;
         }
         if( 10 < resultH ){
             resultStr = mnutes+":"+resultH;
+            return resultStr;
         }
-        return  resultStr;
+        return  "";
     }
 
     /**
