@@ -87,7 +87,7 @@ public class InitDataJob implements CommandLineRunner {
     }
 
     public void updateJobStatus(){
-        String sql = "update process_job set status = 0 where process_job = 'InitHwMeetingJob';";
+        String sql = "update process_job set status = 0 where job_name = 'InitHwMeetingJob';";
         jdbcTemplate.execute(sql);
     }
 
