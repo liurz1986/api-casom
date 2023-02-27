@@ -2,6 +2,7 @@ package com.vrv.vap.apicasom.frameworks.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.vrv.vap.apicasom.business.task.service.impl.SystemConfigServiceImpl;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -20,6 +21,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -42,6 +45,8 @@ import java.util.Map;
  * @description:
  */
 public class HttpClientUtils {
+
+    private static Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
 
     /**
      * gson对象
@@ -86,6 +91,8 @@ public class HttpClientUtils {
             // 判断返回状态是否为200
             if (response.getStatusLine().getStatusCode() == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
+            }else{
+                logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -130,7 +137,12 @@ public class HttpClientUtils {
             }
             // 执行http请求
             response = httpClient.execute(httpPost);
-            resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+            // 判断返回状态是否为200
+            if (response.getStatusLine().getStatusCode() == 200) {
+                resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
+            }else{
+                logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -159,7 +171,12 @@ public class HttpClientUtils {
             httpPost.setEntity(entity);
             // 执行http请求
             response = httpClient.execute(httpPost);
-            resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+            // 判断返回状态是否为200
+            if (response.getStatusLine().getStatusCode() == 200) {
+                resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
+            }else{
+                logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

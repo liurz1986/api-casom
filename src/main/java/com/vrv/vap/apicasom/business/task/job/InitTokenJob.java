@@ -53,11 +53,17 @@ public class InitTokenJob{
         initMeetingRooms();
     }
 
+    /**
+     * 更新城市信息
+     */
     public void updateCity(){
         Map<String,ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
         meetingHttpService.updateCity(zkyUnitBeanMap);
     }
 
+    /**
+     * 会议室信息同步
+     */
     public void initMeetingRooms(){
         int total = meetingHttpService.initMeetingRooms();
         redisUtils.set("MeetingRooms",total);

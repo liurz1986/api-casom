@@ -51,6 +51,12 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Value("${hw.meeting.organizationId}")
     private String organizationId;
 
+    @Value("${hw.meeting.sys.username}")
+    private String sysUserName;
+
+    @Value("${hw.meeting.sys.password}")
+    private String sysPassword;
+
     @Autowired
     private SystemConfigService systemConfigService;
 
@@ -99,6 +105,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String tokenRes = null;
         String configValue = systemConfigService.getSysConfigById("hw_meeting_use");
         JSONObject jsonObject = JSONObject.parseObject(configValue);
+        if(jsonObject == null){
+            logger.warn("配置项hw_meeting_use未配置！");
+            return tokenRes;
+        }
         String username = jsonObject.getString("username");
         String password = jsonObject.getString("password");
         String tokenUrl = url +"/conf-portal" + MeetingUrlConstant.TOKEN_URL;
@@ -547,7 +557,15 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String tokenRes = "";
         String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
         Map<String, String> header = new HashMap<>();
-        String encode = Base64Utils.encodeBase64("admin:admin@1234");
+        String username = "admin";
+        if(StringUtils.isNotBlank(sysUserName)){
+            username = sysUserName;
+        }
+        String password = "admin@1234";
+        if(StringUtils.isNotBlank(sysPassword)){
+            password = sysPassword;
+        }
+        String encode = Base64Utils.encodeBase64(username+":"+password);
         logger.warn("get sys token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
         try {
