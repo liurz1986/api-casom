@@ -39,6 +39,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     public List<DistributionStatisticsVO> typeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
         String sql ="select * from (select count(*) as number ,name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by name)a ORDER BY a.name desc ";
+        logger.debug("异常类型分布统计查询sql:"+sql);
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVOMapper());
         return details;
     }
@@ -53,6 +54,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     public List<DistributionStatisticsVO> gradeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
         String sql="select a.severity as name,a.number as number  from (select count(*) as number, severity  from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by severity)a ORDER BY a.severity desc ";
+        logger.debug("异常严重等级分布统计查询sql:"+sql);
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionSeverityVoMapper());
         return details;
     }
@@ -135,6 +137,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
             default:
                 break;
         }
+        logger.debug("异常趋势统计查询sql:"+sql);
         List<AbnormalMettingTrendVO> details = jdbcTemplate.query(sql,new AbnormalMettingTrendVOMapper());
         return details;
     }

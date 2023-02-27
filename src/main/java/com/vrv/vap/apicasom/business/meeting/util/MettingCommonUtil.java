@@ -243,7 +243,7 @@ public class MettingCommonUtil {
         String resultStr ="";
         long data1 =mnutes*60;
         long resultH = seconds - data1;
-        if( 10>mnutes  && resultH > 0){
+        if( 10 > resultH  && resultH >= 0){
             resultStr = mnutes+":0"+resultH;
         }
         if( 10 < resultH ){

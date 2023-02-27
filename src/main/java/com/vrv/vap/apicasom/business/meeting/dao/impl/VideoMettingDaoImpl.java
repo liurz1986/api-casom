@@ -66,7 +66,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         sql.append(" union ");
         sql.append("select '31-40人' as name,count(*) as num  from (").append(baseSql).append(")as a where a.attendee_count BETWEEN 31 and 40");
         sql.append(" union ");
-        sql.append("select '大于40人' as name,count(*) as num  from (").append(baseSql).append(")as a where  a.duration >40");
+        sql.append("select '大于40人' as name,count(*) as num  from (").append(baseSql).append(")as a where  a.attendee_count >40");
         logger.debug("会议时长分布统计查询sql:"+sql.toString());
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql.toString(),new DistributionStatisticsVOMapper());
         return details;
