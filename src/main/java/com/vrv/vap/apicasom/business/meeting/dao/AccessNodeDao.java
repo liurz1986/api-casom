@@ -16,7 +16,7 @@ public interface AccessNodeDao {
 
     public List<String> getRunMettingCitys(String type);
 
-    public  List<CommonQueryVO> queryNodeNamesByCity(String type, String cityName);
+    public  List<KeyValueQueryVO> queryNodeNamesByCity(String type, String cityName);
 
     public  List<NodeVO> queryRunNodesByCity(String type, String cityName);
 

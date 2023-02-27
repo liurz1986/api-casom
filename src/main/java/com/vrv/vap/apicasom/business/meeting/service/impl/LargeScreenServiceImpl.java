@@ -198,7 +198,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         String type = commonSearchVO.getType();
         String cityName = commonSearchVO.getCityName();
         // 当前城市所有节点名称:组织机构和节点名称分组
-        List<CommonQueryVO> nodeNames = accessNodeDao.queryNodeNamesByCity(type,cityName);
+        List<KeyValueQueryVO> nodeNames = accessNodeDao.queryNodeNamesByCity(type,cityName);
         if(CollectionUtils.isEmpty(nodeNames)){
             return largeMapDetailVO;
         }
@@ -214,15 +214,15 @@ public class LargeScreenServiceImpl implements LargeScreenService {
 
 
 
-    private void cityDetailHandle(List<CommonQueryVO> nodeNames,List<NodeVO> runNodeVos, LargeMapDetailVO largeMapDetailVO) {
+    private void cityDetailHandle(List<KeyValueQueryVO> nodeNames,List<NodeVO> runNodeVos, LargeMapDetailVO largeMapDetailVO) {
         List<LargeOrgVO> orgs = new ArrayList<>();
         // 组织机构分组
-        Map<String,List<CommonQueryVO>> groupLists= nodeNames.stream().collect(Collectors.groupingBy(CommonQueryVO::getKey));
+        Map<String,List<KeyValueQueryVO>> groupLists= nodeNames.stream().collect(Collectors.groupingBy(KeyValueQueryVO::getKey));
         Set<String> keys = groupLists.keySet();
         LargeOrgVO orgVO = null;
         for(String key : keys){
             orgVO = new LargeOrgVO();
-            List<CommonQueryVO> nodeVOs = groupLists.get(key);
+            List<KeyValueQueryVO> nodeVOs = groupLists.get(key);
             orgVO.setOrgName(key);
             List<LargeNodeVO> largeNodes = getLargeNodeVOs(runNodeVos,nodeVOs);
             orgVO.setNodes(largeNodes);
@@ -231,10 +231,10 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         largeMapDetailVO.setOrgs(orgs);
     }
 
-    private List<LargeNodeVO> getLargeNodeVOs(List<NodeVO> runNodeVos,List<CommonQueryVO> nodeVOs) {
+    private List<LargeNodeVO> getLargeNodeVOs(List<NodeVO> runNodeVos,List<KeyValueQueryVO> nodeVOs) {
         List<LargeNodeVO> nodes = new ArrayList<>();
         LargeNodeVO largeNodeVO = null;
-        for(CommonQueryVO commonQueryVO : nodeVOs){
+        for(KeyValueQueryVO commonQueryVO : nodeVOs){
             largeNodeVO = new LargeNodeVO();
             NodeVO nodeVO = isRunNode(commonQueryVO.getValue(),runNodeVos);
             addMeetingTime(nodeVO,largeNodeVO);

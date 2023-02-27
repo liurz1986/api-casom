@@ -113,7 +113,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      */
     @Override
     public List<CommonQueryVO> queryNodesGroupByCity(String type) {
-        String sql ="select city as keyName,organization_name ,name from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
+        String sql ="select city as keyName,organization_name as value1 ,name as value2 from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
         logger.debug("按城市、组织机构、节点分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
@@ -123,8 +123,8 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         public CommonQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             CommonQueryVO data = new CommonQueryVO();
             data.setKey(rs.getString("keyName"));
-            data.setValue(rs.getString("organization_name"));
-            data.setExtend(rs.getString("name"));
+            data.setValue(rs.getString("value1"));
+            data.setExtend(rs.getString("value2"));
             return data;
         }
     }
@@ -171,11 +171,20 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      * @return
      */
     @Override
-    public List<CommonQueryVO> queryNodeNamesByCity(String type, String cityName) {
-        String sql ="select organization_name as keyName, name from hw_meeting_participant where city='"+cityName+"'" +largeScreenCommonSql(type)+" GROUP BY organization_name,name";
+    public List<KeyValueQueryVO> queryNodeNamesByCity(String type, String cityName) {
+        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city='"+cityName+"'" +largeScreenCommonSql(type)+" GROUP BY organization_name,name";
         logger.debug("城市所有节点名称查询sql:"+sql);
-        List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
+        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVOMapper());
         return details;
+    }
+    public class KeyValueQueryVOMapper implements RowMapper<KeyValueQueryVO> {
+        @Override
+        public KeyValueQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            KeyValueQueryVO data = new KeyValueQueryVO();
+            data.setKey(rs.getString("keyName"));
+            data.setValue(rs.getString("value1"));
+            return data;
+        }
     }
 
 
