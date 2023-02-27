@@ -24,4 +24,14 @@ public class AccessNodeSearchVO {
      * 所属分院/地区
      */
     private String region;
+
+    /**
+     * 排序字段名称
+     */
+    private String order_;
+
+    /**
+     * 升序(asc)、降序(desc)
+     */
+    private String by_;
 }
