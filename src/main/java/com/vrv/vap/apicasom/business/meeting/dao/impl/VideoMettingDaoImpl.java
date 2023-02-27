@@ -16,11 +16,17 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 视频会议
+ * @author liurz
+ */
 @Repository
 public class VideoMettingDaoImpl implements VideoMettingDao {
     private static Logger logger = LoggerFactory.getLogger(VideoMettingDaoImpl.class);
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private String meetingDate="meetingDate";
     /**
      * 会议时长分布统计:duration
      * @return
@@ -42,7 +48,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         sql.append(" union ");
         sql.append("select '大于180分钟' as name,count(*) as num  from (").append(filterSql).append(")as a where  a.duration >180");
         logger.debug("会议时长分布统计查询sql:"+sql.toString());
-        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql.toString(),new DistributionStatisticsVOMapper());
+        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql.toString(),new DistributionStatisticsVoMapper());
         return details;
     }
 
@@ -68,7 +74,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         sql.append(" union ");
         sql.append("select '大于40人' as name,count(*) as num  from (").append(baseSql).append(")as a where  a.attendee_count >40");
         logger.debug("会议时长分布统计查询sql:"+sql.toString());
-        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql.toString(),new DistributionStatisticsVOMapper());
+        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql.toString(),new DistributionStatisticsVoMapper());
         return details;
     }
 
@@ -103,7 +109,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         }
         return filterSql;
     }
-    public class DistributionStatisticsVOMapper implements RowMapper<DistributionStatisticsVO> {
+    public class DistributionStatisticsVoMapper implements RowMapper<DistributionStatisticsVO> {
         @Override
         public DistributionStatisticsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             DistributionStatisticsVO detail = new DistributionStatisticsVO();
@@ -140,11 +146,11 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         int end = videoMettingSearchVO.getStart_() * videoMettingSearchVO.getCount_() + videoMettingSearchVO.getCount_();
         String sql= getPageSql(videoMettingSearchVO) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
-        List<VideoMettingVO> details = jdbcTemplate.query(sql,new VideoMettingVOMapper());
+        List<VideoMettingVO> details = jdbcTemplate.query(sql,new VideoMettingVoMapper());
         return details;
     }
 
-    public class VideoMettingVOMapper implements RowMapper<VideoMettingVO> {
+    public class VideoMettingVoMapper implements RowMapper<VideoMettingVO> {
         @Override
         public VideoMettingVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             VideoMettingVO detail = new VideoMettingVO();
@@ -182,7 +188,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         String defaultOrder = "schedule_start_time" ;
         String defaultBy="desc";
         // 目前只按会议日期schedule_start_time
-        if("meetingDate".equals(order)){
+        if(meetingDate.equals(order)){
             defaultOrder = "schedule_start_time" ;
         }
         if(StringUtils.isNotEmpty(by)){
@@ -201,11 +207,11 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     public List<VideoMettingExportExcelVO> exportData(VideoMettingSearchVO videoMettingSearchVO) {
         String sql= getPageSql(videoMettingSearchVO);
         logger.debug("获取导出数据查询sql:"+sql);
-        List<VideoMettingExportExcelVO> details = jdbcTemplate.query(sql,new VVideoMettingExportExcelVOMapper());
+        List<VideoMettingExportExcelVO> details = jdbcTemplate.query(sql,new VideoMettingExportExcelVoMapper());
         return details;
     }
 
-    public class VVideoMettingExportExcelVOMapper implements RowMapper<VideoMettingExportExcelVO> {
+    public class VideoMettingExportExcelVoMapper implements RowMapper<VideoMettingExportExcelVO> {
         @Override
         public VideoMettingExportExcelVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             VideoMettingExportExcelVO excelVO = new VideoMettingExportExcelVO();

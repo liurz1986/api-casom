@@ -40,7 +40,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         String filterSql = getFilterSql(statisticSearchVO);
         String sql ="select * from (select count(*) as number ,name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by name)a ORDER BY a.name desc ";
         logger.debug("异常类型分布统计查询sql:"+sql);
-        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVOMapper());
+        List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVoMapper());
         return details;
     }
 
@@ -109,7 +109,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         return filterSql;
     }
 
-    public class DistributionStatisticsVOMapper implements RowMapper<DistributionStatisticsVO> {
+    public class DistributionStatisticsVoMapper implements RowMapper<DistributionStatisticsVO> {
         @Override
         public DistributionStatisticsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             DistributionStatisticsVO detail = new DistributionStatisticsVO();
@@ -138,10 +138,10 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
                 break;
         }
         logger.debug("异常趋势统计查询sql:"+sql);
-        List<AbnormalMettingTrendVO> details = jdbcTemplate.query(sql,new AbnormalMettingTrendVOMapper());
+        List<AbnormalMettingTrendVO> details = jdbcTemplate.query(sql,new AbnormalMettingTrendVoMapper());
         return details;
     }
-    public class AbnormalMettingTrendVOMapper implements RowMapper<AbnormalMettingTrendVO> {
+    public class AbnormalMettingTrendVoMapper implements RowMapper<AbnormalMettingTrendVO> {
         @Override
         public AbnormalMettingTrendVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingTrendVO detail = new AbnormalMettingTrendVO();
@@ -168,13 +168,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         int end = abnormalMettingSearchVO.getStart_() * abnormalMettingSearchVO.getCount_() + abnormalMettingSearchVO.getCount_();
         String sql= getPageSql(abnormalMettingSearchVO) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
-        List<AbnormalMettingVO> details = jdbcTemplate.query(sql,new AbnormalMettingVOMapper());
+        List<AbnormalMettingVO> details = jdbcTemplate.query(sql,new AbnormalMettingVoMapper());
         return details;
     }
 
 
 
-    public class AbnormalMettingVOMapper implements RowMapper<AbnormalMettingVO> {
+    public class AbnormalMettingVoMapper implements RowMapper<AbnormalMettingVO> {
         @SneakyThrows
         @Override
         public AbnormalMettingVO mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -244,13 +244,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     public List<AbnormalMettingExportExcelVO> exportData(AbnormalMettingSearchVO abnormalMettingSearchVO) {
         String sql= getPageSql(abnormalMettingSearchVO);
         logger.debug("异常记录导出查询sql:"+sql);
-        List<AbnormalMettingExportExcelVO> details = jdbcTemplate.query(sql,new AbnormalMettingExportExcelVOMapper());
+        List<AbnormalMettingExportExcelVO> details = jdbcTemplate.query(sql,new AbnormalMettingExportExcelVoMapper());
         return details;
     }
 
 
 
-    public class AbnormalMettingExportExcelVOMapper implements RowMapper<AbnormalMettingExportExcelVO> {
+    public class AbnormalMettingExportExcelVoMapper implements RowMapper<AbnormalMettingExportExcelVO> {
         @Override
         public AbnormalMettingExportExcelVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AbnormalMettingExportExcelVO data = new AbnormalMettingExportExcelVO();
@@ -319,14 +319,14 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public List<LargeDeatailVO> getStatisticsByName(String type) {
         String sql ="select * from(select name,count(*) as num from hw_meeting_alarm where alarm_status='history' "+largeScreenCommonSql(type)+" group by name)a order by a.num desc limit 0,5 ";
-        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         logger.debug("异常名称分组，次数前五的数据，历史告警查询sql:"+sql);
         return details;
     }
 
 
 
-    public class LargeBranchStatisticsVOMapper implements RowMapper<LargeDeatailVO> {
+    public class LargeBranchStatisticsVoMapper implements RowMapper<LargeDeatailVO> {
         @Override
         public LargeDeatailVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             LargeDeatailVO data = new LargeDeatailVO();

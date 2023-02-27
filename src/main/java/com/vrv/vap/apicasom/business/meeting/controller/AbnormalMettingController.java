@@ -20,6 +20,8 @@ import java.util.List;
 
 /**
  * 异常会议
+ * @author  liurz
+ * @Date 202302
  */
 @RestController
 @RequestMapping("abnormalMetting")
@@ -103,7 +105,26 @@ public class AbnormalMettingController {
     @SysRequestLog(description="会议异常记录查询", actionType = ActionType.SELECT,manually = false)
     @ApiOperation(value="会议异常记录查询",notes="")
     public PageRes<AbnormalMettingVO> getPage(@RequestBody AbnormalMettingSearchVO abnormalMettingSearchVO){
-        return abnormalMettingService.getPage(abnormalMettingSearchVO);
+        PageRes<AbnormalMettingVO> result = new PageRes<>();
+        try{
+            if(StringUtils.isEmpty(abnormalMettingSearchVO.getType())){
+                result.setCode(ResultCodeEnum.UNKNOW_FAILED.getCode().toString());
+                result.setMessage("传参type为空");
+                return result;
+            }
+            if(!MettingCommonUtil.isExistTimeType(abnormalMettingSearchVO.getType().trim())){
+                result.setCode(ResultCodeEnum.UNKNOW_FAILED.getCode().toString());
+                result.setMessage("传参type的值有误");
+                return result;
+            }
+            return abnormalMettingService.getPage(abnormalMettingSearchVO);
+        }catch(Exception e){
+            logger.error("会议异常记录查询异常",e);
+            result.setCode(ResultCodeEnum.UNKNOW_FAILED.getCode().toString());
+            result.setMessage("会议异常记录查询异常");
+            return result;
+        }
+
     }
     /**
      * 会议异常记录导出
@@ -113,6 +134,12 @@ public class AbnormalMettingController {
     @ApiOperation(value="生成会议异常记录导出文件",notes="")
     public Result<String>  exportData(@RequestBody AbnormalMettingSearchVO abnormalMettingSearchVO){
         try{
+            if(StringUtils.isEmpty(abnormalMettingSearchVO.getType())){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type为空");
+            }
+            if(!MettingCommonUtil.isExistTimeType(abnormalMettingSearchVO.getType().trim())){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
+            }
             return abnormalMettingService.exportData(abnormalMettingSearchVO);
         }catch(Exception e){
             logger.error("生成会议异常记录导出文件异常",e);

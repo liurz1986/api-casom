@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * 接入节点
- * @author vrv
+ * @author liurz
+ * @Date 202302
  */
 @RestController
 @RequestMapping("accessNode")

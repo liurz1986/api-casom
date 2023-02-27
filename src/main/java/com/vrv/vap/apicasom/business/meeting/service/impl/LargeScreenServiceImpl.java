@@ -1,12 +1,10 @@
 package com.vrv.vap.apicasom.business.meeting.service.impl;
-
 import com.alibaba.fastjson.JSON;
 import com.vrv.vap.apicasom.business.meeting.dao.AbnormalMettingDao;
 import com.vrv.vap.apicasom.business.meeting.dao.AccessNodeDao;
 import com.vrv.vap.apicasom.business.meeting.dao.VideoMettingDao;
 import com.vrv.vap.apicasom.business.meeting.service.LargeScreenService;
 import com.vrv.vap.apicasom.business.meeting.util.MeetingConstrant;
-import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.common.DateUtil;
@@ -21,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * 会议大屏
  * @author liurz
+ * @Date 202302
  */
 @Service
 public class LargeScreenServiceImpl implements LargeScreenService {

@@ -18,6 +18,8 @@ import java.util.List;
 
 /**
  * 会议字典数据展示
+ * @author liurz
+ * @Date 202302
  */
 @RestController
 @RequestMapping("mettingConfig")

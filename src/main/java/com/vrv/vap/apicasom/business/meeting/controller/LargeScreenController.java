@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * 大屏接口
  *
- * @author var
+ * @author liurz
  * @data 2023-02-22
  */
 @RestController

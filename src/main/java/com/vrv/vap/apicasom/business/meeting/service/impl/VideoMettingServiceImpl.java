@@ -92,7 +92,7 @@ public class VideoMettingServiceImpl implements VideoMettingService {
         try{
             String templatePath=fileConfiguration.getTemplatePath()+"/history_metting_template.xlsx";
             logger.info("视屏会议列表模板路径: "+templatePath);
-            Map<String, String> extenddata = new HashMap<>();
+            Map<String, String> extenddata = new HashMap<String, String>(1);
             extenddata.put("title", "视屏会议");
             ExcelUtils.getInstance().exportObjects2Excel(templatePath,lists,extenddata, VideoMettingExportExcelVO.class, false, filePath);
         }catch(Exception e){

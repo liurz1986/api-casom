@@ -23,6 +23,8 @@ import java.util.List;
 
 /**
  * 视屏会议
+ * @author liurz
+ * @Date 202302
  */
 @RestController
 @RequestMapping("videoMetting")

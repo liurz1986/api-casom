@@ -27,6 +27,11 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private String meetingCount="meetingCount";
+
+    private String meetingTimeTotal="meetingTimeTotal";
+
     /**
      * 获取分页中的总数
      * @param accessNodeSearchVO
@@ -54,10 +59,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         int end = accessNodeSearchVO.getStart_() * accessNodeSearchVO.getCount_() + accessNodeSearchVO.getCount_();
         String sql= getCommonSql(accessNodeSearchVO) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
-        List<AccessNodeVO> details = jdbcTemplate.query(sql,new AccessNodeVOMapper());
+        List<AccessNodeVO> details = jdbcTemplate.query(sql,new AccessNodeVoMapper());
         return details;
     }
-    public class AccessNodeVOMapper implements RowMapper<AccessNodeVO> {
+    public class AccessNodeVoMapper implements RowMapper<AccessNodeVO> {
         @Override
         public AccessNodeVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AccessNodeVO data = new AccessNodeVO();
@@ -76,7 +81,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<AccessNodeExportExcelVO> exportData(AccessNodeSearchVO accessNodeSearchVO) {
         String sql= getCommonSql(accessNodeSearchVO);
         logger.debug("导出获取数据查询sql:"+sql);
-        List<AccessNodeExportExcelVO> details = jdbcTemplate.query(sql,new AccessNodeExportExcelVOMapper());
+        List<AccessNodeExportExcelVO> details = jdbcTemplate.query(sql,new AccessNodeExportExcelVoMapper());
         return details;
     }
 
@@ -98,10 +103,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         String defaultOrder = "a.name" ;
         String defaultBy="desc";
         // 目前有参会次数、参会时长排序
-        if("meetingCount".equals(order)){
+        if(meetingCount.equals(order)){
             defaultOrder = "a.num" ;
         }
-        if("meetingTimeTotal".equals(order)){
+        if(meetingTimeTotal.equals(order)){
             defaultOrder = "a.duration" ;
         }
         if(StringUtils.isNotEmpty(by)){
@@ -111,7 +116,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         return sql;
     }
 
-    public class AccessNodeExportExcelVOMapper implements RowMapper<AccessNodeExportExcelVO> {
+    public class AccessNodeExportExcelVoMapper implements RowMapper<AccessNodeExportExcelVO> {
         @Override
         public AccessNodeExportExcelVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             AccessNodeExportExcelVO data = new AccessNodeExportExcelVO();
@@ -192,10 +197,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<KeyValueQueryVO> queryNodeNamesByCity(String type, String cityName) {
         String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city='"+cityName+"'" +largeScreenCommonSql(type)+" GROUP BY organization_name,name";
         logger.debug("城市所有节点名称查询sql:"+sql);
-        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVOMapper());
+        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
     }
-    public class KeyValueQueryVOMapper implements RowMapper<KeyValueQueryVO> {
+    public class KeyValueQueryVoMapper implements RowMapper<KeyValueQueryVO> {
         @Override
         public KeyValueQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             KeyValueQueryVO data = new KeyValueQueryVO();
@@ -217,10 +222,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<NodeVO> queryRunNodesByCity(String type, String cityName) {
         String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'" +largeScreenCommonSql(type);
         logger.debug("当前城市正在开会的节点信息查询sql:"+sql);
-        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVOMapper());
+        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVoMapper());
         return details;
     }
-    public class NodeVOMapper implements RowMapper<NodeVO> {
+    public class NodeVoMapper implements RowMapper<NodeVO> {
         @Override
         public NodeVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             NodeVO data = new NodeVO();
@@ -248,13 +253,13 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
                 " hw_meeting_attendee as detail on node.name=detail.participant_name and node.meeting_id=detail.meeting_id " +
                 " where node.stage='OFFLINE'" + largeScreenCommonSql(type)+" )a group by a.branch ";
         logger.debug("各地区系统使用统计查询sql:"+sql);
-        List<LargeBranchStatisticsVO> details = jdbcTemplate.query(sql,new BranchStatisticsVOMapper());
+        List<LargeBranchStatisticsVO> details = jdbcTemplate.query(sql,new BranchStatisticsVoMapper());
         return details;
     }
 
 
 
-    public class BranchStatisticsVOMapper implements RowMapper<LargeBranchStatisticsVO> {
+    public class BranchStatisticsVoMapper implements RowMapper<LargeBranchStatisticsVO> {
         @Override
         public LargeBranchStatisticsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             LargeBranchStatisticsVO data = new LargeBranchStatisticsVO();
@@ -278,13 +283,13 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<LargeDeatailVO> getUseStatisticsByBranch(String type) {
         String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" group by branch)a order by a.num desc limit 0,5 ";
         logger.debug("各地区使用占比,历史数据查询sql:"+sql);
-        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
     }
 
 
 
-    public class LargeBranchStatisticsVOMapper implements RowMapper<LargeDeatailVO> {
+    public class LargeBranchStatisticsVoMapper implements RowMapper<LargeDeatailVO> {
         @Override
         public LargeDeatailVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             LargeDeatailVO data = new LargeDeatailVO();
@@ -320,7 +325,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
         String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
         logger.debug("开会次数查询sql:"+sql);
-        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
     }
 
@@ -333,7 +338,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
         String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE'  and out_service='1' "+largeScreenCommonSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
         logger.debug("对外提供服务查询sql:"+sql);
-        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVOMapper());
+        List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
     }
 
