@@ -166,7 +166,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     public List<AbnormalMettingVO> getPageList(AbnormalMettingSearchVO abnormalMettingSearchVO) {
         int start =  abnormalMettingSearchVO.getStart_();
         int end = abnormalMettingSearchVO.getStart_() * abnormalMettingSearchVO.getCount_() + abnormalMettingSearchVO.getCount_();
-        String sql= getPageSql(abnormalMettingSearchVO) +  " limit "+start+","+end;
+        String sql= getPageSql(abnormalMettingSearchVO) +  "  limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
         List<AbnormalMettingVO> details = jdbcTemplate.query(sql,new AbnormalMettingVoMapper());
         return details;
@@ -221,6 +221,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         if(StringUtils.isNotEmpty(filterSql)){
             sql = sql +"and "+ filterSql;
         }
+        sql = sql +" order by alarm_time desc ";
         return sql;
     }
 
