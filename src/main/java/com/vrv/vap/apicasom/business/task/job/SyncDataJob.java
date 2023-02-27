@@ -2,9 +2,12 @@ package com.vrv.vap.apicasom.business.task.job;
 
 import com.vrv.vap.apicasom.business.task.bean.ProcessJob;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
+import com.vrv.vap.apicasom.business.task.service.impl.MeetingHttpServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
 import com.vrv.vap.jpa.common.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +27,8 @@ import java.util.Map;
  */
 @Component
 public class SyncDataJob implements SchedulingConfigurer {
+    // 日志
+    private Logger logger = LoggerFactory.getLogger(SyncDataJob.class);
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -58,9 +63,13 @@ public class SyncDataJob implements SchedulingConfigurer {
         Map<String,Object> map1 = list.get(0);
         String cron = String.valueOf(map1.get("job_cron"));
         String startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+        logger.warn("预约会议调度，时间是{}~{}",startTime,endTime);
         List<String> ids = reservationHwMeetingDataService.queryMeetingIds(startTime,endTime);
+        logger.warn("预约会议调度，会议有{}个！",ids.size());
         reservationHwMeetingDataService.handleMeetingInfo(ids);
+        logger.warn("预约会议调度，会议详情保存成功");
         reservationHwMeetingDataService.handleMeetingAlarm(ids);
+        logger.warn("预约会议调度，会议告警保存成功");
     }
 
     public String getProcessJob(String jobName){

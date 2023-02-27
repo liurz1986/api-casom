@@ -83,11 +83,6 @@ public class InitDataJob implements CommandLineRunner {
             }
             handleData(time);
             updateJobStatus();
-            try {
-                TimeUnit.MINUTES.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -130,9 +125,9 @@ public class InitDataJob implements CommandLineRunner {
 
         if(CollectionUtils.isNotEmpty(ids)){
             historyHwMeetingDataService.handleMeetingInfo(ids);
-
+            logger.warn("补全历史数据 会议详情 完成！");
             historyHwMeetingDataService.handleMeetingAlarm(ids);
-            logger.warn("补全历史数据 完成！");
+            logger.warn("补全历史数据 会议告警 完成！");
         }
     }
 }

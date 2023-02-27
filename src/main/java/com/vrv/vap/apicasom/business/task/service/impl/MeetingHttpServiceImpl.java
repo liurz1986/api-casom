@@ -11,6 +11,7 @@ import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
 import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
+import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -135,8 +136,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         List<String> result = new ArrayList<>();
         Map<String, String> header = getHeader();
         Map<String, Object> param = new HashMap<>();
-        param.put("startTime", startTime);
-        param.put("endTime", endTime);
+        param.put("startTime", startTime+" UTC");
+        param.put("endTime", endTime+" UTC");
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
         try {
             String res = HttpClientUtils.doPost(urlStr, param, header);
@@ -178,8 +179,11 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             String infoStr = HttpClientUtils.doGet(infoUrl, null, header);
             MeetingInfo meetingInfo = gson.fromJson(infoStr, MeetingInfo.class);
             saveMeetingInfo(meetingInfo);
+            logger.warn("历史会议{}详情保存成功！",id);
             saveMeetingAttendee(meetingInfo);
+            logger.warn("历史会议{}与会人保存成功！",id);
             saveMeetingParticipant(meetingInfo);
+            logger.warn("历史会议{}会议节点保存成功！",id);
         } catch (Exception ex) {
             logger.error("获取历史会议-会议ID为{}的会议详情失败！msg={}", id, ex.getLocalizedMessage());
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
@@ -360,8 +364,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         List<String> ids = new ArrayList<>();
         Map<String, String> header = getHeader();
         Map<String, Object> param = new HashMap<>();
-        param.put("startTime", startTime);
-        param.put("endTime", endTime);
+        param.put("startTime", startTime+" UTC");
+        param.put("endTime", endTime+" UTC");
         param.put("active",true);
         String nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
         try {
@@ -412,6 +416,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             hwMeetingInfoService.save(hwMeetingInfo);
             logger.warn("保存现有会议信息成功！会议ID={}", id);
             getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
+            logger.warn("保存现有会议节点信息成功！");
         } catch (Exception ex) {
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
@@ -547,6 +552,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         header.put("Authorization", "Basic " + encode);
         try {
             String result = HttpClientUtils.doGet(tokenUrl, null, header);
+            logger.warn("获取sys token = {}",result);
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
