@@ -38,7 +38,7 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     @Override
     public List<DistributionStatisticsVO> typeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
-        String sql ="select * from (select count(*) as number ,name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by name)a ORDER BY a.name desc ";
+        String sql ="select * from (select count(*) as number,alarm_type as name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by  alarm_type)a ORDER BY a.name desc ";
         logger.debug("异常类型分布统计查询sql:"+sql);
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVoMapper());
         return details;
