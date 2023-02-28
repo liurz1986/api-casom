@@ -46,6 +46,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         // 会议视屏节点总数
         int meetingTotal = getMeetingTotal();
         data.setMeetingTotal(meetingTotal);
+        logger.debug("会议视屏节点总数,来自redis中数据:"+meetingTotal);
         // 当前节点在线总数
         int onlineNoeTotal = videoMettingDao.getOnLineNodes();
         data.setOnlineNodeTotal(onlineNoeTotal);
@@ -205,12 +206,29 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         largeMapDetailVO.setNodeTotal(nodeNames.size());
         // 当前城市正在开会的节点信息
         List<NodeVO> runNodeVos = accessNodeDao.queryRunNodesByCity(type,cityName);
+        // 在线人数处理
+        addRunNodeTotal(largeMapDetailVO,runNodeVos);
         // 城市下运行节点总数
-        largeMapDetailVO.setRunNodeTotal(runNodeVos.size());
         cityDetailHandle(nodeNames,runNodeVos,largeMapDetailVO);
         return largeMapDetailVO;
     }
 
+    // 在线人数处理
+    private void addRunNodeTotal(LargeMapDetailVO largeMapDetailVO, List<NodeVO> runNodeVos) {
+        if(CollectionUtils.isEmpty(runNodeVos)){
+            largeMapDetailVO.setRunNodeTotal(0);
+            return;
+        }
+        List<String> nodes = new ArrayList<>();
+        for(NodeVO node :runNodeVos){
+           String nodeName=  node.getName();
+           if(nodes.contains(nodeName)){
+               continue;
+           }
+            nodes.add(nodeName);
+        }
+        largeMapDetailVO.setRunNodeTotal(nodes.size());
+    }
 
 
     private void cityDetailHandle(List<KeyValueQueryVO> nodeNames,List<NodeVO> runNodeVos, LargeMapDetailVO largeMapDetailVO) {

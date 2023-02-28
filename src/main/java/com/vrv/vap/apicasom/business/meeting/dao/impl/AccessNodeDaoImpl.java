@@ -136,7 +136,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      */
     @Override
     public List<CommonQueryVO> queryNodesGroupByCity(String type) {
-        String sql ="select city as keyName,organization_name as value1 ,name as value2 from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name";
+        String sql ="select city as keyName,organization_name as value1 ,name as value2 from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name,name ";
         logger.debug("按城市、组织机构、节点分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
