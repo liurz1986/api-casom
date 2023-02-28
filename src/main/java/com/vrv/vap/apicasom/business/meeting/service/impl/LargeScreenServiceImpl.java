@@ -213,7 +213,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         return largeMapDetailVO;
     }
 
-    // 在线人数处理
+    // 在线人数处理:组织机构+节点名称唯一表示一个节点
     private void addRunNodeTotal(LargeMapDetailVO largeMapDetailVO, List<NodeVO> runNodeVos) {
         if(CollectionUtils.isEmpty(runNodeVos)){
             largeMapDetailVO.setRunNodeTotal(0);
@@ -222,10 +222,12 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         List<String> nodes = new ArrayList<>();
         for(NodeVO node :runNodeVos){
            String nodeName=  node.getName();
-           if(nodes.contains(nodeName)){
+           String orgName= node.getOrganizationName();
+           String newData = orgName+nodeName;
+           if(nodes.contains(newData)){
                continue;
            }
-            nodes.add(nodeName);
+            nodes.add(newData);
         }
         largeMapDetailVO.setRunNodeTotal(nodes.size());
     }
