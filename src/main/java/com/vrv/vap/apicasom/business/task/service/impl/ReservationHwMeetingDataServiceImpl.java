@@ -3,6 +3,7 @@ package com.vrv.vap.apicasom.business.task.service.impl;
 import com.vrv.vap.apicasom.business.task.bean.HwMeetingAlarm;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,15 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
 
     @Override
     public void handleMeetingInfo(List<String> ids) {
+        if(CollectionUtils.isNotEmpty(ids)){
+            // 删除历史数据
+            // 删除会议详情信息
+            meetingHttpService.deleteDbData("hw_meeting_info",ids);
+            // 删除会议节点信息
+            meetingHttpService.deleteDbData("hw_meeting_participant",ids);
+            // 删除会议与会人信息
+            meetingHttpService.deleteDbData("hw_meeting_attendee",ids);
+        }
         for(String id:ids){
             meetingHttpService.getNowMeetingInfo(id,0);
         }
@@ -33,6 +43,10 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
 
     @Override
     public void handleMeetingAlarm(List<String> ids) {
+        if(CollectionUtils.isNotEmpty(ids)){
+            // 删除会议告警信息
+            meetingHttpService.deleteDbData("hw_meeting_alarm",ids);
+        }
         for(String id:ids){
             meetingHttpService.getNowMeetingAlarm(id,0);
         }
