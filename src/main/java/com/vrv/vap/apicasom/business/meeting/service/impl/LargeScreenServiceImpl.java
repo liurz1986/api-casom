@@ -233,35 +233,47 @@ public class LargeScreenServiceImpl implements LargeScreenService {
 
 
     private void cityDetailHandle(List<KeyValueQueryVO> nodeNames,List<NodeVO> runNodeVos, LargeMapDetailVO largeMapDetailVO) {
-        List<LargeOrgVO> orgs = new ArrayList<>();
         // 组织机构分组
         Map<String,List<KeyValueQueryVO>> groupLists= nodeNames.stream().collect(Collectors.groupingBy(KeyValueQueryVO::getKey));
         Set<String> keys = groupLists.keySet();
         LargeOrgVO orgVO = null;
+        // 在线的组织机构在前面
+        // 离线数据
+        List<LargeOrgVO> offLineOrgs = new ArrayList<>();
+        // 在线数据
+        List<LargeOrgVO> runOrgs = new ArrayList<>();
         for(String key : keys){
             orgVO = new LargeOrgVO();
             List<KeyValueQueryVO> nodeVOs = groupLists.get(key);
             orgVO.setOrgName(key);
-            List<LargeNodeVO> largeNodes = getLargeNodeVOs(runNodeVos,nodeVOs);
-            orgVO.setNodes(largeNodes);
-            orgs.add(orgVO);
+            addLargeNodeVOs(orgVO,runNodeVos,nodeVOs,offLineOrgs,runOrgs);
         }
-        largeMapDetailVO.setOrgs(orgs);
+        runOrgs.addAll(offLineOrgs);
+        largeMapDetailVO.setOrgs(runOrgs);
     }
 
-    private List<LargeNodeVO> getLargeNodeVOs(List<NodeVO> runNodeVos,List<KeyValueQueryVO> nodeVOs) {
+    private void addLargeNodeVOs(LargeOrgVO orgVO,List<NodeVO> runNodeVos,List<KeyValueQueryVO> nodeVOs,List<LargeOrgVO> offLineOrgs, List<LargeOrgVO> runOrgs) {
         // 在线的数据放在前面
         List<LargeNodeVO> runNodes = new ArrayList<>();
         List<LargeNodeVO> offLineNodes = new ArrayList<>();
         LargeNodeVO largeNodeVO = null;
+        boolean isRun = false;
         for(KeyValueQueryVO commonQueryVO : nodeVOs){
             largeNodeVO = new LargeNodeVO();
             String name = commonQueryVO.getValue();
             NodeVO nodeVO = isRunNode(commonQueryVO.getValue(),runNodeVos);
+            if(null != nodeVO){
+                isRun = true;
+            }
             addMeetingTime(nodeVO,largeNodeVO,runNodes,offLineNodes,name);
         }
         runNodes.addAll(offLineNodes);
-        return runNodes;
+        orgVO.setNodes(runNodes);
+        if(isRun){
+            runOrgs.add(orgVO);
+        }else{
+            offLineOrgs.add(orgVO);
+        }
     }
 
     private void addMeetingTime(NodeVO nodeVO, LargeNodeVO largeNodeVO,List<LargeNodeVO> runNodes,List<LargeNodeVO> offLineNodes, String name) {
