@@ -143,7 +143,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public List<VideoMettingVO> getPageList(VideoMettingSearchVO videoMettingSearchVO) {
         int start =  videoMettingSearchVO.getStart_();
-        int end = videoMettingSearchVO.getStart_() * videoMettingSearchVO.getCount_() + videoMettingSearchVO.getCount_();
+        int end =  videoMettingSearchVO.getCount_();
         String sql= getPageSql(videoMettingSearchVO) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
         List<VideoMettingVO> details = jdbcTemplate.query(sql,new VideoMettingVoMapper());

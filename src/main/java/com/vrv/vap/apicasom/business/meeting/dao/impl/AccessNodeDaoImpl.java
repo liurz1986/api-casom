@@ -56,7 +56,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     @Override
     public List<AccessNodeVO> getPageList(AccessNodeSearchVO accessNodeSearchVO) {
         int start =  accessNodeSearchVO.getStart_();
-        int end = accessNodeSearchVO.getStart_() * accessNodeSearchVO.getCount_() + accessNodeSearchVO.getCount_();
+        int end =  accessNodeSearchVO.getCount_();
         String sql= getCommonSql(accessNodeSearchVO) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
         List<AccessNodeVO> details = jdbcTemplate.query(sql,new AccessNodeVoMapper());
