@@ -268,7 +268,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      * @param meetingInfo
      */
     public void saveMeetingAttendee(MeetingInfo meetingInfo) {
-        clearHistoryData("hw_meeting_attendee", meetingInfo.getId());
         List<HwMeetingAttendee> hwMeetingAttendees = new ArrayList<>();
         List<AttendeeRsp> attendees = meetingInfo.getAttendees();
         if (attendees != null) {
@@ -296,7 +295,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      * @param meetingInfo
      */
     public void saveMeetingParticipant(MeetingInfo meetingInfo) {
-        clearHistoryData("hw_meeting_participant", meetingInfo.getId());
         List<ParticipantRsp> participants = meetingInfo.getParticipants();
         List<HwMeetingParticipant> list = new ArrayList<>();
         if (participants != null) {
@@ -447,7 +445,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     @Override
     public void getNowMeetingParticipants(String id, String organizationName, int duration, Date scheduleStartTime) {
-        clearHistoryData("hw_meeting_participant", id);
         Map<String, String> header = getHeader();
         String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);
@@ -499,7 +496,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             for (AlarmVo content : contentList) {
                 HwMeetingAlarm alarm = new HwMeetingAlarm();
                 alarm.setId(UUIDUtils.get32UUID());
-                alarm.setMeetingId(id);
+                alarm.setMeetingId(content.getConfId());
                 alarm.setName(content.getName());
                 alarm.setAlarmNo(content.getAlarmNo());
                 alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
@@ -553,6 +550,18 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         return 0;
     }
 
+    /**
+     * 删除数据
+     * @param tableName
+     * @param ids
+     */
+    @Override
+    public void deleteDbData(String tableName, List<String> ids){
+        String idStr = String.join("','",ids);
+        String sql = "delete from " + tableName + " where meeting_id in ('" + idStr + "');";
+        jdbcTemplate.execute(sql);
+    }
+
     public String getSysToken(){
         String tokenRes = "";
         String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
@@ -578,17 +587,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
 
         return tokenRes;
-    }
-
-    /**
-     * 清除历史数据
-     *
-     * @param tableName
-     * @param meetingId
-     */
-    public void clearHistoryData(String tableName, String meetingId) {
-        String sql = "delete from " + tableName + " where meeting_id = '" + meetingId + "';";
-        jdbcTemplate.execute(sql);
     }
 }
 

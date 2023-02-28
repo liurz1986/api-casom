@@ -80,4 +80,11 @@ public interface MeetingHttpService {
      */
     public int initMeetingRooms();
 
+    /**
+     * 删除数据
+     * @param tableName
+     * @param ids
+     */
+    public void deleteDbData(String tableName,List<String> ids);
+
 }
