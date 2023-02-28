@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 
@@ -81,20 +83,25 @@ public class LargeScreenController {
      * type:quarter(季)，halfyear(半年)、year(一年)
      * @return Result
      */
-    @PostMapping(value = "/queryCityDetail")
+    @GetMapping(value = "/queryCityDetail")
     @ApiOperation(value = "地图城市详情", notes = "")
     @SysRequestLog(description = "地图城市详情", actionType = ActionType.SELECT)
-    public Result<LargeMapDetailVO> queryCityDetail(@RequestBody CommonSearchVO commonSearchVO) {
+    public Result<LargeMapDetailVO> queryCityDetail(HttpServletRequest request) {
         try {
-            if(StringUtils.isEmpty(commonSearchVO.getType())){
+            String type = request.getParameter("type");
+            String cityName = request.getParameter("cityName");
+            if(StringUtils.isEmpty(type)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type的值不能为空");
             }
-            if(!MettingCommonUtil.isExistLargeTimeType(commonSearchVO.getType())){
+            if(!MettingCommonUtil.isExistLargeTimeType(type)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
             }
-            if(StringUtils.isEmpty(commonSearchVO.getCityName())){
+            if(StringUtils.isEmpty(cityName)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "城市的值不能为空");
             }
+            CommonSearchVO commonSearchVO = new CommonSearchVO();
+            commonSearchVO.setType(type);
+            commonSearchVO.setCityName(cityName);
             return ResultUtil.success(largeScreenService.queryCityDetail(commonSearchVO));
         } catch (Exception e) {
             logger.error("地图查询异常,{}", e);
