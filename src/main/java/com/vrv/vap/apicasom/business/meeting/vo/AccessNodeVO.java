@@ -19,7 +19,7 @@ public class AccessNodeVO {
      */
     private String meetingCount;
     /**
-     *  会议时长
+     *  会议时长:分钟
      */
     private String meetingTimeTotal;
     /**

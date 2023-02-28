@@ -70,8 +70,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
             data.setRegion(rs.getString("branch"));
             data.setAssetType(rs.getString("terminal_type"));
             long durationMin = rs.getLong("duration");
-            // 将时间转化成 小时：分钟
-            data.setMeetingTimeTotal(MettingCommonUtil.transferHourAndMinutes(durationMin));
+            data.setMeetingTimeTotal(durationMin+"");
             data.setMeetingCount(rs.getString("num"));
             return data;
         }
@@ -131,12 +130,11 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
 
     /**
      * 按城市、组织机构、节点分组
-     * @param type
      * @return
      */
     @Override
-    public List<CommonQueryVO> queryNodesGroupByCity(String type) {
-        String sql ="select city as keyName,organization_name as value1 ,name as value2 from hw_meeting_participant  where 1=1 " +largeScreenCommonSql(type)+" GROUP BY city,organization_name,name ";
+    public List<CommonQueryVO> queryNodesGroupByCity() {
+        String sql ="select city as keyName,organization_name as value1 ,name as value2 from hw_meeting_participant  GROUP BY city,organization_name,name ";
         logger.debug("按城市、组织机构、节点分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
@@ -153,16 +151,11 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     }
     /**
      * 获取正在开会的城市
-     * @param type
      * @return
      */
     @Override
-    public List<String> getRunMettingCitys(String type) {
-        String sql="select DISTINCT city from hw_meeting_participant  where meeting_id in(select meeting_id from hw_meeting_info  where stage='ONLINE'";
-        if(StringUtils.isNotEmpty(type)){
-            sql = sql+ largeScreenCommonSql(type);
-        }
-        sql = sql+")";
+    public List<String> getRunMettingCitys() {
+        String sql="select DISTINCT city from hw_meeting_participant  where  stage='ONLINE' ";
         logger.debug("获取正在开会的城市查询sql:"+sql);
         List<String> list = jdbcTemplate.queryForList(sql,String.class);
         return list;
@@ -194,8 +187,8 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      * @return
      */
     @Override
-    public List<KeyValueQueryVO> queryNodeNamesByCity(String type, String cityName) {
-        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city='"+cityName+"'" +largeScreenCommonSql(type)+" GROUP BY organization_name,name";
+    public List<KeyValueQueryVO> queryNodeNamesByCity(String cityName) {
+        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city='"+cityName+"'"+" GROUP BY organization_name,name";
         logger.debug("城市所有节点名称查询sql:"+sql);
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
@@ -219,8 +212,8 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      * @return
      */
     @Override
-    public List<NodeVO> queryRunNodesByCity(String type, String cityName) {
-        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'" +largeScreenCommonSql(type);
+    public List<NodeVO> queryRunNodesByCity(String cityName) {
+        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'";
         logger.debug("当前城市正在开会的节点信息查询sql:"+sql);
         List<NodeVO> details = jdbcTemplate.query(sql,new NodeVoMapper());
         return details;
@@ -264,9 +257,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         public LargeBranchStatisticsVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             LargeBranchStatisticsVO data = new LargeBranchStatisticsVO();
             data.setName(rs.getString("branch"));
-            data.setUserNum(rs.getString("userCont")==null?0:Integer.parseInt(rs.getString("userCont")));
-            data.setMeetingDur(rs.getString("durationTotal")==null?0:Integer.parseInt(rs.getString("durationTotal")));
-            data.setMeetingTimes(rs.getString("meetingCount")==null?0:Integer.parseInt(rs.getString("meetingCount")));
+            data.setUserNum(rs.getInt("userCont"));
+            long meetingDur =rs.getLong("durationTotal");
+            data.setMeetingDur(MettingCommonUtil.transferHourAndMinutes(meetingDur));
+            data.setMeetingTimes(rs.getInt("meetingCount"));
             return data;
         }
     }

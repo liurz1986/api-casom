@@ -90,24 +90,24 @@ public class VideoMettingController {
      */
     @PostMapping("exportData")
     @SysRequestLog(description="生成视屏会议数据导出文件", actionType = ActionType.EXPORT,manually = false)
-    @ApiOperation(value="生成视屏会议数据导出文件",notes="")
+    @ApiOperation(value="生成视频会议数据导出文件",notes="")
     public Result<String>  exportData(@RequestBody VideoMettingSearchVO videoMettingSearchVO){
         try{
             return videoMettingService.exportData(videoMettingSearchVO);
         }catch(Exception e){
-            logger.error("生成视屏会议数据导出文件异常",e);
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成视屏会议数据导出文件异常");
+            logger.error("生成视频会议数据导出文件异常",e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成视频会议数据导出文件异常");
         }
     }
 
     /**
-     * 下载视屏会议导出文件
+     * 下载视频会议导出文件
      * @param fileName
      * @param response
      */
     @GetMapping(value="/exportFile/{fileName}")
-    @SysRequestLog(description="下载视屏会议导出文件", actionType = ActionType.EXPORT,manually=false)
-    @ApiOperation(value="下载视屏会议导出文件",notes="")
+    @SysRequestLog(description="下载视频会议导出文件", actionType = ActionType.EXPORT,manually=false)
+    @ApiOperation(value="下载视频会议导出文件",notes="")
     public void exportAssetInfo(@PathVariable  String fileName, HttpServletResponse response){
         videoMettingService.exportAssetInfo(fileName,response);
     }

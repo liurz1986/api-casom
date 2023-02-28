@@ -23,7 +23,7 @@ public class LargeBranchStatisticsVO {
      */
     private int meetingTimes;;
     /**
-     * 会议时长
+     * 会议时长: 单位小时 xx：xx
      */
-    private int meetingDur;
+    private String meetingDur;
 }

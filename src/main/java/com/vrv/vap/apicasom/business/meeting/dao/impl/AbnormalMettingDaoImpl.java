@@ -31,14 +31,14 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * 异常类型分布统计
+     * 异常类型分布统计:按照异常名称分组统计
      * @param statisticSearchVO
      * @return
      */
     @Override
     public List<DistributionStatisticsVO> typeStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql = getFilterSql(statisticSearchVO);
-        String sql ="select * from (select count(*) as number,alarm_type as name from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by  alarm_type)a ORDER BY a.name desc ";
+        String sql ="select * from (select count(*) as number,name  from hw_meeting_alarm where alarm_status='history' and "+filterSql +" group by  name)a ORDER BY a.name desc ";
         logger.debug("异常类型分布统计查询sql:"+sql);
         List<DistributionStatisticsVO> details = jdbcTemplate.query(sql,new DistributionStatisticsVoMapper());
         return details;
@@ -277,27 +277,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
 
     /**
      * 获取存在异常会议的城市：告警状态为current,进行中的告警
-     * @param type
      * @return
      */
     @Override
-    public List<CommonQueryVO> getAbnormalMettingCitys(String type) {
-        String sql ="select node.city,node.organization_name,node.name from hw_meeting_participant as node inner join  " +
-                " (select meeting_id from hw_meeting_info where meeting_id in (select meeting_id from hw_meeting_alarm where alarm_status='current' )" ;
-        switch (type) {
-            case "quarter":
-                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
-                break;
-            case "halfyear":
-                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
-                break;
-            case "year":
-                sql =sql + "and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
-                break;
-            default:
-                break;
-        }
-        sql = sql+ ") meeting on node.meeting_id=meeting.meeting_id group by node.city,node.organization_name,node.name";
+    public List<CommonQueryVO> getAbnormalMettingCitys() {
+        String sql =" select city,organization_name,name from hw_meeting_participant  where meeting_id in (select meeting_id from hw_meeting_alarm where alarm_status='current' ) " +
+                " group by city,organization_name,name" ;
+        logger.debug("获取存在异常会议的城市、组织机构、名称分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
     }

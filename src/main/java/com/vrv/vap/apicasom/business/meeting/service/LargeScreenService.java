@@ -13,7 +13,7 @@ public interface LargeScreenService {
 
     public LargeScreenBaseMessageVO queryBaseMessage(String type);
 
-    public List<LargeMapVO> queryMapMesage(String type);
+    public List<LargeMapVO> queryMapMesage();
 
     public LargeMapDetailVO queryCityDetail(CommonSearchVO commonSearchVO);
 

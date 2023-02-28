@@ -85,19 +85,19 @@ public class LargeScreenServiceImpl implements LargeScreenService {
      * @return Result
      */
     @Override
-    public List<LargeMapVO> queryMapMesage(String type) {
+    public List<LargeMapVO> queryMapMesage() {
         List<LargeMapVO> result = new ArrayList<>();
         // 城市、组织机构、节点分组统计
-        List<CommonQueryVO> groupByCitys = accessNodeDao.queryNodesGroupByCity(type);
+        List<CommonQueryVO> groupByCitys = accessNodeDao.queryNodesGroupByCity();
         if(CollectionUtils.isEmpty(groupByCitys)){
             return result;
         }
         logger.debug("城市、组织机构、节点分组统计:"+JSON.toJSONString(groupByCitys));
         // 获取存在异常会议的城市、组织机构、节点
-        List<CommonQueryVO> abnormalCitys = abnormalMettingDao.getAbnormalMettingCitys(type);
+        List<CommonQueryVO> abnormalCitys = abnormalMettingDao.getAbnormalMettingCitys();
         logger.debug("获取存在异常会议的城市:"+JSON.toJSONString(abnormalCitys));
         // 获取正在开会的城市
-        List<String> runCitys = accessNodeDao.getRunMettingCitys(type);
+        List<String> runCitys = accessNodeDao.getRunMettingCitys();
         logger.debug("获取正在开会的城市:"+JSON.toJSONString(runCitys));
         // 数据组合处理
         result = dataHandle(groupByCitys,abnormalCitys,runCitys);
@@ -195,17 +195,16 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     @Override
     public LargeMapDetailVO queryCityDetail(CommonSearchVO commonSearchVO) {
         LargeMapDetailVO largeMapDetailVO = new LargeMapDetailVO();
-        String type = commonSearchVO.getType();
         String cityName = commonSearchVO.getCityName();
         // 当前城市所有节点名称:组织机构和节点名称分组
-        List<KeyValueQueryVO> nodeNames = accessNodeDao.queryNodeNamesByCity(type,cityName);
+        List<KeyValueQueryVO> nodeNames = accessNodeDao.queryNodeNamesByCity(cityName);
         if(CollectionUtils.isEmpty(nodeNames)){
             return largeMapDetailVO;
         }
         // 城市下节点总数
         largeMapDetailVO.setNodeTotal(nodeNames.size());
         // 当前城市正在开会的节点信息
-        List<NodeVO> runNodeVos = accessNodeDao.queryRunNodesByCity(type,cityName);
+        List<NodeVO> runNodeVos = accessNodeDao.queryRunNodesByCity(cityName);
         // 在线人数处理
         addRunNodeTotal(largeMapDetailVO,runNodeVos);
         // 城市下运行节点总数
@@ -251,20 +250,24 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     }
 
     private List<LargeNodeVO> getLargeNodeVOs(List<NodeVO> runNodeVos,List<KeyValueQueryVO> nodeVOs) {
-        List<LargeNodeVO> nodes = new ArrayList<>();
+        // 在线的数据放在前面
+        List<LargeNodeVO> runNodes = new ArrayList<>();
+        List<LargeNodeVO> offLineNodes = new ArrayList<>();
         LargeNodeVO largeNodeVO = null;
         for(KeyValueQueryVO commonQueryVO : nodeVOs){
             largeNodeVO = new LargeNodeVO();
+            String name = commonQueryVO.getValue();
             NodeVO nodeVO = isRunNode(commonQueryVO.getValue(),runNodeVos);
-            addMeetingTime(nodeVO,largeNodeVO);
-            largeNodeVO.setNodeName(commonQueryVO.getValue());
-            nodes.add(largeNodeVO);
+            addMeetingTime(nodeVO,largeNodeVO,runNodes,offLineNodes,name);
         }
-        return nodes;
+        runNodes.addAll(offLineNodes);
+        return runNodes;
     }
 
-    private void addMeetingTime(NodeVO nodeVO, LargeNodeVO largeNodeVO) {
+    private void addMeetingTime(NodeVO nodeVO, LargeNodeVO largeNodeVO,List<LargeNodeVO> runNodes,List<LargeNodeVO> offLineNodes, String name) {
+        largeNodeVO.setNodeName(name);
         if(null == nodeVO){
+            offLineNodes.add(largeNodeVO);
             return ;
         }
         Date startTime = nodeVO.getStartTime();
@@ -279,6 +282,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         }
         String meetingTime = startStr+"-"+endTimeStr;
         largeNodeVO.setMeetingTime(meetingTime);
+        runNodes.add(largeNodeVO);
     }
 
     private NodeVO isRunNode(String name, List<NodeVO> runNodeNames) {

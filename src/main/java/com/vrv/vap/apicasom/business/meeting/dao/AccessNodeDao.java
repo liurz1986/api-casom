@@ -12,13 +12,13 @@ public interface AccessNodeDao {
 
     public List<AccessNodeExportExcelVO> exportData(AccessNodeSearchVO accessNodeSearchVO);
 
-    public List<CommonQueryVO> queryNodesGroupByCity(String type);
+    public List<CommonQueryVO> queryNodesGroupByCity();
 
-    public List<String> getRunMettingCitys(String type);
+    public List<String> getRunMettingCitys();
 
-    public  List<KeyValueQueryVO> queryNodeNamesByCity(String type, String cityName);
+    public  List<KeyValueQueryVO> queryNodeNamesByCity(String cityName);
 
-    public  List<NodeVO> queryRunNodesByCity(String type, String cityName);
+    public  List<NodeVO> queryRunNodesByCity(String cityName);
 
     public List<LargeBranchStatisticsVO> queryBranchStatistics(String type);
 

@@ -58,21 +58,15 @@ public class LargeScreenController {
 
     /**
      * 地图查询：
-     * type:quarter(季)，halfyear(半年)、year(一年)
+     *
      * @return Result
      */
-    @GetMapping(value = "/queryMapMesage/{type}")
+    @GetMapping(value = "/queryMapMesage")
     @ApiOperation(value = "地图查询", notes = "")
     @SysRequestLog(description = "地图查询", actionType = ActionType.SELECT)
-    public Result<List<LargeMapVO>> queryMapMesage(@PathVariable("type") String type) {
+    public Result<List<LargeMapVO>> queryMapMesage() {
         try {
-            if(StringUtils.isEmpty(type)){
-                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type的值不能为空");
-            }
-            if(!MettingCommonUtil.isExistLargeTimeType(type)){
-                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
-            }
-            return ResultUtil.successList(largeScreenService.queryMapMesage(type));
+            return ResultUtil.successList(largeScreenService.queryMapMesage());
         } catch (Exception e) {
             logger.error("地图查询异常,{}", e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "地图查询异常");
@@ -88,19 +82,11 @@ public class LargeScreenController {
     @SysRequestLog(description = "地图城市详情", actionType = ActionType.SELECT)
     public Result<LargeMapDetailVO> queryCityDetail(HttpServletRequest request) {
         try {
-            String type = request.getParameter("type");
             String cityName = request.getParameter("cityName");
-            if(StringUtils.isEmpty(type)){
-                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type的值不能为空");
-            }
-            if(!MettingCommonUtil.isExistLargeTimeType(type)){
-                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
-            }
             if(StringUtils.isEmpty(cityName)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "城市的值不能为空");
             }
             CommonSearchVO commonSearchVO = new CommonSearchVO();
-            commonSearchVO.setType(type);
             commonSearchVO.setCityName(cityName);
             return ResultUtil.success(largeScreenService.queryCityDetail(commonSearchVO));
         } catch (Exception e) {

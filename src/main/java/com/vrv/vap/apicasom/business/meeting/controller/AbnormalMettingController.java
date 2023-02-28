@@ -32,7 +32,7 @@ public class AbnormalMettingController {
     private AbnormalMettingService abnormalMettingService;
 
     /**
-     * 异常类型分布统计
+     * 异常类型分布统计:按照异常名称分组统计
      *
      */
     @PostMapping("typeStatistics")

@@ -54,8 +54,8 @@ public class MeetingServiceImpl implements MeetingService {
         }
         List<String> regions = new ArrayList<>();
         datas.stream().forEach(item ->{
-            if(!regions.contains(item.getCity())){
-                regions.add(item.getCity());
+            if(!regions.contains(item.getBranch())){
+                regions.add(item.getBranch());
             }
         });
         return regions;
