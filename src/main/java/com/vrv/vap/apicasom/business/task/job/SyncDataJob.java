@@ -40,7 +40,7 @@ public class SyncDataJob implements SchedulingConfigurer {
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.addTriggerTask(
                 //1.添加任务内容(Runnable)
-                () -> SyncMeetingData(),
+                () -> syncMeetingData(),
                 //2.设置执行周期(Trigger)
                 triggerContext -> {
                     //2.1 从数据库获取执行周期
@@ -55,7 +55,7 @@ public class SyncDataJob implements SchedulingConfigurer {
     /**
      * 同步会议数据
      */
-    public void SyncMeetingData(){
+    public void syncMeetingData(){
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
         String sql = "select job_cron from process_job where status = 1 and job_name = 'HwMeetingSync'";
@@ -75,11 +75,11 @@ public class SyncDataJob implements SchedulingConfigurer {
     }
 
     public String getProcessJob(String jobName){
-        String sql = "select job_name,job_cron from process_job where status = 1 and job_name = '{0}';";
+        String sql = "select job_name as jobName,job_cron as jobCron from process_job where status = 1 and job_name = '{0}';";
         sql = sql.replace("{0}",jobName);
         List<ProcessJob> list = jdbcTemplate.query(sql,new BeanPropertyRowMapper<ProcessJob>(ProcessJob.class));
         if(CollectionUtils.isNotEmpty(list)){
-            return list.get(0).getJob_cron();
+            return list.get(0).getJobCron();
         }
         return "0 0/10 * * * ?";
     }

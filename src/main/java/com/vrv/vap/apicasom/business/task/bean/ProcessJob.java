@@ -9,6 +9,6 @@ import lombok.Data;
  */
 @Data
 public class ProcessJob {
-    private String job_name;
-    private String job_cron;
+    private String jobName;
+    private String jobCron;
 }

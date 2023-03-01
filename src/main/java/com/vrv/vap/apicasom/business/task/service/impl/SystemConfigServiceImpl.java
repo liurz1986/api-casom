@@ -45,7 +45,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		logger.info("feignAll接口获取前");
 		VData<List<SystemConfig>> all = adminFeign.allConfig();
  
-		 if(all.getCode().equals("0")) {
+		 if("0".equals(all.getCode())) {
 			 return all.getData();
 		 }
 		 return  null;
@@ -74,8 +74,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public String getSysConfigById(String confId) {
 		try {
-			VData<SystemConfig> systemConfigVData = adminFeign.getConfigById(confId);
-			SystemConfig systemConfig = systemConfigVData.getData();
+			VData<SystemConfig> systemConfigVdata = adminFeign.getConfigById(confId);
+			SystemConfig systemConfig = systemConfigVdata.getData();
 			if(systemConfig != null){
 				if(systemConfig.getConfEnable()==1){
 					return systemConfig.getConfValue();
