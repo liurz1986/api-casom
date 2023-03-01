@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.vrv.vap.apicasom.business.task.bean.ZkyUnitBean;
 import com.vrv.vap.apicasom.business.task.bean.hwmeetingbean.Token;
 import com.vrv.vap.apicasom.business.task.constant.MeetingUrlConstant;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
@@ -28,16 +29,19 @@ import java.util.stream.Collectors;
 /**
  * @author: 梁国露
  * @since: 2023/2/17 15:12
- * @description:
+ * @description: 初始化公共信息（token,分院/城市信息,会议室数量信息）
  */
 @Component
 @EnableScheduling
-public class InitTokenJob{
+public class InitCommonDataJob {
 
     public static String token = null;
 
     @Autowired
     private MeetingHttpService meetingHttpService;
+
+    @Autowired
+    private HwMeetingService hwMeetingService;
 
     @Autowired
     private ZkyUnitService zkyUnitService;
@@ -48,7 +52,7 @@ public class InitTokenJob{
     @Scheduled(cron = "${hw.meeting.token}")
     public void getToken(){
         token = meetingHttpService.getToken(0);
-        meetingHttpService.updateToken(token);
+        hwMeetingService.updateToken(token);
         updateCity();
         initMeetingRooms();
     }
@@ -58,7 +62,7 @@ public class InitTokenJob{
      */
     public void updateCity(){
         Map<String,ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
-        meetingHttpService.updateCity(zkyUnitBeanMap);
+        hwMeetingService.updateCity(zkyUnitBeanMap);
     }
 
     /**

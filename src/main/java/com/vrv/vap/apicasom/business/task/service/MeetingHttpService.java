@@ -20,12 +20,6 @@ public interface MeetingHttpService {
     public String getToken(Integer errorNum);
 
     /**
-     * 更新token
-     * @param newToken
-     */
-    public void updateToken(String newToken);
-
-    /**
      * 查询会议列表
      */
     public List<String> getHistoryMeetingList(String startTime, String endTime,Integer errorNum);
@@ -69,22 +63,10 @@ public interface MeetingHttpService {
     public void getNowMeetingAlarm(String id,Integer errorNum);
 
     /**
-     * 更新城市信息
-     * @param map
-     */
-    public void updateCity(Map<String, ZkyUnitBean> map);
-
-    /**
      * 初始会议室信息
      * @return
      */
     public int initMeetingRooms();
 
-    /**
-     * 删除数据
-     * @param tableName
-     * @param ids
-     */
-    public void deleteDbData(String tableName,List<String> ids);
 
 }
