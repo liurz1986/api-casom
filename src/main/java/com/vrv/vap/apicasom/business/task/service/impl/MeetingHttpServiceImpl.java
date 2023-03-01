@@ -41,10 +41,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
-    Map<String, ZkyUnitBean> zkyUnitBeanMap = new ConcurrentHashMap<>();
-
-    public String token = null;
-
     @Value("${hw.meeting.url}")
     private String url;
 
@@ -73,10 +69,11 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     private HwMeetingAlarmService hwMeetingAlarmService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ZkyUnitService zkyUnitService;
+
+    private static Map<String,ZkyUnitBean> zkyUnitBeanMap = new HashMap<>();
+
+    private static String token;
 
     /**
      * 获取请求头
@@ -85,12 +82,18 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     public Map<String, String> getHeader() {
         // 初始化城市
-        if (zkyUnitBeanMap.isEmpty()) {
+        Map<String,ZkyUnitBean> zkyUnitMap = HwMeetingServiceImpl.zkyUnitBeanMap;
+        String hwToken = HwMeetingServiceImpl.token;
+        if (zkyUnitBeanMap.isEmpty() && zkyUnitMap.isEmpty()) {
             zkyUnitBeanMap = zkyUnitService.initCity();
+        }else if(zkyUnitBeanMap.isEmpty() && !zkyUnitMap.isEmpty()){
+            zkyUnitBeanMap = zkyUnitMap;
         }
         Map<String, String> header = new HashMap<>();
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token) && StringUtils.isBlank(hwToken)) {
             token = getToken(0);
+        }else if(StringUtils.isBlank(token) && StringUtils.isNotBlank(hwToken)){
+            token = hwToken;
         }
         header.put("token", token);
         header.put("Content-type","application/json;charset=UTF-8");
@@ -131,11 +134,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
 
         return tokenRes;
-    }
-
-    @Override
-    public void updateToken(String newToken) {
-        token = newToken;
     }
 
     /**
@@ -343,13 +341,14 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 alarm.setName(content.getName());
                 alarm.setAlarmNo(content.getAlarmNo());
                 alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
-                alarm.setAlarmType(content.getAlarmType());
+                alarm.setAlarmType(content.getName());
                 alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
                 alarm.setSeverity(content.getSeverity());
                 alarm.setAlarmStatus("history");
                 alarms.add(alarm);
             }
             hwMeetingAlarmService.save(alarms);
+            logger.warn("保存历史会议-会议ID{}的告警信息成功！",id);
         } catch (Exception ex) {
             logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex.getLocalizedMessage());
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
@@ -445,6 +444,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     @Override
     public void getNowMeetingParticipants(String id, String organizationName, int duration, Date scheduleStartTime) {
+        Map<String,ZkyUnitBean> zkyUnitBeanMap = HwMeetingServiceImpl.zkyUnitBeanMap;
         Map<String, String> header = getHeader();
         String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);
@@ -500,7 +500,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 alarm.setName(content.getName());
                 alarm.setAlarmNo(content.getAlarmNo());
                 alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
-                alarm.setAlarmType(content.getAlarmType());
+                alarm.setAlarmType(content.getName());
 //                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
 //                alarm.setSeverity(content.getSeverity());
                 alarm.setAlarmStatus("current");
@@ -521,13 +521,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
     }
 
-    @Override
-    public void updateCity(Map<String, ZkyUnitBean> map) {
-        zkyUnitBeanMap.clear();
-        for (Map.Entry<String, ZkyUnitBean> entry : map.entrySet()) {
-            zkyUnitBeanMap.put(entry.getKey(), entry.getValue());
-        }
-    }
 
     @Override
     public int initMeetingRooms(){
@@ -548,18 +541,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             return total;
         }
         return 0;
-    }
-
-    /**
-     * 删除数据
-     * @param tableName
-     * @param ids
-     */
-    @Override
-    public void deleteDbData(String tableName, List<String> ids){
-        String idStr = String.join("','",ids);
-        String sql = "delete from " + tableName + " where meeting_id in ('" + idStr + "');";
-        jdbcTemplate.execute(sql);
     }
 
     public String getSysToken(){
