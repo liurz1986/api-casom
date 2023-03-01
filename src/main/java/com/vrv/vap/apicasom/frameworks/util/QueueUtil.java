@@ -6,6 +6,7 @@ import com.vrv.vap.apicasom.business.task.bean.MeetingQueueVo;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -16,7 +17,7 @@ public class QueueUtil {
     /**
      * 初始化有界队列队列
      */
-    private static final ConcurrentLinkedQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new ConcurrentLinkedQueue<MeetingQueueVo>();
+    private static final LinkedBlockingQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new LinkedBlockingQueue<MeetingQueueVo>(30);
 
     public static void put(MeetingQueueVo meetingSyncVo) {
             boolean flag = LINKED_BLOCKING_QUEUE.add(meetingSyncVo);
