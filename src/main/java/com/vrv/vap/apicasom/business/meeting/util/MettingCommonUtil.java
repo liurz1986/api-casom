@@ -296,4 +296,28 @@ public class MettingCommonUtil {
         BigDecimal reslut = bigDecimal1.divide(bigDecimal2,newScale,BigDecimal.ROUND_HALF_UP);
         return reslut;
     }
+
+
+    /**
+     * 大屏相关：视频会议和节点先关
+     * @param type
+     * @return
+     */
+    public static String largeScreenVideoAndNodeSql(String type){
+        String sql ="";
+        switch (type) {
+            case "quarter":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
+                break;
+            case "halfyear":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
+                break;
+            case "year":
+                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
+                break;
+            default:
+                break;
+        }
+        return sql;
+    }
 }
