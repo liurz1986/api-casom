@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_alarm` (
         `alarm_type` varchar(48) DEFAULT NULL COMMENT '异常类型',
         `alarm_time` datetime DEFAULT NULL COMMENT '告警时间',
         `cleared_time` datetime DEFAULT NULL COMMENT '告警确认或恢复时间',
-        PRIMARY KEY (`id`)
+         PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='会议告警';
 
 CREATE TABLE IF NOT EXISTS `hw_meeting_attendee` (
@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_attendee` (
        `city` varchar(48) DEFAULT NULL COMMENT '城市',
        `branch` varchar(48) DEFAULT NULL COMMENT '分院',
        `duration` int(10) DEFAULT NULL COMMENT '会议时长',
-       PRIMARY KEY (`id`)
+        PRIMARY KEY (`id`),
+        INDEX `meetingId`(`meeting_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议会与人';
 
 CREATE TABLE IF NOT EXISTS `hw_meeting_info` (
@@ -33,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_info` (
        `attendee_count` int(10) DEFAULT NULL COMMENT '会议人数',
        `participant_count` int(10) DEFAULT NULL COMMENT '参会节点数',
        `participant_unity` varchar(255) DEFAULT NULL COMMENT '参会节点',
-       PRIMARY KEY (`meeting_id`)
+        PRIMARY KEY (`meeting_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议详情';
 
 CREATE TABLE IF NOT EXISTS `hw_meeting_participant` (
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_participant` (
       `terminal_type` varchar(10) DEFAULT NULL COMMENT '设备型号',
       `stage` varchar(10) DEFAULT NULL COMMENT '会议类型',
       `out_service` varchar(2) DEFAULT NULL COMMENT '是否对外服务',
-      PRIMARY KEY (`id`)
+      PRIMARY KEY (`id`),
+      INDEX `meetingId`(`meeting_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为会议节点（接入点）';
 
 CREATE TABLE IF NOT EXISTS `hw_sync_error_log` (
