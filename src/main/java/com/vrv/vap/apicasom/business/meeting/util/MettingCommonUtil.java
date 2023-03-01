@@ -221,7 +221,7 @@ public class MettingCommonUtil {
     }
 
     /**
-     * 分钟转化成小时：分钟
+     * 分钟转化成小时.分钟
      * @param minutes
      */
     public static String transferHourAndMinutes(long minutes){
@@ -229,7 +229,7 @@ public class MettingCommonUtil {
             return "0";
         }
         if(minutes >= 10 && minutes < 60  ){
-            return "0:"+minutes;
+            return "0."+minutes;
         }
         if(minutes < 10){
             return "0:0"+minutes;
@@ -241,10 +241,10 @@ public class MettingCommonUtil {
             return hour+"";
         }
         if(result >= 10){
-            return hour+":"+result;
+            return hour+"."+result;
         }
         if(result < 10){
-            return hour+":0"+result;
+            return hour+".0"+result;
         }
         return "";
     }

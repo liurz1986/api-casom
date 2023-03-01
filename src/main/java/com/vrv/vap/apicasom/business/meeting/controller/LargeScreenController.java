@@ -3,7 +3,16 @@ package com.vrv.vap.apicasom.business.meeting.controller;
 import com.vrv.vap.apicasom.business.meeting.service.LargeScreenService;
 import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
+import com.vrv.vap.apicasom.business.task.bean.HwMeetingAttendee;
+import com.vrv.vap.apicasom.business.task.bean.HwMeetingInfo;
+import com.vrv.vap.apicasom.business.task.bean.HwMeetingParticipant;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingAlarmService;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingAttendeeService;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingInfoService;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingParticipantService;
 import com.vrv.vap.common.utils.StringUtils;
+import com.vrv.vap.jpa.common.DateUtil;
+import com.vrv.vap.jpa.common.UUIDUtils;
 import com.vrv.vap.jpa.web.Result;
 import com.vrv.vap.jpa.web.ResultCodeEnum;
 import com.vrv.vap.jpa.web.ResultUtil;
@@ -15,6 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -31,6 +43,12 @@ public class LargeScreenController {
 
     @Autowired
     private LargeScreenService largeScreenService;
+    @Autowired
+    private HwMeetingInfoService hwMeetingInfoService;
+    @Autowired
+    private HwMeetingParticipantService hwMeetingParticipantService;
+    @Autowired
+    private HwMeetingAttendeeService hwMeetingAttendeeService;
     /**
      * 基本信息：会议视屏节点总数、当前节点在线总数、举办会议次数、参会总人数、会议总时长
      * type:quarter(季)，halfyear(半年)、year(一年)
@@ -231,5 +249,90 @@ public class LargeScreenController {
             logger.error("对外提供服务异常,{}", e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "对外提供服务异常");
         }
+    }
+
+    /**
+     * 模拟数据用的接口
+     * @throws ParseException
+     * @throws InterruptedException
+     */
+    @GetMapping(value = "/dataSave")
+    public void testSave() throws ParseException, InterruptedException {
+        List<HwMeetingInfo> mettings = new ArrayList<>();
+        List<HwMeetingParticipant> hwMeetingParticipants = new ArrayList<>();
+        List<HwMeetingAttendee> hwMeetingAttendees = new ArrayList<>();
+        HwMeetingInfo hwMeetingInfo = null;
+        for(int i= 0;i < 400;i++){
+            hwMeetingInfo = getMeettingInfo();
+            List<HwMeetingParticipant> participants = new ArrayList<>();
+            List<HwMeetingAttendee> attendees = new ArrayList<>();
+            getParticipants(participants,attendees,hwMeetingInfo);
+            hwMeetingParticipants.addAll(participants);
+            hwMeetingAttendees.addAll(attendees);
+            mettings.add(hwMeetingInfo);
+        }
+        hwMeetingInfoService.save(mettings);
+        hwMeetingParticipantService.save(hwMeetingParticipants);
+        hwMeetingAttendeeService.save(hwMeetingAttendees);
+    }
+
+    private List<HwMeetingParticipant> getParticipants(List<HwMeetingParticipant> hwMeetingParticipants,List<HwMeetingAttendee> hwMeetingAttendees,HwMeetingInfo hwMeetingInfo) throws ParseException {
+        //,计算机网络信息中心,近代物理研究所
+        HwMeetingParticipant cipant =getHwMeetingParticipant(hwMeetingInfo,"北京基因组研究所","北京","北京");
+        hwMeetingParticipants.add(cipant);
+        HwMeetingAttendee hwMeetingAttendee = getHwMeetingAttendee(hwMeetingInfo,"北京基因组研究所","北京","北京");
+        hwMeetingAttendees.add(hwMeetingAttendee);
+
+        cipant =getHwMeetingParticipant(hwMeetingInfo,"南海海洋研究所","广州","广州分院");
+        hwMeetingParticipants.add(cipant);
+        hwMeetingAttendee = getHwMeetingAttendee(hwMeetingInfo,"南海海洋研究所","广州","广州分院");
+        hwMeetingAttendees.add(hwMeetingAttendee);
+
+        return hwMeetingParticipants;
+    }
+
+    private HwMeetingAttendee getHwMeetingAttendee(HwMeetingInfo hwMeetingInfo,String name,String city,String branch) {
+        HwMeetingAttendee hwMeetingAttendee =new HwMeetingAttendee();
+        hwMeetingAttendee.setMeetingId(hwMeetingInfo.getMeetingId());
+        hwMeetingAttendee.setBranch(branch);
+        hwMeetingAttendee.setCity(city);
+        hwMeetingAttendee.setDuration(50);
+        hwMeetingAttendee.setUserCount(1);
+        hwMeetingAttendee.setParticipantName(name);
+        hwMeetingAttendee.setId(UUIDUtils.get32UUID());
+        return hwMeetingAttendee;
+    }
+
+    private HwMeetingParticipant getHwMeetingParticipant(HwMeetingInfo hwMeetingInfo,String name,String city,String branch) {
+        HwMeetingParticipant cipant = new HwMeetingParticipant();
+        cipant.setDuration(50);
+        cipant.setMeetingId(hwMeetingInfo.getMeetingId());
+        cipant.setStage("OFFLINE");
+        cipant.setScheduleStartTime(hwMeetingInfo.getScheduleStartTime());
+        cipant.setScheduleEndTime(hwMeetingInfo.getScheduleEndTime());
+        cipant.setCity(city);
+        cipant.setBranch(branch);
+        cipant.setTerminalType("型号XXX");
+        cipant.setName(name);
+        cipant.setOrganizationName(name);
+        cipant.setId(UUIDUtils.get32UUID());
+        return cipant;
+    }
+
+    private HwMeetingInfo getMeettingInfo() throws ParseException {
+        HwMeetingInfo hwMeetingInfo = new HwMeetingInfo();
+        hwMeetingInfo.setMeetingId(UUIDUtils.get32UUID());
+        Date current = new Date();
+        hwMeetingInfo.setScheduleStartTime(current);
+        long endTime = current.getTime()+50*60*1000;
+        Date date = new Date(endTime);
+        hwMeetingInfo.setScheduleEndTime(date);
+        hwMeetingInfo.setDuration(50);
+        hwMeetingInfo.setAttendeeCount(6);
+        hwMeetingInfo.setParticipantCount(6);
+        hwMeetingInfo.setParticipantUnity("北京基因组研究所,南海海洋研究所");
+        hwMeetingInfo.setOrganizationName("北京基因组研究所,南海海洋研究所");
+        hwMeetingInfo.setStage("OFFLINE");
+        return hwMeetingInfo;
     }
 }
