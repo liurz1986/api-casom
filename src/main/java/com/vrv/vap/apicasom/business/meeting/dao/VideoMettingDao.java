@@ -15,16 +15,4 @@ public interface VideoMettingDao {
     public List<VideoMettingVO> getPageList(VideoMettingSearchVO videoMettingSearchVO);
 
     public List<VideoMettingExportExcelVO> exportData(VideoMettingSearchVO videoMettingSearchVO);
-
-    public int getOnLineNodes();
-
-    public int getOffLineMettingTotal(String type);
-
-    public int getOfflineMettingUserCount(String type);
-
-    public int getOfflineMeetingTimeTotal(String type);
-
-    public  int getPointToPoint(String type);
-
-    public int getManyPoint(String type);
 }

@@ -2,6 +2,7 @@ package com.vrv.vap.apicasom.business.meeting.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.vrv.vap.apicasom.business.meeting.dao.AbnormalMettingDao;
 import com.vrv.vap.apicasom.business.meeting.dao.AccessNodeDao;
+import com.vrv.vap.apicasom.business.meeting.dao.LargeScreenDao;
 import com.vrv.vap.apicasom.business.meeting.dao.VideoMettingDao;
 import com.vrv.vap.apicasom.business.meeting.service.LargeScreenService;
 import com.vrv.vap.apicasom.business.meeting.util.MeetingConstrant;
@@ -28,11 +29,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     @Autowired
     private RedisUtils  redisUtils;
     @Autowired
-    private AccessNodeDao accessNodeDao;
-    @Autowired
-    private VideoMettingDao videoMettingDao;
-    @Autowired
-    private AbnormalMettingDao abnormalMettingDao;
+    private LargeScreenDao largeScreenDao;
     /**
      * 基本信息：会议视屏节点总数、当前节点在线总数、举办会议次数、参会总人数、会议总时长
      *  会议总时长 单位小时，取整，四舍五入
@@ -48,16 +45,16 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         data.setMeetingTotal(meetingTotal);
         logger.debug("会议视屏节点总数,来自redis中数据:"+meetingTotal);
         // 当前节点在线总数
-        int onlineNoeTotal = videoMettingDao.getOnLineNodes();
+        int onlineNoeTotal = largeScreenDao.getOnLineNodes();
         data.setOnlineNodeTotal(onlineNoeTotal);
         // 举办会议次数:状态为OFFLINE
-        int offlineMettingCount = videoMettingDao.getOffLineMettingTotal(type);
+        int offlineMettingCount = largeScreenDao.getOffLineMettingTotal(type);
         data.setOfflineMettingCount(offlineMettingCount);
         // 参会总人数:状态为OFFLINE
-        int offlineMettingUserCount = videoMettingDao.getOfflineMettingUserCount(type);
+        int offlineMettingUserCount = largeScreenDao.getOfflineMettingUserCount(type);
         data.setOfflineMettingUserCount(offlineMettingUserCount);
         // 会议总时长: 状态为OFFLINE
-        int meetingTimeTotal= videoMettingDao.getOfflineMeetingTimeTotal(type);
+        int meetingTimeTotal= largeScreenDao.getOfflineMeetingTimeTotal(type);
         data.setMeetingTimeTotal(meetingTimeTotal);
         return data;
     }
@@ -88,16 +85,16 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     public List<LargeMapVO> queryMapMesage() {
         List<LargeMapVO> result = new ArrayList<>();
         // 城市、组织机构、节点分组统计
-        List<CommonQueryVO> groupByCitys = accessNodeDao.queryNodesGroupByCity();
+        List<CommonQueryVO> groupByCitys = largeScreenDao.queryNodesGroupByCity();
         if(CollectionUtils.isEmpty(groupByCitys)){
             return result;
         }
         logger.debug("城市、组织机构、节点分组统计:"+JSON.toJSONString(groupByCitys));
         // 获取存在异常会议的城市、组织机构、节点
-        List<CommonQueryVO> abnormalCitys = abnormalMettingDao.getAbnormalMettingCitys();
+        List<CommonQueryVO> abnormalCitys = largeScreenDao.getAbnormalMettingCitys();
         logger.debug("获取存在异常会议的城市:"+JSON.toJSONString(abnormalCitys));
         // 获取正在开会的城市
-        List<String> runCitys = accessNodeDao.getRunMettingCitys();
+        List<String> runCitys = largeScreenDao.getRunMettingCitys();
         logger.debug("获取正在开会的城市:"+JSON.toJSONString(runCitys));
         // 数据组合处理
         result = dataHandle(groupByCitys,abnormalCitys,runCitys);
@@ -197,14 +194,14 @@ public class LargeScreenServiceImpl implements LargeScreenService {
         LargeMapDetailVO largeMapDetailVO = new LargeMapDetailVO();
         String cityName = commonSearchVO.getCityName();
         // 当前城市所有节点名称:组织机构和节点名称分组
-        List<KeyValueQueryVO> nodeNames = accessNodeDao.queryNodeNamesByCity(cityName);
+        List<KeyValueQueryVO> nodeNames = largeScreenDao.queryNodeNamesByCity(cityName);
         if(CollectionUtils.isEmpty(nodeNames)){
             return largeMapDetailVO;
         }
         // 城市下节点总数
         largeMapDetailVO.setNodeTotal(nodeNames.size());
         // 当前城市正在开会的节点信息
-        List<NodeVO> runNodeVos = accessNodeDao.queryRunNodesByCity(cityName);
+        List<NodeVO> runNodeVos = largeScreenDao.queryRunNodesByCity(cityName);
         // 在线人数处理
         addRunNodeTotal(largeMapDetailVO,runNodeVos);
         // 城市下运行节点总数
@@ -316,7 +313,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
      */
     @Override
     public List<LargeBranchStatisticsVO> queryBranchStatistics(String type) {
-        return accessNodeDao.queryBranchStatistics(type);
+        return largeScreenDao.queryBranchStatistics(type);
     }
 
     /**
@@ -329,17 +326,17 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     public LargeBranchUseScaleStatisticsVO queryBranchScaleStatistics(String type) {
         LargeBranchUseScaleStatisticsVO largeBranchUseScaleStatisticsVO = new LargeBranchUseScaleStatisticsVO();
         // 点对点会议次数，历史数据
-        int count = videoMettingDao.getPointToPoint(type);
+        int count = largeScreenDao.getPointToPoint(type);
         largeBranchUseScaleStatisticsVO.setPointNum(count);
         // 各地区使用占比,历史数据
         // 地区分组，次数前五的数据,
-        List<LargeDeatailVO> list = accessNodeDao.getUseStatisticsByBranch(type);
+        List<LargeDeatailVO> list = largeScreenDao.getUseStatisticsByBranch(type);
         if(CollectionUtils.isEmpty(list)){
             largeBranchUseScaleStatisticsVO.setDetail(new ArrayList<>());
             return largeBranchUseScaleStatisticsVO;
         }
         // 节点会议总次数
-        int totalCount = accessNodeDao.getUseStatisticsTotalCount(type);
+        int totalCount = largeScreenDao.getUseStatisticsTotalCount(type);
         // 占比处理
         percentHandle(list,totalCount);
         largeBranchUseScaleStatisticsVO.setDetail(list);
@@ -371,12 +368,12 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     public List<LargeDeatailVO> queryBranchAbnormalStatistics(String type) {
         // 异常及故障情况分析:异常
         // 异常名称分组，次数前五的数据
-        List<LargeDeatailVO> list = abnormalMettingDao.getStatisticsByName(type);
+        List<LargeDeatailVO> list = largeScreenDao.getStatisticsByName(type);
         if(CollectionUtils.isEmpty(list)){
             return  new ArrayList<>();
         }
         // 异常总数
-        int totalCount = abnormalMettingDao.getHistoryTotalCount(type);
+        int totalCount = largeScreenDao.getHistoryTotalCount(type);
         // 占比处理
         percentHandle(list,totalCount);
         return list;
@@ -389,7 +386,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
      */
     @Override
     public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
-        return accessNodeDao.queryNodeMeetingCountStatistics(type);
+        return largeScreenDao.queryNodeMeetingCountStatistics(type);
     }
     /**
      * 对外提供服务
@@ -398,7 +395,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
      */
     @Override
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
-        return accessNodeDao.queryOutServiceStatistics(type);
+        return largeScreenDao.queryOutServiceStatistics(type);
     }
 
     /**
@@ -409,7 +406,7 @@ public class LargeScreenServiceImpl implements LargeScreenService {
     @Override
     public int getManyPoint(String type) {
         // 多点会议次数，历史数据
-        int count = videoMettingDao.getManyPoint(type);
+        int count = largeScreenDao.getManyPoint(type);
         return count;
     }
 

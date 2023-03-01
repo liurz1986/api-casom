@@ -18,9 +18,5 @@ public interface AbnormalMettingDao {
 
     public List<AbnormalMettingExportExcelVO> exportData(AbnormalMettingSearchVO abnormalMettingSearchVO);
 
-    public List<CommonQueryVO> getAbnormalMettingCitys();
 
-    public  List<LargeDeatailVO> getStatisticsByName(String type);
-
-    public int getHistoryTotalCount(String type);
 }
