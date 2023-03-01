@@ -20,7 +20,11 @@ public class QueueUtil {
     private static final LinkedBlockingQueue<MeetingQueueVo> LINKED_BLOCKING_QUEUE = new LinkedBlockingQueue<MeetingQueueVo>(30);
 
     public static void put(MeetingQueueVo meetingSyncVo) {
-            boolean flag = LINKED_BLOCKING_QUEUE.add(meetingSyncVo);
+        try {
+            LINKED_BLOCKING_QUEUE.put(meetingSyncVo);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static MeetingQueueVo poll() {
