@@ -303,17 +303,17 @@ public class MettingCommonUtil {
      * @param type
      * @return
      */
-    public static String largeScreenVideoAndNodeSql(String type){
+    public static String largeScreenVideoAndNodeSql(String type,String filterColum){
         String sql ="";
         switch (type) {
             case "quarter":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(schedule_start_time)";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date("+filterColum+")";
                 break;
             case "halfyear":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date("+filterColum+")";
                 break;
             case "year":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date("+filterColum+")";
                 break;
             default:
                 break;

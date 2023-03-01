@@ -50,7 +50,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getOffLineMettingTotal(String type) {
-        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" and stage='OFFLINE'";
+        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" and stage='OFFLINE'";
         logger.debug("举办会议次数 :状态为offline总数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -66,7 +66,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getOfflineMettingUserCount(String type) {
-        String sql = "select sum(attendee_count) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" and stage='OFFLINE'";
+        String sql = "select sum(attendee_count) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" and stage='OFFLINE'";
         logger.debug("参会总人数:状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -83,7 +83,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getOfflineMeetingTimeTotal(String type) {
-        String sql = "select sum(duration) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" and stage='OFFLINE'";
+        String sql = "select sum(duration) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" and stage='OFFLINE'";
         logger.debug("会议总时长: 状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -100,7 +100,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getPointToPoint(String type) {
-        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" and participant_count<= 2 and stage='OFFLINE'";
+        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" and participant_count<= 2 and stage='OFFLINE'";
         logger.debug("点对点会议次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -117,7 +117,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getManyPoint(String type) {
-        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" and participant_count > 2 and stage='OFFLINE'";
+        String sql = "select count(*) as number from hw_meeting_info where "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" and participant_count > 2 and stage='OFFLINE'";
         logger.debug("多点会议次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -224,12 +224,11 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
                 " select node.name,node.branch,detail.user_count,detail.duration from hw_meeting_participant as node " +
                 " left join " +
                 " hw_meeting_attendee as detail on node.name=detail.participant_name and node.meeting_id=detail.meeting_id " +
-                " where node.stage='OFFLINE'" + MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" )a group by a.branch ";
+                " where node.stage='OFFLINE' and " + MettingCommonUtil.largeScreenVideoAndNodeSql(type,"node.schedule_start_time")+" )a group by a.branch ";
         logger.debug("各地区系统使用统计查询sql:"+sql);
         List<LargeBranchStatisticsVO> details = jdbcTemplate.query(sql,new BranchStatisticsVoMapper());
         return details;
     }
-
 
 
     public class BranchStatisticsVoMapper implements RowMapper<LargeBranchStatisticsVO> {
@@ -255,7 +254,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<LargeDeatailVO> getUseStatisticsByBranch(String type) {
-        String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" group by branch)a order by a.num desc limit 0,5 ";
+        String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" group by branch)a order by a.num desc limit 0,5 ";
         logger.debug("各地区使用占比,历史数据查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
@@ -280,7 +279,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getUseStatisticsTotalCount(String type) {
-        String sql="select count(*)as num from hw_meeting_participant where stage='OFFLINE'"+MettingCommonUtil.largeScreenVideoAndNodeSql(type);
+        String sql="select count(*)as num from hw_meeting_participant where stage='OFFLINE' and  "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time");
         logger.debug("节点会议总次数查询sql:"+sql);
         Map<String, Object> result = jdbcTemplate.queryForMap(sql);
         if (null == result || result.size() == 0) {
@@ -297,7 +296,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<LargeDeatailVO> queryNodeMeetingCountStatistics(String type) {
-        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE' "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" GROUP BY name)a order by a.num desc limit 0,5";
         logger.debug("开会次数查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
@@ -310,7 +309,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
-        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE'  and out_service='1' "+MettingCommonUtil.largeScreenVideoAndNodeSql(type)+" GROUP BY name)a order by a.num desc limit 0,5";
+        String sql="select * from (select name,count(*) as num from hw_meeting_participant where stage='OFFLINE'  and out_service='1' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" GROUP BY name)a order by a.num desc limit 0,5";
         logger.debug("对外提供服务查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
