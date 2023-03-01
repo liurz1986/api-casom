@@ -95,6 +95,7 @@ public class HttpClientUtils {
                 logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
             }
         } catch (Exception e) {
+            logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         return resultString;
@@ -144,6 +145,7 @@ public class HttpClientUtils {
                 logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
             }
         } catch (Exception e) {
+            logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
 
@@ -178,6 +180,7 @@ public class HttpClientUtils {
                 logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
             }
         } catch (Exception e) {
+            logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
 
