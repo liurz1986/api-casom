@@ -62,3 +62,11 @@ CREATE TABLE IF NOT EXISTS `hw_sync_error_log` (
      `error_time` datetime DEFAULT NULL COMMENT '错误时间',
      PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='华为同步错误日志表';
+
+CREATE TABLE IF NOT EXISTS `zky_unit` (
+            `id` varchar(125) NOT NULL COMMENT '记录ID',
+            `participant_name` varchar(125) DEFAULT NULL COMMENT '节点名称',
+            `city` varchar(125) DEFAULT NULL COMMENT '城市',
+            `branch` varchar(255) DEFAULT NULL COMMENT '分院',
+            PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='中科院城市节点表';
