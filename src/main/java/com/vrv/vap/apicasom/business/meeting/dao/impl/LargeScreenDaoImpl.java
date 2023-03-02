@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -169,9 +170,11 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<KeyValueQueryVO> queryNodeNamesByCity(String cityName) {
-        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city='"+cityName+"'"+" GROUP BY organization_name,name";
+        List<Object> params = new ArrayList<>();
+        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city=?  GROUP BY organization_name,name";
         logger.debug("城市所有节点名称查询sql:"+sql);
-        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
+        params.add(cityName);
+        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper(),params.toArray());
         return details;
     }
     public class KeyValueQueryVoMapper implements RowMapper<KeyValueQueryVO> {
@@ -193,9 +196,11 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<NodeVO> queryRunNodesByCity(String cityName) {
-        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city='"+cityName+"'";
+        List<Object> params = new ArrayList<>();
+        String sql ="select name,organization_name,schedule_start_time,schedule_end_time,stage from hw_meeting_participant where stage='ONLINE' and city=? ";
         logger.debug("当前城市正在开会的节点信息查询sql:"+sql);
-        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVoMapper());
+        params.add(cityName);
+        List<NodeVO> details = jdbcTemplate.query(sql,new NodeVoMapper(),params.toArray());
         return details;
     }
     public class NodeVoMapper implements RowMapper<NodeVO> {

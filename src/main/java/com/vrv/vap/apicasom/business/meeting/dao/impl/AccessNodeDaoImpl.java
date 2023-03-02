@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +40,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
      */
     @Override
     public long getPageTotal(AccessNodeSearchVO accessNodeSearchVO) {
-        String sql = "select count(*) as number from("+getCommonSql(accessNodeSearchVO)+")a";
+        List<Object> params = new ArrayList<>();
+        String sql = "select count(*) as number from("+getCommonSql(accessNodeSearchVO,params)+")a";
         logger.debug("分页查询获取总数查询sql:"+sql);
-        Map<String, Object> result = jdbcTemplate.queryForMap(sql);
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql,params.toArray());
         if (null == result || result.size() == 0) {
             return 0;
         }
@@ -57,9 +59,10 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     public List<AccessNodeVO> getPageList(AccessNodeSearchVO accessNodeSearchVO) {
         int start =  accessNodeSearchVO.getStart_();
         int end =  accessNodeSearchVO.getCount_();
-        String sql= getCommonSql(accessNodeSearchVO) +  " limit "+start+","+end;
+        List<Object> params = new ArrayList<>();
+        String sql= getCommonSql(accessNodeSearchVO,params) +  " limit "+start+","+end;
         logger.debug("分页查询获取数据查询sql:"+sql);
-        List<AccessNodeVO> details = jdbcTemplate.query(sql,new AccessNodeVoMapper());
+        List<AccessNodeVO> details = jdbcTemplate.query(sql,new AccessNodeVoMapper(),params.toArray());
         return details;
     }
     public class AccessNodeVoMapper implements RowMapper<AccessNodeVO> {
@@ -78,23 +81,26 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
 
     @Override
     public List<AccessNodeExportExcelVO> exportData(AccessNodeSearchVO accessNodeSearchVO) {
-        String sql= getCommonSql(accessNodeSearchVO);
+        List<Object> params = new ArrayList<>();
+        String sql= getCommonSql(accessNodeSearchVO,params);
         logger.debug("导出获取数据查询sql:"+sql);
-        List<AccessNodeExportExcelVO> details = jdbcTemplate.query(sql,new AccessNodeExportExcelVoMapper());
+        List<AccessNodeExportExcelVO> details = jdbcTemplate.query(sql,new AccessNodeExportExcelVoMapper(),params.toArray());
         return details;
     }
 
 
-    private String getCommonSql(AccessNodeSearchVO accessNodeSearchVO) {
+    private String getCommonSql(AccessNodeSearchVO accessNodeSearchVO,List<Object> params) {
         // 节点名称、所有分院/地区、设备类型分组其中会议时长的和除以60转为小时，统计次数作为参会次数,状态为会议结束offline
         String sql="select * from (select count(id) as num,sum(duration) as duration,name,branch,terminal_type from hw_meeting_participant where 1=1 ";
         // 节点名称精确查询
         if(StringUtils.isNotEmpty(accessNodeSearchVO.getNodeName())){
-            sql = sql +" and name='"+accessNodeSearchVO.getNodeName()+"'";
+            sql = sql +" and name=? ";
+            params.add(accessNodeSearchVO.getNodeName());
         }
         // 分院精确查询
         if(StringUtils.isNotEmpty(accessNodeSearchVO.getRegion())){
-            sql = sql +" and branch='"+accessNodeSearchVO.getRegion()+"'";
+            sql = sql +" and branch=? ";
+            params.add(accessNodeSearchVO.getRegion());
         }
         // 排序处理：默认name降序
         String by= accessNodeSearchVO.getBy_();

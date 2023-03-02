@@ -34,7 +34,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public List<DistributionStatisticsVO> queyMeetingDurationStatistics(StatisticSearchVO statisticSearchVO) {
         String filterSql =  getFilterSql(statisticSearchVO);
-        filterSql ="select * from hw_meeting_info where "+ filterSql+" and stage='OFFLINE'";;
+        filterSql ="select * from hw_meeting_info where 1=1"+ filterSql+" and stage='OFFLINE'";;
         StringBuffer sql = new StringBuffer();
         sql.append("select '0-60分钟' as name,count(*) as num  from (").append(filterSql).append(")as a where a.duration BETWEEN 0 and 60");
         sql.append(" union ");
@@ -60,7 +60,7 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
     @Override
     public List<DistributionStatisticsVO> queyParticipantsStatistics(StatisticSearchVO statisticSearchVO) {
         String baseSql =  getFilterSql(statisticSearchVO);
-        baseSql ="select * from hw_meeting_info where "+ baseSql + " and stage='OFFLINE'";
+        baseSql ="select * from hw_meeting_info where 1=1"+ baseSql + " and stage='OFFLINE'";
         StringBuffer sql = new StringBuffer();
         sql.append("select '2-5人' as name,count(*) as num  from (").append(baseSql).append(")as a where a.attendee_count BETWEEN 2 and 5");
         sql.append(" union ");
@@ -93,16 +93,16 @@ public class VideoMettingDaoImpl implements VideoMettingDao {
         String filterSql ="";
         switch (type) {
             case "month":
-                filterSql ="DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(schedule_start_time)";
+                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(schedule_start_time)";
                 break;
             case "halfyear":
-                filterSql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
+                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(schedule_start_time)";
                 break;
             case "year":
-                filterSql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
+                filterSql =" and  DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(schedule_start_time)";
                 break;
             case "none":
-                filterSql="date_format(schedule_start_time,'%Y-%m-%d') >= '"+ DateUtil.format(statisticSearchVO.getStartDate(),"yyyy-MM-dd") +"' and date_format(schedule_start_time,'%Y-%m-%d')  <='"+DateUtil.format(statisticSearchVO.getEndDate(),"yyyy-MM-dd")+"'";
+                filterSql=" and date_format(schedule_start_time,'%Y-%m-%d') >= '"+ DateUtil.format(statisticSearchVO.getStartDate(),"yyyy-MM-dd") +"' and date_format(schedule_start_time,'%Y-%m-%d')  <='"+DateUtil.format(statisticSearchVO.getEndDate(),"yyyy-MM-dd")+"'";
                 break;
             default:
                 break;

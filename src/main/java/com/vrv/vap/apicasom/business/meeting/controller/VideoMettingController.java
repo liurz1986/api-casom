@@ -48,6 +48,12 @@ public class VideoMettingController {
             if(!MettingCommonUtil.isExistTimeType(statisticSearchVO.getType().trim())){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
             }
+            // 手动输入时：开始时间和结束时间必填
+            if("none".equals(statisticSearchVO.getType().trim())){
+                if(null ==statisticSearchVO.getEndDate() || null == statisticSearchVO.getStartDate()){
+                    return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"手动输入日期，开始日期和结束日期必填！");
+                }
+            }
             return ResultUtil.successList(videoMettingService.queyMeetingDurationStatistics(statisticSearchVO));
         }catch(Exception e){
             logger.error("会议时长分布统计异常",e);
@@ -69,6 +75,12 @@ public class VideoMettingController {
             }
             if(!MettingCommonUtil.isExistTimeType(statisticSearchVO.getType().trim())){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"传参type的值有误");
+            }
+            // 手动输入时：开始时间和结束时间必填
+            if("none".equals(statisticSearchVO.getType().trim())){
+                if(null ==statisticSearchVO.getEndDate() || null == statisticSearchVO.getStartDate()){
+                    return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"手动输入日期，开始日期和结束日期必填！");
+                }
             }
             return ResultUtil.successList(videoMettingService.queyParticipantsStatistics(statisticSearchVO));
         }catch(Exception e){
