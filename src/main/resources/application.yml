@@ -70,12 +70,15 @@ vap:
     capacity: 200000
     sink-type: database
     databases:
-      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.152}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
         username: ${MYSQL_USER:root}
-        password: mysql
+        password: ${MYSQL_PASSWORD:mysql}
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.152}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+        username: ${MYSQL_USER:root}
+        password: ${MYSQL_PASSWORD:mysql}
     driver: ${DATABASE_DRIVER:com.mysql.jdbc.Driver}
     insert-sql: insert into sys_log (id, request_ip,type, user_id, user_name, organization_name, description, request_url, request_time, request_method, method_name, bean_name, params_value, response_result, login_type, role_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  swagger:
+ swagger:
     enabled: true
     title: api-alarmdeal接口文档
     description: api-接口文档
