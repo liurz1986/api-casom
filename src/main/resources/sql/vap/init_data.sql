@@ -3,7 +3,7 @@
 INSERT INTO `process_job`(`id`, `job_name`, `status`, `create_time`, `job_cron`, `type`, `day`, `time_str`, `describe`, `service_id`) VALUES (11, 'InitHwMeetingJob', 1, '2023-02-21 09:59:05', NULL, 0, NULL, NULL, '初始化华为会议数据', 'api-alarmdeal');
 INSERT INTO `process_job`(`id`, `job_name`, `status`, `create_time`, `job_cron`, `type`, `day`, `time_str`, `describe`, `service_id`) VALUES (12, 'HwMeetingSync', 1, '2023-02-21 09:59:57', '0 */2 * * * ?', 0, NULL, NULL, '华为数据同步任务', 'api-alarmdeal');
 
--- changeset linaggl:20230222-casom-001 labels:zky_unit
+-- changeset linaggl:20230222-casom-002 labels:zky_unit
 INSERT INTO `zky_unit`(`id`, `participant_name`, `city`, `branch`) VALUES ('0f71cf5c-b680-11ed-8329-ac1f6bd1347b', '本部', '北京', '北京');
 INSERT INTO `zky_unit`(`id`, `participant_name`, `city`, `branch`) VALUES ('0f750f50-b680-11ed-8329-ac1f6bd1347b', '怀柔园区', '北京', '北京');
 INSERT INTO `zky_unit`(`id`, `participant_name`, `city`, `branch`) VALUES ('0f789829-b680-11ed-8329-ac1f6bd1347b', '高能物理研究所', '北京', '北京');
