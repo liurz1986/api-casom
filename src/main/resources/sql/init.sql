@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_alarm` (
         `alarm_type` varchar(48) DEFAULT NULL COMMENT '异常类型',
         `alarm_time` datetime DEFAULT NULL COMMENT '告警时间',
         `cleared_time` datetime DEFAULT NULL COMMENT '告警确认或恢复时间',
+        `alarm_status` varchar(48) DEFAULT NULL COMMENT '告警状态',
          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='会议告警';
 
