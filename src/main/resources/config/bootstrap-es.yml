@@ -7,6 +7,7 @@ spring:
         file-extension: yml
         shared-dataids: base-dev.yaml
         refreshable-dataids: base-dev.yaml
+        group: DEFAULT_GROUP
       discovery:
         server-addr: ${SERVER_ADDR}
         namespace: ${NAMESPACE}
