@@ -444,7 +444,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     @Override
     public void getNowMeetingParticipants(String id, String organizationName, int duration, Date scheduleStartTime) {
-        Map<String,ZkyUnitBean> zkyUnitBeanMap = HwMeetingServiceImpl.zkyUnitBeanMap;
         Map<String, String> header = getHeader();
         String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);

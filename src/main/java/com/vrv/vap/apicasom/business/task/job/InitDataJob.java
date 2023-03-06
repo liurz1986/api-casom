@@ -75,7 +75,7 @@ public class InitDataJob implements CommandLineRunner {
             String configValue = systemConfigService.getSysConfigById("meeting_time_conf");
             // 存在配置，且配置开启
             TimeBean time = null;
-            if(StringUtils.isNotBlank(configValue)){
+            if(StringUtils.isBlank(configValue)){
                 time = new TimeBean();
                 logger.error("时间格式配置错误，tb_conf配置项，meeting_time_conf 未配置");
             }else{
