@@ -146,6 +146,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
         return details;
     }
 
+
     private String getQuerySql(Date endDate, Date beginDate, String type , List<Object> params) {
         String sql="select @#@ as name ,count(*) as value  from hw_meeting_info  " +
                 "where stage='OFFLINE' and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=?  " +
@@ -177,5 +178,42 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
             return data;
         }
     }
+
+    /**
+     * 开会次数: 状态为OFFLINE
+     * @param searchVO
+     * @return
+     */
+    @Override
+    public int getOffLineMettingTotal(IntegratedLargeSearchVO searchVO) {
+        String sql = "select count(*) as number from hw_meeting_info where  stage='OFFLINE'";
+        List<Object> params = new ArrayList<>();
+        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        logger.debug("举办会议次数 :状态为offline总数查询sql:"+sql);
+        Map<String, Object> result = null;
+        if(params.size()> 0){
+            result = jdbcTemplate.queryForMap(sql,params.toArray());
+        }else{
+            result = jdbcTemplate.queryForMap(sql);
+        }
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+
+    }
+
 
 }

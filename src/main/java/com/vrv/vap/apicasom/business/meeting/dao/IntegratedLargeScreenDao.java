@@ -16,4 +16,6 @@ public interface IntegratedLargeScreenDao {
     public List<KeyValueQueryVO> queryBranchNodeStatistics();
 
     public List<KeyValueQueryVO> getTreandStatistics(Date endDate, Date beginDate, String hourY);
+
+    public  int getOffLineMettingTotal(IntegratedLargeSearchVO searchVO);
 }
