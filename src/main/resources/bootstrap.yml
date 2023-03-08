@@ -1,6 +1,6 @@
 spring:
   application:
-    name:  api-casom-test
+    name:  api-casom
   profiles:
     active: es
   main:
