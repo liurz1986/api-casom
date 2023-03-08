@@ -55,17 +55,17 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
         String sql = "select sum(attendee_count) as number from hw_meeting_info where stage='OFFLINE'";
         List<Object> params = new ArrayList<>();
         if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') >= ? and date_format(schedule_start_time,'%Y-%m-%d') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         logger.debug("参会总人数:状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = null;
@@ -89,17 +89,17 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
         String sql = "select sum(duration) as number from hw_meeting_info where  stage='OFFLINE'";
         List<Object> params = new ArrayList<>();
         if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') >= ? and date_format(schedule_start_time,'%Y-%m-%d') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
         }
         logger.debug("会议总时长: 状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = null;
@@ -148,7 +148,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
 
     private String getQuerySql(Date endDate, Date beginDate, String type , List<Object> params) {
         String sql="select @#@ as name ,count(*) as value  from hw_meeting_info  " +
-                "where stage='OFFLINE' and date_format(schedule_start_time,'%Y-%m-%d') >= ? and date_format(schedule_start_time,'%Y-%m-%d') <=?  " +
+                "where stage='OFFLINE' and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=?  " +
                 "group by @#@ ";
         switch (type) {
             case "1":
