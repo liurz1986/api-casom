@@ -370,13 +370,13 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
         String sql ="";
         switch (type) {
             case "quarter":
-                sql =" and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date(alarm_time)";
+                sql =" and DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d') ";
                 break;
             case "halfyear":
-                sql ="and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(alarm_time)";
+                sql ="and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             case "year":
-                sql ="and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(alarm_time)";
+                sql ="and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             default:
                 break;

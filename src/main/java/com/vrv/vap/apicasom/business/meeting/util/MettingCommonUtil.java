@@ -337,13 +337,13 @@ public class MettingCommonUtil {
         String sql ="";
         switch (type) {
             case "quarter":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date("+filterColum+")";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 3 MONTH) <= date_format("+filterColum+",'%Y-%m-%d') and date_format("+filterColum+",'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')" ;
                 break;
             case "halfyear":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date("+filterColum+")";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date_format("+filterColum+",'%Y-%m-%d') and date_format("+filterColum+",'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             case "year":
-                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date("+filterColum+")";
+                sql ="DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date_format("+filterColum+",'%Y-%m-%d') and date_format("+filterColum+",'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             default:
                 break;

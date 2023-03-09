@@ -150,7 +150,7 @@ public class IntegratedLargeScreenServiceImpl implements IntegratedLargeScreenSe
      * @return
      */
     private List<KeyValueQueryVO> getTreandStatisticsHour(Date beginDate, Date endDate) throws ParseException {
-        List<String> dataXs= getDataXByHour(endDate,beginDate);
+        List<String> dataXs=  MettingCommonUtil.getDataXByHour(endDate,beginDate);
         List<KeyValueQueryVO> list = integratedLargeScreenDao.getTreandStatistics(endDate,beginDate,MeetingConstrant.HOUR_Y);
         return dataSupplement(list,dataXs);
     }
@@ -243,7 +243,7 @@ public class IntegratedLargeScreenServiceImpl implements IntegratedLargeScreenSe
      */
     private String judgeDateStatus(Date beginDate, Date endDate) {
         // 判断是不是大于24H
-        boolean is24h = isDay(endDate,beginDate);
+        boolean is24h = MettingCommonUtil.isDay(endDate,beginDate);
         if(!is24h){
             return MeetingConstrant.HOUR_Y;
         }
@@ -254,27 +254,6 @@ public class IntegratedLargeScreenServiceImpl implements IntegratedLargeScreenSe
         }
         return MeetingConstrant.DAY_Y;
 
-    }
-
-    /**
-     * 判断是不是大于24小时：
-     * 时间格式为：yyyy-MM-dd HH:mm:ss
-     * 24小时换算成毫秒：24*60*60*1000
-     * @param endDate
-     * @param startDate
-     * @return
-     */
-    private boolean isDay(Date endDate,Date startDate) {
-        long endtime = endDate.getTime();
-        long starttime= startDate.getTime();
-        long result = endtime-starttime;
-        // 24小时换算成毫秒
-        long hour= 24*60*60*1000;
-        // 大于24小时按天
-        if(result > hour){
-            return true;
-        }
-        return false;
     }
 
 

@@ -86,13 +86,13 @@ public class AbnormalMettingDaoImpl implements AbnormalMettingDao {
         String filterSql ="";
         switch (type) {
             case "month":
-                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(alarm_time)";
+                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             case "halfyear":
-                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date(alarm_time)";
+                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 6 MONTH) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             case "year":
-                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date(alarm_time)";
+                filterSql =" and DATE_SUB(CURDATE(), INTERVAL 1 YEAR) <= date_format(alarm_time,'%Y-%m-%d') and date_format(alarm_time,'%Y-%m-%d')<= date_format(CURDATE(),'%Y-%m-%d')";
                 break;
             case "none":
                 // 时间范围

@@ -52,19 +52,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
     public int getOfflineMettingUserCount(IntegratedLargeSearchVO searchVO) {
         String sql = "select sum(attendee_count) as number from hw_meeting_info where stage='OFFLINE'";
         List<Object> params = new ArrayList<>();
-        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
+        sql=sql+ " and "+ filterSql(searchVO,params);
         logger.debug("参会总人数:状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = null;
         if(params.size()> 0){
@@ -86,19 +74,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
     public int getOfflineMeetingTimeTotal(IntegratedLargeSearchVO searchVO) {
         String sql = "select sum(duration) as number from hw_meeting_info where  stage='OFFLINE'";
         List<Object> params = new ArrayList<>();
-        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
+        sql=sql+ " and  "+ filterSql(searchVO,params);
         logger.debug("会议总时长: 状态为OFFLINE查询sql:"+sql);
         Map<String, Object> result = null;
         if(params.size()> 0){
@@ -147,7 +123,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
 
     private String getQuerySql(Date endDate, Date beginDate, String type , List<Object> params) {
         String sql="select @#@ as name ,count(*) as value  from hw_meeting_info  " +
-                "where stage='OFFLINE' and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=?  " +
+                "where stage='OFFLINE' and date_format(schedule_start_time,'%Y-%m-%d') >= ? and date_format(schedule_start_time,'%Y-%m-%d') <=?  " +
                 "group by @#@ ";
         switch (type) {
             case "1":
@@ -186,19 +162,7 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
     public int getOffLineMettingTotal(IntegratedLargeSearchVO searchVO) {
         String sql = "select count(*) as number from hw_meeting_info where  stage='OFFLINE'";
         List<Object> params = new ArrayList<>();
-        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
-        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" and date_format(schedule_start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
-        }
+        sql=sql+ " and "+ filterSql(searchVO,params);
         logger.debug("举办会议次数 :状态为offline总数查询sql:"+sql);
         Map<String, Object> result = null;
         if(params.size()> 0){
@@ -211,6 +175,24 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
         }
         return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
 
+    }
+
+    private String filterSql(IntegratedLargeSearchVO searchVO,List<Object> params) {
+        String sql = "";
+        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
+            sql="  date_format(schedule_start_time,'%Y-%m-%d') >= ? and date_format(schedule_start_time,'%Y-%m-%d') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+        }
+        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
+            sql="  date_format(schedule_start_time,'%Y-%m-%d') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
+        }
+        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
+            sql="  date_format(schedule_start_time,'%Y-%m-%d') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
+        }
+        return sql;
     }
 
     @Override
@@ -226,17 +208,17 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
         }
         List<Object> params = new ArrayList<>();
         if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
-            sql=sql+" where date_format(start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(start_time,'%Y-%m-%d %H:%i:%S') <=? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+            sql=sql +" where date_format(start_time,'%Y-%m-%d') >= ? and date_format(start_time,'%Y-%m-%d') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
         }
         if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
-            sql=sql+" where date_format(tart_time,'%Y-%m-%d %H:%i:%S') >= ? ";
-            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+            sql=sql +" where date_format(start_time,'%Y-%m-%d') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd"));
         }
         if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
-            sql=sql+" where date_format(start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
-            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+            sql=sql +" where date_format(start_time,'%Y-%m-%d') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd"));
         }
         logger.debug(message+"总数查询sql:"+sql);
         Map<String, Object> result = null;
