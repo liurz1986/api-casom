@@ -4,14 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vrv.vap.apicasom.business.task.bean.*;
-import com.vrv.vap.apicasom.business.task.bean.hwmeetingbean.*;
+import com.vrv.vap.apicasom.business.task.bean.httpres.hwmeetingbean.*;
 import com.vrv.vap.apicasom.business.task.constant.MeetingUrlConstant;
 import com.vrv.vap.apicasom.business.task.service.*;
 import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
 import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
-import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,11 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**

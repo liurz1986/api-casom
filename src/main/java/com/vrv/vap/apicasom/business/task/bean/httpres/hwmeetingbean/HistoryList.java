@@ -1,4 +1,4 @@
-package com.vrv.vap.apicasom.business.task.bean.hwmeetingbean;
+package com.vrv.vap.apicasom.business.task.bean.httpres.hwmeetingbean;
 
 import lombok.Data;
 
@@ -6,12 +6,12 @@ import java.util.List;
 
 /**
  * @author: 梁国露
- * @since: 2023/2/20 11:09
+ * @since: 2023/2/16 17:39
  * @description:
  */
 @Data
-public class NowMeetingList {
-    private List<ScheduleConfBrief> content;
+public class HistoryList {
+    private List<Content> content;
     private Pageable pageable;
     private boolean last;
     private int totalElements;

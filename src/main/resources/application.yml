@@ -141,6 +141,9 @@ feign:
     enabled: true
 
 hw:
+  send:
+    time: 0 */1 * * * ?
+    url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getLocalNum
   meeting:
     sys:
       username: admin
@@ -148,6 +151,7 @@ hw:
     organizationId:
     token: 0 */10 * * * ?
     url: http://192.168.118.228:9888
+
 
 
 logging:

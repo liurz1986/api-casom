@@ -1,4 +1,4 @@
-package com.vrv.vap.apicasom.business.task.bean.hwmeetingbean;
+package com.vrv.vap.apicasom.business.task.bean.httpres.hwmeetingbean;
 
 import lombok.Data;
 
