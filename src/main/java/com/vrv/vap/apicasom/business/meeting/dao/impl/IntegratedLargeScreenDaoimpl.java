@@ -2,7 +2,6 @@ package com.vrv.vap.apicasom.business.meeting.dao.impl;
 
 import com.vrv.vap.apicasom.business.meeting.dao.IntegratedLargeScreenDao;
 import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
-import com.vrv.vap.apicasom.business.meeting.vo.CommonQueryVO;
 import com.vrv.vap.apicasom.business.meeting.vo.IntegratedLargeSearchVO;
 import com.vrv.vap.apicasom.business.meeting.vo.KeyValueQueryVO;
 import com.vrv.vap.jpa.common.DateUtil;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -215,5 +213,41 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
 
     }
 
-
+    @Override
+    public int getFiles(IntegratedLargeSearchVO searchVO, String type) {
+        String sql="";
+        String message="";
+        if("send".equals(type)){
+            sql = "select sum(send_num) as number from zky_send ";
+            message ="发送文件";
+        }else{
+            sql = "select sum(receive_num) as number from zky_send ";
+            message ="接收文件";
+        }
+        List<Object> params = new ArrayList<>();
+        if(null != searchVO.getBeginTime() && null != searchVO.getEndTime()){
+            sql=sql+" where date_format(start_time,'%Y-%m-%d %H:%i:%S') >= ? and date_format(start_time,'%Y-%m-%d %H:%i:%S') <=? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        if(null !=  searchVO.getBeginTime()  && null == searchVO.getEndTime()){
+            sql=sql+" where date_format(tart_time,'%Y-%m-%d %H:%i:%S') >= ? ";
+            params.add(DateUtil.format(searchVO.getBeginTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        if(null ==  searchVO.getBeginTime()  && null != searchVO.getEndTime()){
+            sql=sql+" where date_format(start_time,'%Y-%m-%d %H:%i:%S') <= ? ";
+            params.add(DateUtil.format(searchVO.getEndTime(),"yyyy-MM-dd HH:mm:ss"));
+        }
+        logger.debug(message+"总数查询sql:"+sql);
+        Map<String, Object> result = null;
+        if(params.size()> 0){
+            result = jdbcTemplate.queryForMap(sql,params.toArray());
+        }else{
+            result = jdbcTemplate.queryForMap(sql);
+        }
+        if (null == result || result.size() == 0) {
+            return 0;
+        }
+        return result.get("number")==null?0:Integer.parseInt(String.valueOf(result.get("number")));
+    }
 }

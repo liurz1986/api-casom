@@ -65,10 +65,12 @@ public class IntegratedLargeScreenServiceImpl implements IntegratedLargeScreenSe
         // 开会次数: 状态为OFFLINE
         int offlineMettingCount = integratedLargeScreenDao.getOffLineMettingTotal(searchVO);
         data.setMeetingTimes(offlineMettingCount);
-        // 发送文件: 写死
-        data.setSendFiles(0);
-        // 接收文件: 写死
-        data.setReceiveFiles(0);
+        // 发送文件:
+        int sendFiles = integratedLargeScreenDao.getFiles(searchVO,"send");
+        data.setSendFiles(sendFiles);
+        // 接收文件:
+        int receiveFiles = integratedLargeScreenDao.getFiles(searchVO,"receive");
+        data.setReceiveFiles(receiveFiles);
         return data;
     }
 

@@ -36,7 +36,7 @@ public class IntegratedLargeScreenController {
     private IntegratedLargeScreenService integratedLargeScreenService;
 
     /**
-     * 基本信息展示(视频会议系统节点数量、当前在线节点数、当前开会节点数、参会总人数、会议总时长、开会次数)
+     * 基本信息展示(视频会议系统节点数量、当前在线节点数、当前开会节点数、参会总人数、会议总时长、开会次数、发送文件、接收文件)
      * @return Result
      */
     @PostMapping(value = "/queryBasemessage")

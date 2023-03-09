@@ -18,4 +18,6 @@ public interface IntegratedLargeScreenDao {
     public List<KeyValueQueryVO> getTreandStatistics(Date endDate, Date beginDate, String hourY);
 
     public  int getOffLineMettingTotal(IntegratedLargeSearchVO searchVO);
+
+    public int getFiles(IntegratedLargeSearchVO searchVO, String type);
 }
