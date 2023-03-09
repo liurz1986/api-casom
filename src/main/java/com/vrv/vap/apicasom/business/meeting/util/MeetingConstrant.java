@@ -47,4 +47,18 @@ public class MeetingConstrant {
      *  大屏城市状态：不存在异常会议和正在进行的会议
      */
     public static String CITY_STATUS_NONE="none";
+
+
+    /**
+     * 按小时
+     */
+    public static String HOUR_Y="1";
+    /**
+     * 按天
+     */
+    public static String DAY_Y="2";
+    /**
+     * 按月
+     */
+    public static String MONTH_Y="3";
 }

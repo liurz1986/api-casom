@@ -1,4 +1,5 @@
 package com.vrv.vap.apicasom.business.meeting.util;
+import com.vrv.vap.jpa.common.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -25,7 +26,7 @@ public class MettingCommonUtil {
      */
     public final static String TIMETYPE="none";
 
-    public final static long DAYTIME=86400000;
+
 
       static{
           ranges.put("MAJOR","重要");
@@ -78,6 +79,9 @@ public class MettingCommonUtil {
     }
     /**
      * 判断开始时间与结束时间之间是否大于24小时
+     *  针对时间格式为：年月日(yyyy-MM-dd)，如果是年月日时分，就不是这样判断了
+     * 1. 开始时间与结束时间相等：表示小于等于24小时
+     * 2. 开始时间大于结束时间：表示大于24
      * @param endDate
      * @param startDate
      * @return
@@ -87,7 +91,7 @@ public class MettingCommonUtil {
         long starttime= startDate.getTime();
         long result = endtime-starttime;
         // 大于24小时按天
-        if(result > DAYTIME){
+        if(result > 0){
             return true;
         }
         return false;
@@ -167,6 +171,7 @@ public class MettingCommonUtil {
 
     /**
      *  根据开始时间和结束，按小时处理
+     *  针对时间格式为：年月日(yyyy-MM-dd)
      * @return
      * @throws ParseException
      */
@@ -179,6 +184,8 @@ public class MettingCommonUtil {
         if(startTimes == endTimes){
             return getDataXByDay24(startDate);
         }
+        // 因为是年月日，结束时间自动加到24小时
+        endTimes = endTimes+ 24*60*60*1000;
         while(startTimes <= endTimes){
             Date date = new Date(startTimes);
             dataXS.add(sdf.format(date));
@@ -201,6 +208,29 @@ public class MettingCommonUtil {
             Date date = new Date(startTimes);
             dataXS.add(sdf.format(date));
             startTimes = startTimes+1000 * 60 * 60 * 24;
+        }
+        return dataXS;
+    }
+
+    /**
+     *  根据开始时间和结束，按月处理
+     * @return
+     * @throws ParseException
+     */
+    public static List<String> getMonthDataX(Date endDate,Date startDate) throws ParseException {
+        List<String> dataXS= new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");  // 具体天
+        String endTimeStr = sdf.format(endDate);
+        Date endTime = sdf.parse(endTimeStr);
+        long endTimes = endTime.getTime();
+        String startTimeStr = sdf.format(startDate);
+        Date startTime = sdf.parse(startTimeStr);
+        long startTimes = startTime.getTime();
+        while(startTimes <= endTimes){
+            Date date = new Date(startTimes);
+            dataXS.add(sdf.format(date));
+            startTimes = DateUtils.addMonths(startTime,1).getTime();
+            startTime = new Date(startTimes);
         }
         return dataXS;
     }
