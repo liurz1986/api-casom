@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_alarm` (
         `alarm_type` varchar(48) DEFAULT NULL COMMENT '异常类型',
         `alarm_time` datetime DEFAULT NULL COMMENT '告警时间',
         `cleared_time` datetime DEFAULT NULL COMMENT '告警确认或恢复时间',
-        `alarm_status` varchar(48) DEFAULT NULL COMMENT '告警状态',
          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='会议告警';
 
@@ -71,3 +70,19 @@ CREATE TABLE IF NOT EXISTS `zky_unit` (
             `branch` varchar(255) DEFAULT NULL COMMENT '分院',
             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='中科院城市节点表';
+
+-- changeset lianggl:20230306-alarmdeal-002 labels:"新增字段，新增表"
+CREATE TABLE IF NOT EXISTS `zky_send` (
+            `id` varchar(125) NOT NULL COMMENT '记录ID',
+            `org_name` varchar(255) DEFAULT NULL COMMENT '组织机构名称',
+            `org_code` varchar(255) DEFAULT NULL COMMENT '组织机构编码',
+            `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+            `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+            `send_type` varchar(125) DEFAULT NULL COMMENT '类型',
+            `send_scope` varchar(125) DEFAULT NULL COMMENT '单位',
+            `receive_num` int(10) DEFAULT NULL COMMENT '接收数量',
+            `send_num` int(10) DEFAULT NULL COMMENT '发送数量',
+            PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '告警状态';
