@@ -20,6 +20,9 @@ public class ZkyUnitBean {
     @Column(name="id")
     private String id;
 
+    @Column(name="participant_code")
+    private String participantCode;
+
     @Column(name="participant_name")
     private String participantName;
 

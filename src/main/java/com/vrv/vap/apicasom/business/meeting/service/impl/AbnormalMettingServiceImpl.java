@@ -208,11 +208,12 @@ public class AbnormalMettingServiceImpl implements AbnormalMettingService {
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="会议异常记录"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
-        logger.info("fileName: "+uuid);
-        filePath=filePath+ File.separator+uuid;
+        String uuid="会议异常记录"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
+        logger.info("uuid: "+uuid);
+        String fileName = uuid + ".xls";
+        filePath=filePath+ File.separator+fileName;
         try{
-            String templatePath= fileConfiguration.getTemplatePath()+"/abnoraml_metting_template.xlsx";
+            String templatePath= fileConfiguration.getTemplatePath()+"/abnoraml_metting_template.xls";
             logger.info("会议异常记录模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<>();
             extenddata.put("title", "会议异常记录");
@@ -231,7 +232,8 @@ public class AbnormalMettingServiceImpl implements AbnormalMettingService {
      */
     @Override
     public void exportAssetInfo(String fileName, HttpServletResponse response) {
-        FileUtil.downLoadFile(fileName, fileConfiguration.getFilePath(), response);
+        FileUtil.downLoadFile(fileName+ ".xls", fileConfiguration.getFilePath(), response);
+
     }
 
 }

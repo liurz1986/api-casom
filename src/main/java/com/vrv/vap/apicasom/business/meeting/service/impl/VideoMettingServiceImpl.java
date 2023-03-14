@@ -86,11 +86,12 @@ public class VideoMettingServiceImpl implements VideoMettingService {
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="视频会议"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
-        logger.info("fileName: "+uuid);
-        filePath=filePath+ File.separator+uuid;
+        String uuid="视频会议"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
+        logger.info("uuid: "+uuid);
+        String fileName = uuid + ".xls";
+        filePath=filePath+ File.separator+fileName;
         try{
-            String templatePath=fileConfiguration.getTemplatePath()+"/history_metting_template.xlsx";
+            String templatePath=fileConfiguration.getTemplatePath()+"/history_metting_template.xls";
             logger.info("视频会议列表模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<String, String>(1);
             extenddata.put("title", "视频会议");
@@ -104,6 +105,6 @@ public class VideoMettingServiceImpl implements VideoMettingService {
 
     @Override
     public void exportAssetInfo(String fileName, HttpServletResponse response) {
-        FileUtil.downLoadFile(fileName, fileConfiguration.getFilePath(), response);
+        FileUtil.downLoadFile(fileName+ ".xls", fileConfiguration.getFilePath(), response);
     }
 }

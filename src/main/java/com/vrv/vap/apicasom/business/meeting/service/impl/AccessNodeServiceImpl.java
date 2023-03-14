@@ -71,11 +71,12 @@ public class AccessNodeServiceImpl implements AccessNodeService {
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="接入节点"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss")+".xlsx";
-        logger.info("fileName: "+uuid);
-        filePath=filePath+ File.separator+uuid;
+        String uuid="接入节点"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
+        logger.info("uuid: "+uuid);
+        String fileName = uuid + ".xls";
+        filePath=filePath+ File.separator+fileName;
         try{
-            String templatePath= fileConfiguration.getTemplatePath()+"/node_template.xlsx";
+            String templatePath= fileConfiguration.getTemplatePath()+"/node_template.xls";
             logger.info("接入节点列表模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<>();
             extenddata.put("title", "接入节点");
@@ -89,6 +90,6 @@ public class AccessNodeServiceImpl implements AccessNodeService {
 
     @Override
     public void exportAssetInfo(String fileName, HttpServletResponse response) {
-        FileUtil.downLoadFile(fileName, fileConfiguration.getFilePath(), response);
+        FileUtil.downLoadFile(fileName+ ".xls", fileConfiguration.getFilePath(), response);
     }
 }
