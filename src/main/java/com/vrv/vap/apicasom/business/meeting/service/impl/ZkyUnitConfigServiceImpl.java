@@ -161,6 +161,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
      */
     @Override
     public Result<String> update(ZkyUnitVO zkyUnitVO) {
+        if(StringUtils.isEmpty(zkyUnitVO.getId())){
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"id不能为空："+zkyUnitVO.getId());
+        }
         ZkyUnitBean beanOld = zkyUnitService.getOne(zkyUnitVO.getId());
         if(null == beanOld){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"当前节点不存在："+zkyUnitVO.getId());
