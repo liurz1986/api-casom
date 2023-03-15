@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 节点基础数据配置
@@ -337,6 +338,40 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
                 return isMustResult;
             }
         }
+        // 节点code、节点名称重复判断
+        Result<String> repeatNameCodeResult = nameCodeRepeatValidate(datas);
+        if(repeatNameCodeResult.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
+            return repeatNameCodeResult;
+        }
+        Result<String> repeatNameResult = nameRepeatValidate(datas);
+        if(repeatNameResult.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
+            return repeatNameResult;
+        }
+        return ResultUtil.success("success");
+    }
+
+    private Result<String> nameCodeRepeatValidate(List<ZkyUnitBean> datas) {
+        // 节点code分组
+        Map<String, List<ZkyUnitBean>> maps =  datas.stream().collect(Collectors.groupingBy(map -> map.getParticipantCode(), Collectors.toList()));
+        Set<String> keys = maps.keySet();
+        for(String key : keys){
+            int size = maps.get(key).size();
+            if(size > 1){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"导入数据中节点code<<"+key+">>重复");
+            }
+        }
+        return ResultUtil.success("success");
+    }
+    private Result<String> nameRepeatValidate(List<ZkyUnitBean> datas) {
+        // 节点名称分组
+        Map<String, List<ZkyUnitBean>> maps =  datas.stream().collect(Collectors.groupingBy(map -> map.getParticipantName(), Collectors.toList()));
+        Set<String> keys = maps.keySet();
+        for(String key : keys){
+            int size = maps.get(key).size();
+            if(size > 1){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"导入数据中节点名称<<"+key+">>重复");
+            }
+        }
         return ResultUtil.success("success");
     }
 
@@ -351,6 +386,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         }
         // 获取现有所有数据
         List<ZkyUnitBean> oldDatas = zkyUnitService.findAll();
+        // 节点code去重处理
         for(ZkyUnitBean bean : datas){
             // 是否节点code是否存在
             ZkyUnitBean oldData = getParticipantCodeExist(bean.getParticipantCode(),oldDatas);
