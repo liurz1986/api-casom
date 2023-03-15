@@ -76,6 +76,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if(StringUtils.isNotEmpty(zkyUnitSerachVO.getParticipantName())){
             cons.add(QueryCondition.like("participantName",zkyUnitSerachVO.getParticipantName()));
         }
+        if(StringUtils.isNotEmpty(zkyUnitSerachVO.getParticipantCode())){
+            cons.add(QueryCondition.like("participantCode",zkyUnitSerachVO.getParticipantCode()));
+        }
         if(StringUtils.isNotEmpty(zkyUnitSerachVO.getCity())){
             cons.add(QueryCondition.like("city",zkyUnitSerachVO.getCity()));
         }
