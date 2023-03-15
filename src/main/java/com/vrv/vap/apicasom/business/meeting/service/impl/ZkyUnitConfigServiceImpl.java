@@ -91,8 +91,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     /**
      * 节点基础数据配置新增
-     * 1.必填校验：节点名称、节点code、城市、分院
-     * 2. 节点code、名称唯一性校验
+     * 1.必填校验：节点名称、节点编号、城市、分院
+     * 2. 节点编号、名称唯一性校验
      * @param zkyUnitVO
      * @return
      */
@@ -111,8 +111,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     /**
      * 单个数据保存校验：
-     * 1.必填校验：节点名称、节点code、城市、分院
-     * 2. 节点code、名称唯一性校验
+     * 1.必填校验：节点名称、节点编号、城市、分院
+     * 2. 节点编号、名称唯一性校验
      * @param zkyUnitVO
      * @return
      */
@@ -122,12 +122,12 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if(isMustResult.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
             return isMustResult;
         }
-        // 节点code、名称唯一性校验
+        // 节点编号、名称唯一性校验
         List<QueryCondition> cons = new ArrayList<>();
         cons.add(QueryCondition.eq("participantCode",zkyUnitVO.getParticipantCode()));
         List<ZkyUnitBean> zkyUnit = zkyUnitService.findAll(cons);
         if(null != zkyUnit && zkyUnit.size()>0){
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点Code已经存在："+zkyUnitVO.getParticipantCode());
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点编号已经存在："+zkyUnitVO.getParticipantCode());
         }
         cons = new ArrayList<>();
         cons.add(QueryCondition.eq("participantName",zkyUnitVO.getParticipantName()));
@@ -142,7 +142,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     private Result<String> isMustValidate(ZkyUnitBean zkyUnitVO) {
         if(StringUtils.isEmpty(zkyUnitVO.getParticipantCode())){
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点Code不能为空");
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点编号不能为空");
         }
         if(StringUtils.isEmpty(zkyUnitVO.getParticipantName())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点名称不能为空");
@@ -158,8 +158,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     /**
      * 节点基础数据配置修改
-     * 1.必填校验：节点名称、节点code、城市、分院
-     * 2.节点code、名称唯一性校验
+     * 1.必填校验：节点名称、节点编号、城市、分院
+     * 2.节点编号、名称唯一性校验
      * @param zkyUnitVO
      * @return
      */
@@ -184,8 +184,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     /**
      * 单个数据修改校验：
-     * 1.必填校验：节点名称、节点code、城市、分院
-     * 2. 节点code唯一性校验
+     * 1.必填校验：节点名称、节点编号、城市、分院
+     * 2. 节点编号唯一性校验
      * @param zkyUnitVO
      * @return
      */
@@ -195,13 +195,13 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if(isMustResult.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
             return isMustResult;
         }
-        // 节点code唯一性校验
+        // 节点编号唯一性校验
         List<QueryCondition> cons = new ArrayList<>();
         cons.add(QueryCondition.eq("participantCode",zkyUnitVO.getParticipantCode()));
         cons.add(QueryCondition.notEq("id",zkyUnitVO.getId()));
         List<ZkyUnitBean> zkyUnit = zkyUnitService.findAll(cons);
         if(null != zkyUnit && zkyUnit.size()>0){
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点Code已经存在："+zkyUnitVO.getParticipantCode());
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点编号已经存在："+zkyUnitVO.getParticipantCode());
         }
         cons = new ArrayList<>();
         cons.add(QueryCondition.eq("participantName",zkyUnitVO.getParticipantName()));
@@ -252,7 +252,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         List<ZkyUnitExportExcelVO> datas = new ArrayList<>();
         ZkyUnitExportExcelVO data = new ZkyUnitExportExcelVO();
         data.setParticipantName("节点名称xx");
-        data.setParticipantCode("节点Codexx");
+        data.setParticipantCode("节点编号xx");
         data.setCity("城市XX");
         data.setBranch("分院XX");
         datas.add(data);
@@ -303,9 +303,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     /**
      * 数据导入
      * 节点基础配置
-     *  1.必填校验：节点名称、节点code、城市、分院
-     *  2. 节点code唯一性校验
-     *  3. 节点code存在做更新处理、不存在新增处理
+     *  1.必填校验：节点名称、节点编号、城市、分院
+     *  2. 节点编号唯一性校验
+     *  3. 节点编号存在做更新处理、不存在新增处理
      * @param file
      * @return
      */
@@ -321,7 +321,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if(result.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
             return result;
         }
-        // 判断节点code是否存在，存在的话做更新处理
+        // 判断节点编号是否存在，存在的话做更新处理
         dataUpdateHandle(datas);
         // 数据保存
         zkyUnitService.save(datas);
@@ -338,7 +338,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
                 return isMustResult;
             }
         }
-        // 节点code、节点名称重复判断
+        // 节点编号、节点名称重复判断
         Result<String> repeatNameCodeResult = nameCodeRepeatValidate(datas);
         if(repeatNameCodeResult.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
             return repeatNameCodeResult;
@@ -351,13 +351,13 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     }
 
     private Result<String> nameCodeRepeatValidate(List<ZkyUnitBean> datas) {
-        // 节点code分组
+        // 节点编号分组
         Map<String, List<ZkyUnitBean>> maps =  datas.stream().collect(Collectors.groupingBy(map -> map.getParticipantCode(), Collectors.toList()));
         Set<String> keys = maps.keySet();
         for(String key : keys){
             int size = maps.get(key).size();
             if(size > 1){
-                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"导入数据中节点code<<"+key+">>重复");
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"导入数据中节点编号<<"+key+">>重复");
             }
         }
         return ResultUtil.success("success");
@@ -376,7 +376,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     }
 
     /**
-     * 判断节点code是否存在，存在的话做更新处理,不存在做新增处理
+     * 判断节点编号是否存在，存在的话做更新处理,不存在做新增处理
      *
      * @param datas
      */
@@ -386,9 +386,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         }
         // 获取现有所有数据
         List<ZkyUnitBean> oldDatas = zkyUnitService.findAll();
-        // 节点code去重处理
+        // 节点编号去重处理
         for(ZkyUnitBean bean : datas){
-            // 是否节点code是否存在
+            // 是否节点编号是否存在
             ZkyUnitBean oldData = getParticipantCodeExist(bean.getParticipantCode(),oldDatas);
             if(null != oldData){
                 //更新，保留guid
