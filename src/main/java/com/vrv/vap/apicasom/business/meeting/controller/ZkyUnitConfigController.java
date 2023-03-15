@@ -55,7 +55,7 @@ public class ZkyUnitConfigController {
     }
     /**
      * 节点基础数据配置新增
-     * 1.必填校验：节点名称、节点code、城市、分院
+     * 1.必填校验：研究所名称、节点名称、节点编号、分院/地区、城市
      * 2. 节点code唯一性校验
      * @param zkyUnitVO
      * @return
@@ -74,8 +74,8 @@ public class ZkyUnitConfigController {
 
     /**
      * 节点基础数据配置修改
-     * 1.必填校验：节点名称、节点code、城市、分院
-     * 2.节点code唯一性校验
+     * 1.必填校验：研究所名称、节点名称、节点编号、分院/地区、城市
+     * 2.节点编号、节点名称唯一性校验
      * @param zkyUnitVO
      * @return
      */

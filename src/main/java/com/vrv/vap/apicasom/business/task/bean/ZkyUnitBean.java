@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * @author: 梁国露
@@ -20,6 +21,14 @@ public class ZkyUnitBean {
     @Column(name="id")
     private String id;
 
+    /**
+     * 研究所名称
+     */
+    @Column(name="name")
+    private String name;
+    /**
+     * 节点编号
+     */
     @Column(name="participant_code")
     private String participantCode;
 
@@ -31,4 +40,7 @@ public class ZkyUnitBean {
 
     @Column(name="branch")
     private String branch;
+
+    @Column(name="create_time")
+    private Date createTime;
 }

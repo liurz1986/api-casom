@@ -86,5 +86,7 @@ CREATE TABLE IF NOT EXISTS `zky_send` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '告警状态';
--- changeset liurz:20230314-zky_unit-001 labels:"新增字段"
-alter table zky_unit add participant_code varchar(48) DEFAULT NULL COMMENT '节点code';
+-- changeset liurz:20230315-zky_unit-001 labels:"新增字段"
+alter table zky_unit add participant_code varchar(200) DEFAULT NULL COMMENT '节点编号';
+alter table zky_unit add name varchar(200) DEFAULT NULL COMMENT '研究所名称';
+alter table zky_unit add create_time datetime DEFAULT NULL COMMENT '记录时间';

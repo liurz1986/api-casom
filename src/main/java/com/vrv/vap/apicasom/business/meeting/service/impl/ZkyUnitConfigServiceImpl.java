@@ -58,8 +58,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     public PageRes<ZkyUnitBean> getPage(ZkyUnitSerachVO zkyUnitSerachVO) {
         PageReq pageReq=new PageReq();
         pageReq.setCount(zkyUnitSerachVO.getCount_());
-        pageReq.setBy(zkyUnitSerachVO.getBy_()==null?"desc":zkyUnitSerachVO.getBy_());
-        pageReq.setOrder(zkyUnitSerachVO.getOrder_() == null?"participantName":zkyUnitSerachVO.getOrder_());
+        pageReq.setBy("desc");
+        pageReq.setOrder("createTime");
         pageReq.setStart(zkyUnitSerachVO.getStart_());
         List<QueryCondition> conditions =  getQueryCondition(zkyUnitSerachVO);
         Page<ZkyUnitBean> ZkyUnitBeans = zkyUnitService.findAll(conditions,pageReq.getPageable());
@@ -74,6 +74,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     private List<QueryCondition> getQueryCondition(ZkyUnitSerachVO zkyUnitSerachVO) {
         List<QueryCondition> cons = new ArrayList<>();
+        if(StringUtils.isNotEmpty(zkyUnitSerachVO.getName())){
+            cons.add(QueryCondition.like("name",zkyUnitSerachVO.getName()));
+        }
         if(StringUtils.isNotEmpty(zkyUnitSerachVO.getParticipantName())){
             cons.add(QueryCondition.like("participantName",zkyUnitSerachVO.getParticipantName()));
         }
@@ -105,6 +108,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
             return result;
         }
         bean.setId(UUIDUtils.get32UUID());
+        bean.setCreateTime(new Date());
         zkyUnitService.save(bean);
         return ResultUtil.success("success");
     }
@@ -141,6 +145,9 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
 
     private Result<String> isMustValidate(ZkyUnitBean zkyUnitVO) {
+        if(StringUtils.isEmpty(zkyUnitVO.getName())){
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"研究所名称不能为空");
+        }
         if(StringUtils.isEmpty(zkyUnitVO.getParticipantCode())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点编号不能为空");
         }
@@ -148,7 +155,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"节点名称不能为空");
         }
         if(StringUtils.isEmpty(zkyUnitVO.getBranch())){
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"分院不能为空");
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"分院/地区不能为空");
         }
         if(StringUtils.isEmpty(zkyUnitVO.getCity())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"城市不能为空");
@@ -178,6 +185,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if(result.getCode().equals(ResultCodeEnum.UNKNOW_FAILED.getCode())){
             return result;
         }
+        bean.setCreateTime(new Date());
         zkyUnitService.save(bean);
         return ResultUtil.success("success");
     }
@@ -251,10 +259,11 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     private List<ZkyUnitExportExcelVO> getTemplateData() {
         List<ZkyUnitExportExcelVO> datas = new ArrayList<>();
         ZkyUnitExportExcelVO data = new ZkyUnitExportExcelVO();
-        data.setParticipantName("节点名称xx");
-        data.setParticipantCode("节点编号xx");
-        data.setCity("城市XX");
-        data.setBranch("分院XX");
+        data.setName("研究所xxx");
+        data.setParticipantName("节点名称xxx");
+        data.setParticipantCode("节点编号xxx");
+        data.setBranch("xxx");
+        data.setCity("xxx");
         datas.add(data);
         return datas;
     }
@@ -396,6 +405,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
             }else{
                 bean.setId(UUIDUtils.get32UUID());
             }
+            bean.setCreateTime(new Date());
         }
     }
 
@@ -431,10 +441,11 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
 
     private ZkyUnitBean getZkUnit(List<String> row) {
         ZkyUnitBean bean = new ZkyUnitBean();
-        bean.setParticipantCode(row.get(1));
+        bean.setName(row.get(1));
         bean.setParticipantName(row.get(2));
-        bean.setCity(row.get(3));
-        bean.setBranch(row.get(4));
+        bean.setParticipantCode(row.get(3));
+        bean.setCity(row.get(4));
+        bean.setBranch(row.get(5));
         return bean;
     }
 

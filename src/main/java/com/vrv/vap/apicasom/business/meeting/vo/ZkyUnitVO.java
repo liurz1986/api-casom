@@ -3,6 +3,7 @@ package com.vrv.vap.apicasom.business.meeting.vo;
 import lombok.Data;
 
 
+
 /**
  * 节点接触数据配置VO
  */
@@ -13,7 +14,11 @@ public class ZkyUnitVO {
      */
     private String id;
     /**
-     * 节点code
+     * 研究院名称
+     */
+    private String name;
+    /**
+     * 节点编号
      */
     private String participantCode;
     /**
