@@ -224,21 +224,21 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         if (!newFile.exists()) {
             newFile.mkdirs();
         }
-        String uuid="节点基础数据导出模板"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
+        String uuid="节点配置导入模板"+ DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
         logger.info("fileName: "+uuid);
         // 文件名称
         String fileName = uuid + ".xls";
         filePath=filePath+ File.separator+fileName;
         try{
             String templatePath=fileConfiguration.getTemplatePath()+"/zkyunit_template.xls";
-            logger.info("节点基础数据模板路径: "+templatePath);
+            logger.info("节点配置导入模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<String, String>(1);
-            extenddata.put("title", "节点基础数据");
+            extenddata.put("title", "节点数据");
             List<ZkyUnitExportExcelVO> datas = getTemplateData();
             ExcelUtils.getInstance().exportObjects2Excel(templatePath,datas,extenddata, ZkyUnitExportExcelVO.class, false, filePath);
         }catch(Exception e){
-            logger.error("生成节点基础数据导出模板文件失败",e);
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成节点基础数据导出模板文件失败");
+            logger.error("生成节点配置导入模板文件失败",e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成节点配置导入模板文件失败");
         }
         return ResultUtil.success(uuid);
     }
@@ -283,7 +283,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
             String templatePath=fileConfiguration.getTemplatePath()+"/zkyunit_template.xls";
             logger.info("节点基础数据模板路径: "+templatePath);
             Map<String, String> extenddata = new HashMap<String, String>(1);
-            extenddata.put("title", "节点基础数据");
+            extenddata.put("title", "节点数据");
             ExcelUtils.getInstance().exportObjects2Excel(templatePath,exportDatas,extenddata, ZkyUnitExportExcelVO.class, false, filePath);
         }catch(Exception e){
             logger.error("生成节点基础数据配置导出文件失败",e);

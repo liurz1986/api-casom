@@ -110,19 +110,19 @@ public class ZkyUnitConfigController {
     }
 
     /**
-     * 生成节点基础数据配置导出模板
+     * 生成节点基础数据配置导入模板
      * @param
      * @return
      */
     @PostMapping("exportDataTemplate")
-    @SysRequestLog(description="生成节点基础数据配置导出模板", actionType = ActionType.EXPORT,manually = false)
-    @ApiOperation(value="生成节点基础数据配置导出模板",notes="")
+    @SysRequestLog(description="生成节点基础数据配置导入模板", actionType = ActionType.EXPORT,manually = false)
+    @ApiOperation(value="生成节点基础数据配置导入模板",notes="")
     public Result<String> exportDataTemplate(){
         try{
             return zkyUnitConfigService.exportDataTemplate();
         }catch (Exception e){
-            logger.error("生成节点基础数据配置导出模板文件异常",e);
-            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成节点基础数据配置导出模板文件异常");
+            logger.error("生成节点基础数据配置导入模板文件异常",e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"生成节点基础数据配置导入模板文件异常");
         }
     }
     /**
