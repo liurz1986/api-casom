@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
@@ -277,7 +278,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     public Result<String> exportData(ZkyUnitSerachVO zkyUnitSerachVO) {
         logger.debug("节点基础数据配置导出请求参数："+ JSON.toJSONString(zkyUnitSerachVO));
         List<QueryCondition> conditions =  getQueryCondition(zkyUnitSerachVO);
-        List<ZkyUnitBean> list = zkyUnitService.findAll(conditions);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
+        List<ZkyUnitBean> list = zkyUnitService.findAll(conditions,sort);
         List<ZkyUnitExportExcelVO> exportDatas = mapper.mapList(list,ZkyUnitExportExcelVO.class);
         String filePath = fileConfiguration.getFilePath();
         File newFile= new File(filePath);
