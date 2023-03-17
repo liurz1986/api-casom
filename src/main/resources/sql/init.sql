@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS `hw_meeting_alarm` (
         `alarm_type` varchar(48) DEFAULT NULL COMMENT '异常类型',
         `alarm_time` datetime DEFAULT NULL COMMENT '告警时间',
         `cleared_time` datetime DEFAULT NULL COMMENT '告警确认或恢复时间',
-        `alarm_status` varchar(48) DEFAULT NULL COMMENT '告警状态',
          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='会议告警';
 
@@ -76,3 +75,6 @@ CREATE TABLE IF NOT EXISTS `zky_unit` (
 alter table zky_unit add participant_code varchar(200) DEFAULT NULL COMMENT '节点编号';
 alter table zky_unit add name varchar(200) DEFAULT NULL COMMENT '研究所名称';
 alter table zky_unit add create_time datetime DEFAULT NULL COMMENT '记录时间';
+
+-- changeset liangguol:20230315-hw_meeting_alarm-002 labels:"新增字段"
+alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '告警状态';
