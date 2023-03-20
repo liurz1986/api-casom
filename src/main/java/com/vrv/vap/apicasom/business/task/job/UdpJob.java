@@ -21,6 +21,7 @@ public class UdpJob implements CommandLineRunner {
             @SneakyThrows
             @Override
             public void run() {
+                looger.error("==============udp测试开启===================");
                 // 创建DatagramSocket对象，指定监听端口号
                 DatagramSocket socket = new DatagramSocket(20519);
                 // 创建DatagramPacket对象，用于接收数据
