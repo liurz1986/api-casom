@@ -265,12 +265,19 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public void saveMeetingAttendee(MeetingInfo meetingInfo) {
         List<HwMeetingAttendee> hwMeetingAttendees = new ArrayList<>();
         List<AttendeeRsp> attendees = meetingInfo.getAttendees();
+        List<ParticipantRsp> participantRsps = meetingInfo.getParticipants();
         if (attendees != null) {
             Map<String, List<AttendeeRsp>> attendeeMap = attendees.stream().collect(Collectors.groupingBy(AttendeeRsp::getParticipantName));
             for (Map.Entry<String, List<AttendeeRsp>> entry : attendeeMap.entrySet()) {
                 HwMeetingAttendee hwMeetingAttendee = new HwMeetingAttendee();
                 hwMeetingAttendee.setId(UUIDUtils.get32UUID());
-
+                //TODO
+                // 通过与会人列表中会场名称与会议详情信息中会场信息的会场名称匹配得到会场ID
+                List<ParticipantRsp> participantRspList = participantRsps.stream().filter(item->item.getName().equals(entry.getKey())).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(participantRspList)){
+                    ParticipantRsp participantRsp = participantRspList.get(0);
+                    hwMeetingAttendee.setParticipantCode(participantRsp.getId());
+                }
                 hwMeetingAttendee.setMeetingId(meetingInfo.getId());
                 hwMeetingAttendee.setDuration(meetingInfo.getDuration());
                 hwMeetingAttendee.setParticipantName(entry.getKey());

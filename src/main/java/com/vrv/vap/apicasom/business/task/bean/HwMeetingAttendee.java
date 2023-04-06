@@ -31,6 +31,10 @@ public class HwMeetingAttendee {
     @ApiModelProperty(value = "会场名称")
     private String participantName;
 
+    @Column(name="participant_code")
+    @ApiModelProperty(value = "会场code")
+    private String participantCode;
+
     @Column(name="user_count")
     @ApiModelProperty(value = "参会人数")
     private Integer userCount;
