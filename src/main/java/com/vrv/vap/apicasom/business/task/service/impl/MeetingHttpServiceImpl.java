@@ -464,6 +464,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                         HwMeetingParticipant hwMeetingParticipant = new HwMeetingParticipant();
                         hwMeetingParticipant.setId(UUIDUtils.get32UUID());
                         hwMeetingParticipant.setMeetingId(id);
+                        hwMeetingParticipant.setParticipantCode(participantDetail.getGeneralParam().getId());
                         hwMeetingParticipant.setName(participantDetail.getGeneralParam().getName());
                         hwMeetingParticipant.setTerminalType(participantDetail.getGeneralParam().getModel());
                         hwMeetingParticipant.setStage("ONLINE");
