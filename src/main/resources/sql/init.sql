@@ -78,3 +78,6 @@ alter table zky_unit add create_time datetime DEFAULT NULL COMMENT '记录时间
 
 -- changeset liangguol:20230315-hw_meeting_alarm-002 labels:"新增字段"
 alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '告警状态';
+
+-- changeset liangguol:20230406-hw_meeting_alarm-002 labels:"新增字段"
+alter table hw_meeting_participant add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';

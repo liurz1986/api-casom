@@ -299,6 +299,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 participant.setName(participantRsp.getName());
                 participant.setDuration(meetingInfo.getDuration());
                 participant.setMeetingId(meetingInfo.getId());
+                participant.setParticipantCode(participantRsp.getId());
                 participant.setCity(zkyUnitBeanMap.get(participantRsp.getOrganizationName()).getCity());
                 participant.setBranch(zkyUnitBeanMap.get(participantRsp.getOrganizationName()).getBranch());
                 participant.setStage("OFFLINE");
