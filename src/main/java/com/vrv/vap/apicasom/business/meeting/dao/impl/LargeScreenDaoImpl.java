@@ -136,8 +136,10 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<CommonQueryVO> queryNodesGroupByCity() {
-        String sql ="select a.city as keyName,a.organization_name as value1,base.participant_name as value2  from(select city ,organization_name,participant_code from hw_meeting_participant  GROUP BY city,organization_name,participant_code) a " +
-                "left join  zky_unit as base on a.participant_code=base.participant_code ";
+        String sql ="select base.city as keyName ,node.organization_name as value1 ,base.participant_name as value2 " +
+                "from hw_meeting_participant  as node " +
+                "inner join  zky_unit as base on node.participant_code=base.participant_code " +
+                "GROUP BY keyName,value1,value2 ";
         logger.debug("按城市、组织机构、节点code分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;
@@ -158,7 +160,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<String> getRunMettingCitys() {
-        String sql="select DISTINCT city from hw_meeting_participant  where  stage='ONLINE' ";
+        String sql="select DISTINCT base.city from hw_meeting_participant  as node inner join zky_unit as base on node.participant_code=base.participant_code where  node.stage='ONLINE' ";
         logger.debug("获取正在开会的城市查询sql:"+sql);
         List<String> list = jdbcTemplate.queryForList(sql,String.class);
         return list;
@@ -173,7 +175,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
     public List<KeyValueQueryVO> queryNodeNamesByCity(String cityName) {
         List<Object> params = new ArrayList<>();
         String sql ="select node.organization_name as keyName, base.participant_name as value1 from hw_meeting_participant as node " +
-                "inner join zky_unit as base on node.participant_code=base.participant_code where node.city=?  GROUP BY keyName,value1";
+                "inner join zky_unit as base on node.participant_code=base.participant_code where base.city=?  GROUP BY keyName,value1";
         logger.debug("城市所有节点名称查询sql:"+sql);
         params.add(cityName);
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper(),params.toArray());
@@ -200,7 +202,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
     public List<NodeVO> queryRunNodesByCity(String cityName) {
         List<Object> params = new ArrayList<>();
         String sql ="select base.participant_name as name ,node.organization_name,node.schedule_start_time,node.schedule_end_time,node.stage from hw_meeting_participant as node " +
-                "left join zky_unit as base on base.participant_code=node.participant_code where node.stage='ONLINE' and node.city=? ";
+                "inner join zky_unit as base on base.participant_code=node.participant_code where node.stage='ONLINE' and base.city=? ";
         logger.debug("当前城市正在开会的节点信息查询sql:"+sql);
         params.add(cityName);
         List<NodeVO> details = jdbcTemplate.query(sql,new NodeVoMapper(),params.toArray());
@@ -229,7 +231,8 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
     @Override
     public List<LargeBranchStatisticsVO> queryBranchStatistics(String type) {
         String sql = "select a.branch,sum(a.user_count) as userCont,sum(a.duration) as durationTotal,count(a.name) as meetingCount from( " +
-                " select node.name,node.branch,detail.user_count,detail.duration from hw_meeting_participant as node " +
+                " select node.name,base.branch,detail.user_count,detail.duration from hw_meeting_participant as node " +
+                " inner join zky_unit as base on base.participant_code=node.participant_code" +
                 " left join " +
                 " hw_meeting_attendee as detail on node.participant_code=detail.participant_code and node.meeting_id=detail.meeting_id " +
                 " where node.stage='OFFLINE' and " + MettingCommonUtil.largeScreenVideoAndNodeSql(type,"node.schedule_start_time")+" )a group by a.branch ";
@@ -262,7 +265,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<LargeDeatailVO> getUseStatisticsByBranch(String type) {
-        String sql ="select * from(select branch as name,count(*)as num from hw_meeting_participant where stage='OFFLINE' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"schedule_start_time")+" group by branch)a order by a.num desc limit 0,5 ";
+        String sql ="select * from(select base.branch as name,count(*)as num from hw_meeting_participant as node inner join zky_unit as base on base.participant_code=node.participant_code where node.stage='OFFLINE' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"node.schedule_start_time")+" group by name)a order by a.num desc limit 0,5 ";
         logger.debug("各地区使用占比,历史数据查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
@@ -335,9 +338,10 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public List<CommonQueryVO> getAbnormalMettingCitys() {
-        String sql ="select a.city as keyName,a.organization_name as value1,base.participant_name as value2 from(" +
-                "select city,organization_name ,participant_code  from hw_meeting_participant  where meeting_id in (select meeting_id from hw_meeting_alarm where alarm_status='current' ) " +
-                "group by city,organization_name,participant_code)a left join zky_unit as base on base.participant_code=a.participant_code" ;
+        String sql ="select base.city as keyName,a.organization_name as value1,base.participant_name as value2 from( " +
+                "select city,organization_name ,participant_code  from hw_meeting_participant  where meeting_id in (select meeting_id from hw_meeting_alarm where alarm_status='current' ) )a " +
+                "inner join zky_unit as base on base.participant_code=a.participant_code " +
+                "group by  keyName,value1,value2 " ;
         logger.debug("获取存在异常会议的城市、组织机构、节点code分组查询sql:"+sql);
         List<CommonQueryVO> details = jdbcTemplate.query(sql,new CommonQueryVoMapper());
         return details;

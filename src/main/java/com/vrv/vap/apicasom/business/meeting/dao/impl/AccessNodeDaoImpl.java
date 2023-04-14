@@ -92,7 +92,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
     private String getCommonSql(AccessNodeSearchVO accessNodeSearchVO,List<Object> params) {
         // 节点名称、所有分院/地区、设备类型分组其中会议时长的和除以60转为小时，统计次数作为参会次数,状态为会议结束offline
         String sql="select a.num,a.duration,a.branch,a.terminal_type,a.participant_name as name" +
-                " from (select count(node.id) as num,sum(node.duration) as duration,node.participant_code,node.branch,node.terminal_type,base.participant_name from " +
+                " from (select count(node.id) as num,sum(node.duration) as duration,base.branch,node.terminal_type,base.participant_name from " +
                 " hw_meeting_participant as node inner join zky_unit as base " +
                 " on node.participant_code=base.participant_code  where 1=1 ";
         // 节点名称精确查询
@@ -102,7 +102,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         }
         // 分院精确查询
         if(StringUtils.isNotEmpty(accessNodeSearchVO.getRegion())){
-            sql = sql +" and node.branch=? ";
+            sql = sql +" and base.branch=? ";
             params.add(accessNodeSearchVO.getRegion());
         }
         // 排序处理：默认name降序
@@ -120,7 +120,7 @@ public class AccessNodeDaoImpl implements AccessNodeDao {
         if(StringUtils.isNotEmpty(by)){
             defaultBy= by;
         }
-        sql= sql+" and stage='OFFLINE' group by participant_code,branch,terminal_type )a order by "+defaultOrder +" "+ defaultBy;
+        sql= sql+" and stage='OFFLINE' group by participant_name,branch,terminal_type )a order by "+defaultOrder +" "+ defaultBy;
         return sql;
     }
 
