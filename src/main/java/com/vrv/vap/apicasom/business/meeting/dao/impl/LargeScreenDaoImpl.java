@@ -172,7 +172,8 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
     @Override
     public List<KeyValueQueryVO> queryNodeNamesByCity(String cityName) {
         List<Object> params = new ArrayList<>();
-        String sql ="select organization_name as keyName, name as value1 from hw_meeting_participant where city=?  GROUP BY organization_name,name";
+        String sql ="select node.organization_name as keyName, base.participant_name as value1 from hw_meeting_participant as node " +
+                "inner join zky_unit as base on node.participant_code=base.participant_code where node.city=?  GROUP BY keyName,value1";
         logger.debug("城市所有节点名称查询sql:"+sql);
         params.add(cityName);
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper(),params.toArray());
