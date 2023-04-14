@@ -98,7 +98,9 @@ public class IntegratedLargeScreenDaoimpl implements IntegratedLargeScreenDao {
      */
     @Override
     public List<KeyValueQueryVO> queryBranchNodeStatistics() {
-        String sql ="select branch as name,count(*) as value  from hw_meeting_participant where stage='OFFLINE' group by branch  ";
+        String sql ="select a.branch as name,count(*) as value from (" +
+                "select base.branch from hw_meeting_participant  " +
+                "as node inner join zky_unit as base  on node.participant_code=base.participant_code where node.stage='OFFLINE')a group by a.branch ";
         logger.debug("各地区接入节点分布查询sql:"+sql);
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
