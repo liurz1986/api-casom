@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * @author: 梁国露
  * @since: 2023/2/17 15:12
- * @description: 初始化公共信息（token,分院/城市信息,会议室数量信息）
+ * @description: 收发件消息
  */
 @Component
 @EnableScheduling
