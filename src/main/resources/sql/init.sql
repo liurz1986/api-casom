@@ -82,3 +82,17 @@ alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '
 -- changeset liangguol:20230406-hw_meeting_alarm-002 labels:"新增字段"
 alter table hw_meeting_participant add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';
 alter table hw_meeting_attendee add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';
+
+-- changeset liangguol:20230406-zky_send-001 labels:"新增发送接收文件表"
+CREATE TABLE `zky_send` (
+        `id` varchar(125) NOT NULL COMMENT '记录ID',
+        `org_name` varchar(255) DEFAULT NULL COMMENT '组织机构名称',
+        `org_code` varchar(255) DEFAULT NULL COMMENT '组织机构编码',
+        `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+        `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+        `send_type` varchar(125) DEFAULT NULL COMMENT '类型',
+        `send_scope` varchar(125) DEFAULT NULL COMMENT '单位',
+        `receive_num` int(10) DEFAULT NULL COMMENT '接收数量',
+        `send_num` int(10) DEFAULT NULL COMMENT '发送数量',
+        PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
