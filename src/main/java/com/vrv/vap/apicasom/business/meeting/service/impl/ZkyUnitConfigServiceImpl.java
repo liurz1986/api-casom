@@ -263,8 +263,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         data.setName("研究所xxx");
         data.setParticipantName("节点名称xxx");
         data.setParticipantCode("节点编号xxx");
-        data.setBranch("xxx");
-        data.setCity("xxx");
+        data.setBranch("分院/地区xxx");
+        data.setCity("城市xx");
         datas.add(data);
         return datas;
     }
