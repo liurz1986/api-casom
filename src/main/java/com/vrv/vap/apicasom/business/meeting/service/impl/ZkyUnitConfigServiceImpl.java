@@ -446,8 +446,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         bean.setName(row.get(1));
         bean.setParticipantName(row.get(2));
         bean.setParticipantCode(row.get(3));
-        bean.setCity(row.get(4));
-        bean.setBranch(row.get(5));
+        bean.setBranch(row.get(4));
+        bean.setCity(row.get(5));
         return bean;
     }
 
