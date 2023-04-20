@@ -116,6 +116,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String encode = Base64Utils.encodeBase64(username + ":" + password);
         logger.warn("get token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
+        header.put("Content-type","application/json;charset=UTF-8");
         try {
             String result = HttpClientUtils.doGet(tokenUrl, null, header);
             Token token = gson.fromJson(result, Token.class);
