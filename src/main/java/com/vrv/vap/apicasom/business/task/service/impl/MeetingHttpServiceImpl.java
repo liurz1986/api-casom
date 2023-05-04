@@ -119,6 +119,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         header.put("Content-type","application/json;charset=UTF-8");
         try {
             String result = HttpClientUtils.doGet(tokenUrl, null, header);
+            logger.warn("getToken 接口返回：{}",result);
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
@@ -147,6 +148,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
         try {
             String res = HttpClientUtils.doPost(urlStr, param, header);
+            logger.warn("getHistoryMeetingList 接口返回：{}",res);
             HistoryList historyList = gson.fromJson(res, HistoryList.class);
             List<Content> contentList = new ArrayList<>();
             if (historyList != null) {
@@ -183,6 +185,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         infoUrl = infoUrl.replace("{0}", id);
         try {
             String infoStr = HttpClientUtils.doGet(infoUrl, null, header);
+            logger.warn("getHistoryMeetingInfo 接口返回：{}",infoStr);
             MeetingInfo meetingInfo = gson.fromJson(infoStr, MeetingInfo.class);
             saveMeetingInfo(meetingInfo);
             logger.warn("历史会议{}详情保存成功！",id);
@@ -336,6 +339,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         try {
             Map<String,Object> param = new HashMap<>();
             String res = HttpClientUtils.doPost(urlStr, param, header);
+            logger.warn("getHistoryMeetingAlarm 接口返回：{}",res);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
             List<HwMeetingAlarm> alarms = new ArrayList<>();
@@ -383,6 +387,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
         try {
             String res = HttpClientUtils.doPost(nowMeetingUrl, param, header);
+            logger.warn("getNowMeetingList 接口返回：{}",res);
             NowMeetingList meetingList = gson.fromJson(res, NowMeetingList.class);
             List<ScheduleConfBrief> list = meetingList.getContent();
             if (CollectionUtils.isNotEmpty(list)) {
@@ -419,6 +424,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         nowMeetingInfoUrl = nowMeetingInfoUrl.replace("{0}", id);
         try {
             String res = HttpClientUtils.doGet(nowMeetingInfoUrl, null, header);
+            logger.warn("getNowMeetingInfo 接口返回：{}",res);
             ConferenceRspVo conferenceRspVo = gson.fromJson(res, ConferenceRspVo.class);
             ConferenceRsp conferenceRsp = conferenceRspVo.getConference();
             hwMeetingInfo.setMeetingId(conferenceRsp.getId());
@@ -456,6 +462,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         Map<String,Object> param = new HashMap<>();
         try {
             String res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
+            logger.warn("getNowMeetingParticipants 接口返回：{}",res);
             OnlineConferencesRes onlineConferencesRes = gson.fromJson(res, OnlineConferencesRes.class);
             List<ParticipantDetail> content = onlineConferencesRes.getContent();
             if (CollectionUtils.isNotEmpty(content)) {
@@ -495,6 +502,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         urlStr = urlStr.replace("{0}", id);
         try {
             String res = HttpClientUtils.doGet(urlStr, null, header);
+            logger.warn("getNowMeetingAlarm 接口返回：{}",res);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
             List<HwMeetingAlarm> alarms = new ArrayList<>();
@@ -541,6 +549,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         param.put("searchtree",false);
         String roomUrl = url+"/sys-portal"+MeetingUrlConstant.MEETING_ROOMS_URL;
         String res = HttpClientUtils.doPost(roomUrl, param, header);
+        logger.warn("initMeetingRooms 接口返回：{}",res);
         if(StringUtils.isNotBlank(res)){
             MeetingRoomsRes meetingRoomsRes = gson.fromJson(res,MeetingRoomsRes.class);
             int total = meetingRoomsRes.getTotalElements();
