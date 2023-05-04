@@ -83,7 +83,7 @@ public class HttpClientUtils {
             HttpGet httpGet = new HttpGet(url);
             if(header != null){
                 for(Map.Entry<String,String> entry:header.entrySet()){
-                    httpGet.setHeader(entry.getKey(), entry.getValue());
+                    httpGet.addHeader(entry.getKey(), entry.getValue());
                 }
             }
             // 执行请求
@@ -119,7 +119,7 @@ public class HttpClientUtils {
             HttpPost httpPost = new HttpPost(url);
             if(header != null){
                 for(Map.Entry<String,String> entry:header.entrySet()){
-                    httpPost.setHeader(entry.getKey(), entry.getValue());
+                    httpPost.addHeader(entry.getKey(), entry.getValue());
                 }
             }
             // 创建参数列表
@@ -138,6 +138,7 @@ public class HttpClientUtils {
             }
             // 执行http请求
             response = httpClient.execute(httpPost);
+
             // 判断返回状态是否为200
             if (response.getStatusLine().getStatusCode() == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
