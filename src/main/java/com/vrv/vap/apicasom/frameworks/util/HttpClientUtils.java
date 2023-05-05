@@ -133,7 +133,7 @@ public class HttpClientUtils {
 //                httpPost.setEntity(entity);
                 // 模拟表单
                 String body = gson.toJson(param);
-                StringEntity entity = new StringEntity(body,"utf-8");
+                StringEntity entity = new StringEntity(body,"UTF-8");
                 httpPost.setEntity(entity);
             }
             // 执行http请求

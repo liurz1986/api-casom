@@ -17,8 +17,8 @@ public class Token {
     private String userType;
 
     @ApiModelProperty("过期时间")
-    private int expire;
+    private Long expire;
 
     @ApiModelProperty("剩余过期天数")
-    private int passwordExpireAfter;
+    private String passwordExpireAfter;
 }
