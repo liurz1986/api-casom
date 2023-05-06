@@ -40,8 +40,8 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
     public List<ZkySend> getZkySend(String startTime,String endTime,String type) {
         List<ZkySend> zkySends = new ArrayList<>();
         Map<String,Object> param = new HashMap<>();
-        param.put("startTime",startTime);
-        param.put("endTime",endTime);
+        param.put("startDate",startTime);
+        param.put("endDate",endTime);
         param.put("sendType",type);
         param.put("sendScope","院部机关");
         Map<String,String> header = new HashMap<>();
