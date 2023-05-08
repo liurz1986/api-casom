@@ -33,20 +33,16 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
      */
     private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
-    @Value("${hw.send.url}")
-    private String zkySendUrl;
-
     @Override
-    public List<ZkySend> getZkySend(String startTime,String endTime,String type) {
+    public List<ZkySend> getZkySend(String startTime,String endTime,String sendScope,String url) {
         List<ZkySend> zkySends = new ArrayList<>();
         Map<String,Object> param = new HashMap<>();
         param.put("startDate",startTime);
         param.put("endDate",endTime);
-        param.put("sendType",type);
-        param.put("sendScope","院部机关");
+        param.put("sendScope",sendScope);
         Map<String,String> header = new HashMap<>();
         header.put("Content-type","application/json;charset=UTF-8");
-        String res = HttpClientUtils.doPost(zkySendUrl,param,header);
+        String res = HttpClientUtils.doPost(url,param,header);
 
         if(StringUtils.isNotBlank(res)){
             Type typeToken = new TypeToken<List<ZkySend>>(){}.getType();

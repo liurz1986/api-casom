@@ -53,4 +53,8 @@ public class ZkySend {
     @Column(name="send_num")
     @ApiModelProperty("发送数量")
     private Integer sendNum;
+
+    @Column(name="send_region")
+    @ApiModelProperty("发送区域")
+    private Integer sendRegion;
 }

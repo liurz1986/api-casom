@@ -96,3 +96,6 @@ CREATE TABLE `zky_send` (
         `send_num` int(10) DEFAULT NULL COMMENT '发送数量',
         PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- changeset liangguol:20230508-zky_send-002 labels:"新增字段"
+alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';

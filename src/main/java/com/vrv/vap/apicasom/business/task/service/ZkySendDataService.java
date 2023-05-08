@@ -13,5 +13,6 @@ public interface ZkySendDataService {
     /**
      *
      */
-    public List<ZkySend> getZkySend(String startTime,String endTime,String type);
+    public List<ZkySend> getZkySend(String startTime,String endTime,String sendScope,String url);
+
 }
