@@ -16,10 +16,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author: 梁国露
@@ -38,6 +36,9 @@ public class ZkySendDataJob {
     @Autowired
     private ZkySendService zkySendService;
 
+    @Autowired
+    private ZkyUnitService zkyUnitService;
+
 
     @Value("${hw.send.url}")
     private String zkySendUrl;
@@ -45,8 +46,11 @@ public class ZkySendDataJob {
     @Value("${hw.send.local-url}")
     private String zkySendLocalUrl;
 
+    private Map<String,String> zkyCityMap= new HashMap<>();
+
     @Scheduled(cron = "${hw.send.time}")
     public void getZkySend(){
+        getZkyCityMap();
         logger.info("中科院文件信息同步开始");
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
@@ -61,6 +65,8 @@ public class ZkySendDataJob {
                 String id = UUIDUtils.get32UUID();
                 item.setId(id);
                 item.setSendRegion(1);
+                String branch = zkyCityMap.get(item.getOrgName());
+                item.setBranch(branch);
             });
             zkySends.addAll(zkySendList);
         }
@@ -70,6 +76,8 @@ public class ZkySendDataJob {
                 String id = UUIDUtils.get32UUID();
                 item.setId(id);
                 item.setSendRegion(1);
+                String branch = zkyCityMap.get(item.getOrgName());
+                item.setBranch(branch);
             });
             zkySends.addAll(zkyList);
         }
@@ -82,6 +90,8 @@ public class ZkySendDataJob {
                 String id = UUIDUtils.get32UUID();
                 item.setId(id);
                 item.setSendRegion(0);
+                String branch = zkyCityMap.get(item.getOrgName());
+                item.setBranch(branch);
             });
             zkySends.addAll(zkySendLocalList);
         }
@@ -91,6 +101,8 @@ public class ZkySendDataJob {
                 String id = UUIDUtils.get32UUID();
                 item.setId(id);
                 item.setSendRegion(0);
+                String branch = zkyCityMap.get(item.getOrgName());
+                item.setBranch(branch);
             });
             zkySends.addAll(zkyLocalList);
         }
@@ -101,5 +113,19 @@ public class ZkySendDataJob {
         }
         logger.info("中科院文件信息同步，文件信息保存");
 
+    }
+
+    /**
+     * 获取城市分院对照
+     * @return
+     */
+    public void getZkyCityMap(){
+        List<ZkyUnitBean> list = zkyUnitService.findAll();
+        Map<String,List<ZkyUnitBean>> zkyUnitMap = list.stream().collect(Collectors.groupingBy(ZkyUnitBean::getName));
+        for(Map.Entry<String,List<ZkyUnitBean>> entry : zkyUnitMap.entrySet()){
+            if(entry.getValue().size() != 0){
+                zkyCityMap.put(entry.getKey(),entry.getValue().get(0).getBranch());
+            }
+        }
     }
 }

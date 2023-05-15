@@ -99,3 +99,23 @@ CREATE TABLE `zky_send` (
 
 -- changeset liangguol:20230508-zky_send-002 labels:"新增字段"
 alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';
+
+-- changeset liangguol:20230510-zky_send-003 labels:"新增字段"
+alter table zky_send add branch varchar (10) DEFAULT NULL COMMENT '分院';
+CREATE TABLE `exchange_box_file` (
+         `guid` varchar(125) NOT NULL COMMENT '主键ID',
+         `file_type` varchar(5) NOT NULL COMMENT '文件类型',
+         `total` int(10) DEFAULT NULL COMMENT '总数',
+         `flowingTotal` int(10) DEFAULT NULL COMMENT '流转总数',
+         `registrationTotal` int(10) DEFAULT NULL COMMENT '登记总数',
+         `create_time` datetime DEFAULT NULL COMMENT '时间',
+         PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交换箱文件数据';
+
+CREATE TABLE `exchange_box_usr` (
+        `guid` varchar(125) NOT NULL COMMENT '主键ID',
+        `total_user` int(10) DEFAULT NULL COMMENT '总用户数',
+        `login_count` int(10) DEFAULT NULL COMMENT '用户登录次数',
+        `create_time` datetime DEFAULT NULL COMMENT '时间',
+        PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交换箱用户数据';
