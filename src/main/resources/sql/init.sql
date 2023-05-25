@@ -132,6 +132,7 @@ CREATE TABLE `zky_exchange_box`  (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='公文交换箱';
 
 CREATE TABLE `zky_print_user_org`  (
+                                       `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
                                        `user_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '用户名称',
                                        `branch` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '分院(地区)',
                                        `organization_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '单位/部门',
