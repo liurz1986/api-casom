@@ -273,6 +273,12 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.5</version>
         </dependency>
+        <!-- es的封装包 -->
+        <dependency>
+            <groupId>com.vrv.vap</groupId>
+            <artifactId>vap-es</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
 
 

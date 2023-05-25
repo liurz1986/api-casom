@@ -28,6 +28,15 @@ spring:
     show-banner: false
   session:
     store-type: redis
+  data:
+    elasticsearch:
+      cluster-name: ${ES_CLUSTER_NAME:elasticsearch-cluster}
+      cluster-client-nodes: ${ES_CLUSTER_HOST:192.168.120.201}:${ES_CLUSTER_PORT:9200}
+      http:
+        username: ${ES_CLUSTER_UNAME:admin}
+        password: ${ES_CLUSTER_PWD:vrv@12345}
+        maxConnectNum: 100
+        maxConnectPerRoute: 100
   redis:
     database: 0
     host: ${REDIS_HOST:192.168.120.201}
@@ -49,6 +58,10 @@ spring:
     time-zone: GMT+8
 dataflag: es
 version: chutian
+
+es:
+  shardCount: 5
+  repliceCount: 0
 druid:
   mysql:
     usePingMethod: false
@@ -75,10 +88,10 @@ vap:
     capacity: 200000
     sink-type: database
     databases:
-      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.152}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
         username: ${MYSQL_USER:root}
         password: ${MYSQL_PASSWORD:mysql}
-      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.152}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
+      - url: jdbc:mysql://${MYSQL_HOST:192.168.120.201}:${MYSQL_PORT:3306}/ajb_vap?useUnicode=true&useSSL=false&characterEncoding=UTF-8
         username: ${MYSQL_USER:root}
         password: ${MYSQL_PASSWORD:mysql}
     driver: ${DATABASE_DRIVER:com.mysql.jdbc.Driver}

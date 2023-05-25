@@ -56,7 +56,7 @@ public class ZkySend {
 
     @Column(name="send_region")
     @ApiModelProperty("发送区域")
-    private Integer sendRegion;
+    private Integer sendRegion;  // 1表示远程、0表示本地
 
     @Column(name="branch")
     @ApiModelProperty("分院")
