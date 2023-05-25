@@ -84,7 +84,7 @@ alter table hw_meeting_participant add participant_code varchar(80) DEFAULT NULL
 alter table hw_meeting_attendee add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';
 
 -- changeset liangguol:20230406-zky_send-001 labels:"新增发送接收文件表"
-CREATE TABLE `zky_send` (
+CREATE TABLE IF NOT EXISTS `zky_send` (
         `id` varchar(125) NOT NULL COMMENT '记录ID',
         `org_name` varchar(255) DEFAULT NULL COMMENT '组织机构名称',
         `org_code` varchar(255) DEFAULT NULL COMMENT '组织机构编码',
@@ -103,7 +103,7 @@ alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';
 -- changeset liangguol:20230523-zky_send-003 labels:"新增字段"
 alter table zky_send add branch varchar (10) DEFAULT NULL COMMENT '分院';
 -- changeset liurz:20230523-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
-CREATE TABLE `zky_email`  (
+CREATE TABLE IF NOT EXISTS `zky_email`  (
                               `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
                               `eamil_time` date DEFAULT NULL COMMENT '时间',
                               `org_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '部门名称',
@@ -113,7 +113,7 @@ CREATE TABLE `zky_email`  (
                               PRIMARY KEY (`guid`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件收发';
 
-CREATE TABLE `zky_exchange_box`  (
+CREATE TABLE IF NOT EXISTS `zky_exchange_box`  (
                                      `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
                                      `deadline` date DEFAULT NULL COMMENT '截至时间',
                                      `receive_total` int(9) DEFAULT NULL COMMENT '收件总数',
@@ -131,7 +131,7 @@ CREATE TABLE `zky_exchange_box`  (
                                      PRIMARY KEY (`guid`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='公文交换箱';
 
-CREATE TABLE `zky_print_user_org`  (
+CREATE TABLE IF NOT EXISTS `zky_print_user_org`  (
                                        `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
                                        `user_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '用户名称',
                                        `branch` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '分院(地区)',
