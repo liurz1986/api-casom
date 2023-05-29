@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class SituationLargeScreenController {
     @Autowired
     private SituationLargeScreenService situationLargeScreenService;
     /**
-     * 公文及文件交换系统发件数量、收件数量 {"beginTime":"2023-03-01","endTime":"2023-03-02"}
+     * 公文及文件交换系统发件数量、收件数量{"type":"all"}
      * @return Result
      */
     @PostMapping(value = "/fileSendAndReceiveNum")
@@ -46,11 +45,16 @@ public class SituationLargeScreenController {
         }
     }
     /**
-     * 发件和收件情况统计 {"beginTime":"2023-03-01","endTime":"2023-03-02"}
+     * 发件和收件情况统计 {"type":"all"}
      * 1.本地区收件
      * 2.本地地区发件
      * 3.跨地区收件
      * 4.跨地区发件
+     * 全部的话：根据实际最大时间和最小时间来判断
+     *      大于2年按年统计
+     *      大于1个月按月统计
+     *      小于等于1个月按天统计
+     * 全部的话，如果没有数据x轴为空
      * @return Result
      */
     @PostMapping(value = "/fileSendAndReceiveTrend")
@@ -66,7 +70,7 @@ public class SituationLargeScreenController {
     }
 
     /**
-     * 院机关各部门邮件收发数量  {"beginTime":"2023-03-01","endTime":"2023-03-02"}
+     * 院机关各部门邮件收发数量  {"type":"all"}
      * @return Result
      */
     @PostMapping(value = "/emailSendAndReceiveNum")
@@ -82,7 +86,7 @@ public class SituationLargeScreenController {
     }
 
     /**
-     * 收发件数量 {"beginTime":"2023-03-01","endTime":"2023-03-02","tabName":"1"}
+     * 收发件数量  {"type":"all","tabName":"1"}
      * tabName "1":各分院(地区)  "2":院机关各部门
      * 1.本地区收件
      * 2.本地地区发件
@@ -108,7 +112,7 @@ public class SituationLargeScreenController {
     }
 
     /**
-     * 打印和刻录数量 {"beginTime":"2023-03-01","endTime":"2023-03-02"}
+         * 打印和刻录数量 {"type":"month"}
      * @return Result
      */
     @PostMapping(value = "/printingAndBurningNum")
@@ -116,7 +120,7 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "打印和刻录数量", actionType = ActionType.SELECT)
     public Result<List<PrintingAndBurningNumVO>> printingAndBurningNum(@RequestBody SituationLargeSearchVO searchVO) {
         try {
-            return ResultUtil.successList(situationLargeScreenService.printingAndBurningNum(searchVO));
+            return situationLargeScreenService.printingAndBurningNum(searchVO);
         } catch (Exception e) {
             logger.error("打印和刻录数量异常,{}", e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "打印和刻录数量异常");

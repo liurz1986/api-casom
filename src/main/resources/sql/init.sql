@@ -102,15 +102,15 @@ alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';
 
 -- changeset liangguol:20230523-zky_send-003 labels:"新增字段"
 alter table zky_send add branch varchar (10) DEFAULT NULL COMMENT '分院';
--- changeset liurz:20230523-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
+-- changeset liurz:20230529-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
 CREATE TABLE IF NOT EXISTS `zky_email`  (
-                              `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-                              `eamil_time` date DEFAULT NULL COMMENT '时间',
-                              `org_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '部门名称',
-                              `receive_num` int(11) DEFAULT NULL COMMENT '收件数',
-                              `send_num` int(11) DEFAULT NULL COMMENT '发件数',
-                              `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
-                              PRIMARY KEY (`guid`) USING BTREE
+    `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `email_time` date DEFAULT NULL COMMENT '邮件时间',
+    `org_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '部门名称',
+    `receive_num` int(11) DEFAULT NULL COMMENT '收件数',
+    `send_num` int(11) DEFAULT NULL COMMENT '发件数',
+    `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
+    PRIMARY KEY (`guid`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件收发';
 
 CREATE TABLE IF NOT EXISTS `zky_exchange_box`  (

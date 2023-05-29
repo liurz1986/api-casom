@@ -127,7 +127,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
             }
             ZkyEmail zkyEmail =  result.getData();
             // 部门名称和时间重复校验
-            String str = zkyEmail.getOrgName()+"-"+zkyEmail.getEamilTime();
+            String str = zkyEmail.getOrgName()+"-"+zkyEmail.getEmailTime();
             if(orgNameAndTime.contains(str)){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"导入数据中部门名称和时间存在重复的："+str);
             }
@@ -158,7 +158,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
         if(ResultCodeEnum.UNKNOW_FAILED.getCode().equals(emailResult.getCode())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"时间:"+emailResult.getMsg());
         }
-        bean.setEamilTime(emailResult.getData());
+        bean.setEmailTime(emailResult.getData());
         // 收件数必填、格式校验
         String receiveNum = row.get(2);
         if(StringUtils.isEmpty(receiveNum)){
@@ -212,7 +212,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
      */
     private List<ZkyEmail> dataHandle(List<ZkyEmail> list, List<ZkyEmail> hisDatas) {
         for(ZkyEmail zkyEmail : list){
-            Date emailTime = zkyEmail.getEamilTime();
+            Date emailTime = zkyEmail.getEmailTime();
             String orgName = zkyEmail.getOrgName();
             zkyEmail.setImportTime(new Date());
             // 没有历史数据的情况
@@ -233,7 +233,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
 
     private ZkyEmail getHisData(Date emailTime, String orgName, List<ZkyEmail> hisDatas) {
         for(ZkyEmail zkyEmail : hisDatas){
-            Date emailTimeOld = zkyEmail.getEamilTime();
+            Date emailTimeOld = zkyEmail.getEmailTime();
             String orgNameOld = zkyEmail.getOrgName();
             if(emailTime.equals(emailTimeOld)&&orgName.equals(orgNameOld)){
                 return zkyEmail;

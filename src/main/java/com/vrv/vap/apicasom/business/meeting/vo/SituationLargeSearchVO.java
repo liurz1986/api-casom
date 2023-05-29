@@ -1,9 +1,6 @@
 package com.vrv.vap.apicasom.business.meeting.vo;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.util.Date;
 
 /**
  * 时间段查询

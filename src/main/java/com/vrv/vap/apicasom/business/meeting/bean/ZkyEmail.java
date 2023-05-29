@@ -27,9 +27,9 @@ public class ZkyEmail {
     private String orgName;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
-    @Column(name="eamil_time")
+    @Column(name="email_time")
     @ApiModelProperty("时间")
-    private Date eamilTime;
+    private Date emailTime;
 
     @Column(name="receive_num")
     @ApiModelProperty("收件数")

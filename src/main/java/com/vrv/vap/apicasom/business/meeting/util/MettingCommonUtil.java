@@ -90,7 +90,6 @@ public class MettingCommonUtil {
         long endtime = endDate.getTime();
         long starttime= startDate.getTime();
         long result = endtime-starttime;
-        // 大于24小时按天
         if(result > 0){
             return true;
         }
@@ -219,7 +218,7 @@ public class MettingCommonUtil {
      */
     public static List<String> getMonthDataX(Date endDate,Date startDate) throws ParseException {
         List<String> dataXS= new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");  // 具体天
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");  // 具体月
         String endTimeStr = sdf.format(endDate);
         Date endTime = sdf.parse(endTimeStr);
         long endTimes = endTime.getTime();
@@ -235,6 +234,28 @@ public class MettingCommonUtil {
         return dataXS;
     }
 
+    /**
+     *  根据开始时间和结束，按年处理
+     * @return
+     * @throws ParseException
+     */
+    public static List<String> getYearDataX(Date endDate,Date startDate) throws ParseException {
+        List<String> dataXS= new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");  // 具体年
+        String endTimeStr = sdf.format(endDate);
+        Date endTime = sdf.parse(endTimeStr);
+        long endTimes = endTime.getTime();
+        String startTimeStr = sdf.format(startDate);
+        Date startTime = sdf.parse(startTimeStr);
+        long startTimes = startTime.getTime();
+        while(startTimes <= endTimes){
+            Date date = new Date(startTimes);
+            dataXS.add(sdf.format(date));
+            startTimes = DateUtils.addYears(startTime,1).getTime();
+            startTime = new Date(startTimes);
+        }
+        return dataXS;
+    }
     private static List<String> getDataXByDay24(Date startDate) throws ParseException {
         List<String> dataXS = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -349,5 +370,94 @@ public class MettingCommonUtil {
                 break;
         }
         return sql;
+    }
+
+    /**
+     *  日历根据月统计：根据传入的时间向前或向后推的月份
+     *  Calendar.MONTH：表示月
+     *   n:为负数，倒退几个月，为证书，向前推几个月
+     * @param format
+     * @param month
+     * @return
+     * @throws ParseException
+     */
+    public static String addMonth(Date date ,String format,int month) throws ParseException {
+        Calendar cd = Calendar.getInstance();
+        cd.setTime(date);
+        cd.add(Calendar.MONTH, month);
+        return format(cd.getTime(),format);
+    }
+
+    /**
+     *  日历根据月统计：根据传入的时间向前或向后推的月份
+     *  Calendar.MONTH：表示月
+     *  n:为负数，倒退几个月，为证书，向前推几个月
+     * @param format
+     * @param month
+     * @return
+     * @throws ParseException
+     */
+    public static Date addMonthFormatDate(Date date ,String format,int month) throws ParseException {
+        Calendar cd = Calendar.getInstance();
+        cd.setTime(date);
+        cd.add(Calendar.MONTH, month);
+        String dateString = format(cd.getTime(),format);
+        Date parseDate = parse(dateString,format);
+        return parseDate;
+    }
+
+    /**
+     * 日历跟年统计：根据传入的时间向前或向后推的年份
+     * Calendar.YEAR：表示年
+     * n:为负数，倒退几个年，为证书，向前推几个年
+     * @param n
+     * @return
+     */
+    public static String addNYear(Date date ,String format,int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.YEAR, n);
+        return  format(calendar.getTime(),format);
+    }
+
+    /**
+     * 日历跟年统计：根据传入的时间向前或向后推的年份
+     * Calendar.YEAR：表示年
+     * n:为负数，倒退几个年，为证书，向前推几个年
+     * @param n
+     * @return
+     */
+    public static Date addNYearFormatDate(Date date ,String format,int n) throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.YEAR, n);
+        String dateString = format(calendar.getTime(),format);
+        Date parseDate = parse(dateString,format);
+        return  parseDate;
+    }
+
+    public static String format(Date date,String format) {
+        SimpleDateFormat formatTool = new SimpleDateFormat();
+        formatTool.applyPattern(format);
+        return formatTool.format(date);
+    }
+
+    public static Date parse(String dateString,String format) throws ParseException {
+        SimpleDateFormat formatTool = new SimpleDateFormat();
+        formatTool.applyPattern(format);
+        return formatTool.parse(dateString);
+    }
+    public static Date dateFormatDate(Date date ,String format) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        String dateStr = sdf.format(date);
+        return sdf.parse(dateStr);
+    }
+
+
+    public static String addDay(Date date ,String format,int day) throws ParseException {
+        Calendar cd = Calendar.getInstance();
+        cd.setTime(date);
+        cd.add(Calendar.DATE, day);
+        return format(cd.getTime(),format);
     }
 }
