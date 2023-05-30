@@ -318,15 +318,103 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     @Override
     public List<FileSendAndReceiveVO>  fileSendAndReceiveTab(SituationLargeSearchVO searchVO, String tabName) {
         List<FileSendAndReceiveVO> result = new ArrayList<>();
-        FileSendAndReceiveVO data = new FileSendAndReceiveVO();
-        data.setLocalSendNum(10);
-        data.setLocalReceiveNum(20);
-        data.setTransRegionalReceiveNum(14);
-        data.setTransRegionalSendNum(48);
-        data.setName("北京地区");
-        result.add(data);
+        // 各分院(地区)：send_scope为全院
+        if("1".equals(tabName)){
+            return groupBranchResult(searchVO.getType());
+        }
+        // 院机关各部门：send_scope为院机关
+        if("2".equals(tabName)){
+            return groupOrgNameResult(searchVO.getType());
+        }
         return result;
     }
+
+    /**
+     * 各分院统计
+     * @param type
+     * @return
+     */
+    private List<FileSendAndReceiveVO> groupBranchResult(String type) {
+        Map<String,FileSendAndReceiveVO> handle = new HashMap<>();
+        List<Map<String,Object>> list = situationLargeScreenDao.fileSendAndReceiveBranch(type);
+        for(Map<String,Object> data : list){
+            String branch = String.valueOf(data.get("branch"));
+            String sendRegion = String.valueOf(data.get("sendRegion"));
+            String sendType = String.valueOf(data.get("sendType"));
+            int receiveNum = data.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(data.get("receiveNum")));
+            int sendNum = data.get("sendNum") == null?0:Integer.parseInt(String.valueOf(data.get("sendNum")));
+            if(handle.containsKey(branch)){
+                FileSendAndReceiveVO oldData = handle.get(branch);
+                addData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                handle.put(branch,oldData);
+            }else{
+                FileSendAndReceiveVO vo = new FileSendAndReceiveVO();
+                addData(vo,sendRegion,sendType,receiveNum,sendNum);
+                vo.setName(branch);
+                handle.put(branch,vo);
+            }
+        }
+        Collection<FileSendAndReceiveVO> collections = handle.values();
+        List<FileSendAndReceiveVO> resultDatas = collections.stream().collect(Collectors.toList());
+        return resultDatas;
+    }
+
+    private List<FileSendAndReceiveVO> groupOrgNameResult(String type) {
+        Map<String,FileSendAndReceiveVO> handle = new HashMap<>();
+        List<Map<String,Object>> list = situationLargeScreenDao.fileSendAndReceiveOrgName(type);
+        for(Map<String,Object> data : list){
+            String orgName = String.valueOf(data.get("orgName"));
+            String sendRegion = String.valueOf(data.get("sendRegion"));
+            String sendType = String.valueOf(data.get("sendType"));
+            int receiveNum = data.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(data.get("receiveNum")));
+            int sendNum = data.get("sendNum") == null?0:Integer.parseInt(String.valueOf(data.get("sendNum")));
+            if(handle.containsKey(orgName)){
+                FileSendAndReceiveVO oldData = handle.get(orgName);
+                addData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                handle.put(orgName,oldData);
+            }else{
+                FileSendAndReceiveVO vo = new FileSendAndReceiveVO();
+                addData(vo,sendRegion,sendType,receiveNum,sendNum);
+                vo.setName(orgName);
+                handle.put(orgName,vo);
+            }
+        }
+        Collection<FileSendAndReceiveVO> collections = handle.values();
+        List<FileSendAndReceiveVO> resultDatas = collections.stream().collect(Collectors.toList());
+        return resultDatas;
+    }
+
+    /**
+     * 数据组装
+     * sendRegion中1表示跨地区、0表示本地
+     * sendType为发件、收件
+     * @param data
+     * @param sendRegion
+     * @param sendType
+     * @param receiveNum
+     * @param sendNum
+     */
+    private void addData(FileSendAndReceiveVO data, String sendRegion,String sendType , int receiveNum, int sendNum) {
+        // 本地
+        if("0".equals(sendRegion)){
+            if("发件".equals(sendType)){
+                data.setLocalSendNum(sendNum);
+            }
+            if("收件".equals(sendType)){
+                data.setLocalReceiveNum(receiveNum);
+            }
+        }
+        // 跨地区
+        if("1".equals(sendRegion)){
+            if("发件".equals(sendType)){
+                data.setTransRegionalSendNum(sendNum);
+            }
+            if("收件".equals(sendType)){
+                data.setTransRegionalReceiveNum(receiveNum);
+            }
+        }
+    }
+
     /**
      * 打印和刻录数量 (es中data_time的时间格式为：yyyy-MM-dd)
      * @return Result
@@ -590,33 +678,109 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     @Override
     public Map<String, Object> fileExchangePer(SituationLargeSearchVO searchVO) {
         Map<String, Object> data = new HashMap<>();
-        data.put("local",80);
-        data.put("transRegional",20);
+        // send_region,send_type分组统计
+        List<Map<String, Object>> groupDatas = situationLargeScreenDao.getGroupBySendRegionAndSendType(searchVO.getType());
+        int localNum = 0;
+        int transRegional =0;
+        for(Map<String, Object> map : groupDatas){
+            String sendRegion = String.valueOf(map.get("sendRegion"));
+            String sendType = String.valueOf(map.get("sendType"));
+            int receiveNum = map.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(map.get("receiveNum")));
+            int sendNum = map.get("sendNum") == null?0:Integer.parseInt(String.valueOf(map.get("sendNum")));
+            // 本地
+            if("0".equals(sendRegion)){
+                if("发件".equals(sendType)){
+                    localNum = localNum + sendNum;
+                }
+                if("收件".equals(sendType)){
+                    localNum = localNum + receiveNum;
+                }
+            }
+            // 跨地区
+            if("1".equals(sendRegion)){
+                if("发件".equals(sendType)){
+                    transRegional = transRegional + sendNum;
+                }
+                if("收件".equals(sendType)){
+                    transRegional = transRegional + receiveNum;
+                }
+            }
+        }
+        data.put("local",localNum);
+        data.put("transRegional",transRegional);
         return data;
     }
     /**
      * 地图
-     *
+     * send_scope为全院
      * @return Result
      */
     @Override
     public List<String> branchMap(SituationLargeSearchVO searchVO) {
-        List<String> citys = new ArrayList<>();
-        citys.add("武汉");
-        citys.add("上海");
-        return citys;
+        return situationLargeScreenDao.branchMap(searchVO.getType());
     }
 
+    /**
+     * 根据city和时间范围查询
+     * @param searchVO
+     * @return
+     */
     @Override
     public List<MapDetailVO> cityMapDetail(SituationLargeSearchVO searchVO) {
-        List<MapDetailVO> result = new ArrayList<>();
-        MapDetailVO vo = new MapDetailVO();
-        vo.setName("力学研究所");
-        vo.setLocalSendNum(12);
-        vo.setLocalReceiveNum(25);
-        vo.setTransRegionalReceiveNum(45);
-        vo.setTransRegionalSendNum(18);
-        result.add(vo);
-        return result;
+        Map<String,MapDetailVO> handle = new HashMap<>();
+        String city = searchVO.getCity();
+        String type = searchVO.getType();
+        List<MapDetailQueryVO> groupDatas = situationLargeScreenDao.getGroupDeatailByCity(city,type);
+        for(MapDetailQueryVO data : groupDatas){
+            String orgName = data.getOrgName();
+            String sendRegion =data.getSendRegion();
+            String sendType = data.getSendType();
+            int receiveNum = data.getReceiveNum();
+            int sendNum = data.getSendNum();
+            if(handle.containsKey(orgName)){
+                MapDetailVO oldData = handle.get(orgName);
+                addMapDetailVOData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                handle.put(orgName,oldData);
+            }else{
+                MapDetailVO vo = new MapDetailVO();
+                addMapDetailVOData(vo,sendRegion,sendType,receiveNum,sendNum);
+                vo.setName(orgName);
+                handle.put(orgName,vo);
+            }
+        }
+        Collection<MapDetailVO> collections = handle.values();
+        List<MapDetailVO> resultDatas = collections.stream().collect(Collectors.toList());
+        return resultDatas;
     }
+    /**
+     * 数据组装
+     * sendRegion中1表示跨地区、0表示本地
+     * sendType为发件、收件
+     * @param data
+     * @param sendRegion
+     * @param sendType
+     * @param receiveNum
+     * @param sendNum
+     */
+    private void addMapDetailVOData(MapDetailVO data, String sendRegion,String sendType , int receiveNum, int sendNum) {
+        // 本地
+        if("0".equals(sendRegion)){
+            if("发件".equals(sendType)){
+                data.setLocalSendNum(sendNum);
+            }
+            if("收件".equals(sendType)){
+                data.setLocalReceiveNum(receiveNum);
+            }
+        }
+        // 跨地区
+        if("1".equals(sendRegion)){
+            if("发件".equals(sendType)){
+                data.setTransRegionalSendNum(sendNum);
+            }
+            if("收件".equals(sendType)){
+                data.setTransRegionalReceiveNum(receiveNum);
+            }
+        }
+    }
+
 }

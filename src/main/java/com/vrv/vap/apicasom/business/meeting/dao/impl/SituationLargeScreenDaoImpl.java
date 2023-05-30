@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +28,7 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
 
     /**
      *公文及文件交换系统发件数量、收件数量TOP10
+     *  send_scope为全院
      * searchType : 1表示发件 2表示收件
      * @param searchType
      * @param timeType
@@ -184,5 +184,80 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         String sql ="select sum(receive_num) as receiveNum,sum(send_num) as sendNum from zky_email where 1=1 "+CommonSql(type,"email_time");
         return jdbcTemplate.queryForMap(sql);
 
+    }
+
+    /**
+     * 院部机关下org_name、send_region、send_type分组统计
+     * @param type
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> fileSendAndReceiveOrgName(String type) {
+        String sql ="select org_name as orgName,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where send_scope='院部机关' "+CommonSql(type,"start_time") +"group by org_name,send_region,send_type";
+        return jdbcTemplate.queryForList(sql);
+
+    }
+
+    /**
+     * 收发件数量：按分院统计
+     *          send_scope为'全院'
+     * @param type
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> fileSendAndReceiveBranch(String type) {
+        String sql ="select branch ,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where send_scope='全院' "+CommonSql(type,"start_time") +"group by branch,send_region,send_type";
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    /**
+     * send_region,send_type分组统计
+     *
+     * @param type
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> getGroupBySendRegionAndSendType(String type) {
+        String sql ="select send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where 1=1 "+CommonSql(type,"start_time") +"group by send_region,send_type";
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    /**
+     * 获取地图中城市
+     * send_scope为全院城市统计
+     * @param type
+     * @return
+     */
+    @Override
+    public List<String> branchMap(String type) {
+        String sql="select DISTINCT city  from zky_send as send inner join zky_unit as unit on send.org_name=unit.name where send_scope='全院' "+CommonSql(type,"send.start_time") ;
+        return jdbcTemplate.queryForList(sql,String.class);
+    }
+
+    /**
+     * 地图详情
+     * @param city
+     * @param type
+     * @return
+     */
+    @Override
+    public List<MapDetailQueryVO> getGroupDeatailByCity(String city, String type) {
+        List<String> params = new ArrayList<>();
+        String sql ="select org_name as orgName,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from(" +
+                "select send.*  from zky_send as send inner join zky_unit as unit on send.org_name=unit.name where unit.city=? and send.send_scope='全院' "+CommonSql(type,"send.start_time")+")a group by org_name,send_region,send_type";
+        params.add(city);
+        return jdbcTemplate.query(sql,new MapDetailQueryVOMapper(),params.toArray());
+    }
+    public class MapDetailQueryVOMapper implements RowMapper<MapDetailQueryVO> {
+        @Override
+        public MapDetailQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            MapDetailQueryVO data = new MapDetailQueryVO();
+            data.setOrgName(rs.getString("orgName"));
+            data.setSendRegion(rs.getString("sendRegion"));
+            data.setSendType(rs.getString("sendType"));
+            data.setReceiveNum(rs.getInt("receiveNum"));
+            data.setSendNum(rs.getInt("sendNum"));
+            return data;
+        }
     }
 }

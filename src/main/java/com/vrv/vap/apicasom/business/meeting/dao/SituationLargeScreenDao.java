@@ -1,9 +1,6 @@
 package com.vrv.vap.apicasom.business.meeting.dao;
 
-import com.vrv.vap.apicasom.business.meeting.vo.AbnormalMettingTrendVO;
-import com.vrv.vap.apicasom.business.meeting.vo.KeyValueQueryVO;
-import com.vrv.vap.apicasom.business.meeting.vo.SituationLargeSearchVO;
-import com.vrv.vap.apicasom.business.meeting.vo.TreandVO;
+import com.vrv.vap.apicasom.business.meeting.vo.*;
 
 import java.util.Date;
 import java.util.List;
@@ -48,4 +45,14 @@ public interface SituationLargeScreenDao {
    * @return
    */
   public Map<String, Object> emailSendAndReceiveTotal(String type);
+
+  public List<Map<String, Object>> fileSendAndReceiveOrgName(String type);
+
+  public List<Map<String, Object>> fileSendAndReceiveBranch(String type);
+
+  public List<Map<String, Object>> getGroupBySendRegionAndSendType(String type);
+
+  public List<String> branchMap(String type);
+
+  public List<MapDetailQueryVO> getGroupDeatailByCity(String city, String type);
 }

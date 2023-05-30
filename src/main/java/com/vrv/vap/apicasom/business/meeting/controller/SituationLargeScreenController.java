@@ -38,6 +38,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "公文及文件交换系统发件数量、收件数量top10", actionType = ActionType.SELECT)
     public Result<FileSendAndReceiveNumVO> fileSendAndReceiveNum(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.success(situationLargeScreenService.fileSendAndReceiveNum(searchVO));
         } catch (Exception e) {
             logger.error("公文及文件交换系统发件数量、收件数量top10异常,{}", e);
@@ -62,6 +66,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "发件和收件情况统计", actionType = ActionType.SELECT)
     public Result<List<FileSendAndReceiveVO>> fileSendAndReceiveTrend(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.successList(situationLargeScreenService.fileSendAndReceiveTrend(searchVO));
         } catch (Exception e) {
             logger.error("发件和收件情况统计异常,{}", e);
@@ -78,6 +86,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "院机关各部门邮件收发数量", actionType = ActionType.SELECT)
     public Result<EmailSendAndReceiveNumVO> emailSendAndReceiveNum(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.success(situationLargeScreenService.emailSendAndReceiveNum(searchVO));
         } catch (Exception e) {
             logger.error("院机关各部门邮件收发数量异常,{}", e);
@@ -99,6 +111,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "收发件数量", actionType = ActionType.SELECT)
     public Result<List<FileSendAndReceiveVO>> fileSendAndReceiveTab(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             String tabName = searchVO.getTabName();
             // 为空默认为：各分院
             if(StringUtils.isEmpty(tabName)){
@@ -120,6 +136,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "打印和刻录数量", actionType = ActionType.SELECT)
     public Result<List<PrintingAndBurningNumVO>> printingAndBurningNum(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return situationLargeScreenService.printingAndBurningNum(searchVO);
         } catch (Exception e) {
             logger.error("打印和刻录数量异常,{}", e);
@@ -137,6 +157,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "公文交换箱系统情况", actionType = ActionType.SELECT)
     public Result<ExchangeBoxVO> exchangeBox(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.success(situationLargeScreenService.exchangeBox(searchVO));
         } catch (Exception e) {
             logger.error("公文交换箱系统情况异常,{}", e);
@@ -144,8 +168,8 @@ public class SituationLargeScreenController {
         }
     }
     /**
-     * 本地区/跨地区文件交换占比
-     *{"beginTime":"2023-03-01","endTime":"2023-03-02"}
+     * 本地区/跨地区文件交换占比 {"type":"month"}
+     * type： month(近一个月)、halfyear(半年)、year(一年)
      * @return Result
      */
     @PostMapping(value = "/fileExchangePer")
@@ -153,6 +177,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "本地区/跨地区文件交换占比", actionType = ActionType.SELECT)
     public Result<Map<String,Object>> fileExchangePer(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.success(situationLargeScreenService.fileExchangePer(searchVO));
         } catch (Exception e) {
             logger.error("本地区/跨地区文件交换占比异常,{}", e);
@@ -170,6 +198,10 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "地图", actionType = ActionType.SELECT)
     public Result<List<String>> branchMap(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.successList(situationLargeScreenService.branchMap(searchVO));
         } catch (Exception e) {
             logger.error("地图异常,{}", e);
@@ -179,6 +211,7 @@ public class SituationLargeScreenController {
     /**
      * 地图详情
      * 1.根据city和时间范围查询
+     * {"type":"month","city":"北京"}
      * @return Result
      */
     @PostMapping(value = "/cityMapDetail")
@@ -186,6 +219,14 @@ public class SituationLargeScreenController {
     @SysRequestLog(description = "地图详情", actionType = ActionType.SELECT)
     public Result<List<MapDetailVO>> cityMapDetail(@RequestBody SituationLargeSearchVO searchVO) {
         try {
+            String city = searchVO.getCity();
+            String type = searchVO.getType();
+            if(StringUtils.isEmpty(city)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "city不能为空");
+            }
+            if(StringUtils.isEmpty(type)){
+                return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "type不能为空");
+            }
             return ResultUtil.successList(situationLargeScreenService.cityMapDetail(searchVO));
         } catch (Exception e) {
             logger.error("地图详情异常,{}", e);
