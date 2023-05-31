@@ -693,15 +693,16 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
             return data;
         }
         // 获取当前月数据，没有的话查询上一个月，以此类推
-        ZkyExchangeBox curretData = getCurrnetMonthData(endTime,boxs,startTime);
+        ZkyExchangeBox curretData = getCurrnetMonthData(endTime,boxs,startTime,type);
         if(null == curretData){
             return data;
         }
-        // 获取截至月的数据
+        // 获取截至月的数据,没有的话数据当处理
         ZkyExchangeBox nextData =  getNextData(startTime,boxs);
-        // 如果截至月数据为空，返回数据就是当前月数据
+        // 如果截至月数据为空，当月数据当零处理，这是特殊情况
         if(null == nextData){
-           return getExchangeBoxVO(curretData,data);
+            logger.error("当前月向后推对应的月数不存在，当月数据当零处理");
+            nextData = new ZkyExchangeBox();
         }
         // 如果截至月不为空，用当前月减去截至月
         addExchangeBoxData(data,curretData,nextData);
@@ -714,7 +715,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         return   getZkyExchangeBox(dateStr,boxs);
     }
 
-    private ZkyExchangeBox getCurrnetMonthData(Date endTime, List<ZkyExchangeBox> boxs,Date startTime) {
+    private ZkyExchangeBox getCurrnetMonthData(Date endTime, List<ZkyExchangeBox> boxs,Date startTime,String type) {
         String currMonthStr= DateUtil.format(endTime,"yyyy-MM");
         String startStr= DateUtil.format(startTime,"yyyy-MM");
         if(startStr.equals(currMonthStr)){
@@ -724,8 +725,12 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         if(null != box){
             return box;
         }else{
+            // 近一个月，如果没有直接返回null
+            if("month".equals(type)){
+                return null;
+            }
             Date nextDate = DateUtil.addMouth(endTime,-1);
-            return getCurrnetMonthData(nextDate,boxs,startTime);
+            return getCurrnetMonthData(nextDate,boxs,startTime,type);
         }
     }
 
