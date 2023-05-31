@@ -7,7 +7,7 @@ import lombok.Data;
  */
 @Data
 public class ExchangeBoxExtendVO {
-    private int roamTotal; // 流程总数
+    private int roamTotal; // 流转总数
 
     private int registerTotal; // 登记总数
 }

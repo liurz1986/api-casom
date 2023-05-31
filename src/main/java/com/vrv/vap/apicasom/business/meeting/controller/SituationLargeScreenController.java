@@ -128,7 +128,8 @@ public class SituationLargeScreenController {
     }
 
     /**
-         * 打印和刻录数量 {"type":"month"}
+     * 打印和刻录数量 {"type":"month"}
+     * 分院为院机关的话改为北京地区
      * @return Result
      */
     @PostMapping(value = "/printingAndBurningNum")

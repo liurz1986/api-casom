@@ -19,7 +19,7 @@ public interface SituationLargeScreenService {
 
     public Result<List<PrintingAndBurningNumVO>> printingAndBurningNum(SituationLargeSearchVO searchVO) throws ParseException, IOException;
 
-    public ExchangeBoxVO exchangeBox(SituationLargeSearchVO searchVO);
+    public ExchangeBoxVO exchangeBox(SituationLargeSearchVO searchVO) throws ParseException;
 
     public Map<String,Object> fileExchangePer(SituationLargeSearchVO searchVO);
 

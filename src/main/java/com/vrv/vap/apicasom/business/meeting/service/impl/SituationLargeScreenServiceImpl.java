@@ -1,6 +1,7 @@
 package com.vrv.vap.apicasom.business.meeting.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.vrv.vap.apicasom.business.meeting.bean.ZkyExchangeBox;
 import com.vrv.vap.apicasom.business.meeting.bean.ZkyPrintUserOrg;
 import com.vrv.vap.apicasom.business.meeting.cache.LocalCache;
 import com.vrv.vap.apicasom.business.meeting.dao.SituationLargeScreenDao;
@@ -442,6 +443,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
 
     /**
      * 根据es数据和用户打印机构数据组装数据
+     * 分院为院机关的话改为北京地区
      * @param datas
      * @param alls
      * @return
@@ -451,27 +453,31 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         List<String> noExistUserNames = new ArrayList<>();
         List<String> existBranhs = new ArrayList<>();
         for(PrintingAndBurningNumVO vo : datas){
-           String userName=  vo.getName();
-           int burningNum = vo.getBurningNum();
-           int printingNum = vo.getPrintingNum();
-           String branch = getBranchByUserName(userName,alls);
-           if(null == branch){
-               noExistUserNames.add(userName);
-               continue;
-           }
-           if(existBranhs.contains(branch)){
-               PrintingAndBurningNumVO his = result.get(branch);
-               his.setBurningNum(his.getBurningNum()+burningNum);
-               his.setPrintingNum(his.getPrintingNum()+printingNum);
-               result.put(branch,his);
-           }else{
-               PrintingAndBurningNumVO newData = new PrintingAndBurningNumVO();
-               newData.setBurningNum(burningNum);
-               newData.setPrintingNum(printingNum);
-               newData.setName(branch);
-               existBranhs.add(branch);
-               result.put(branch,newData);
-           }
+            String userName=  vo.getName();
+            int burningNum = vo.getBurningNum();
+            int printingNum = vo.getPrintingNum();
+            String branch = getBranchByUserName(userName,alls);
+            if(null == branch){
+                noExistUserNames.add(userName);
+                continue;
+            }
+            // 分院为院机关的话改为北京地区
+            if("院机关".equals(branch)){
+                branch="北京地区";
+            }
+            if(existBranhs.contains(branch)){
+                PrintingAndBurningNumVO his = result.get(branch);
+                his.setBurningNum(his.getBurningNum()+burningNum);
+                his.setPrintingNum(his.getPrintingNum()+printingNum);
+                result.put(branch,his);
+            }else{
+                PrintingAndBurningNumVO newData = new PrintingAndBurningNumVO();
+                newData.setBurningNum(burningNum);
+                newData.setPrintingNum(printingNum);
+                newData.setName(branch);
+                existBranhs.add(branch);
+                result.put(branch,newData);
+            }
         }
         logger.info("es中用户不在用户打印列表中数据有："+ JSON.toJSONString(noExistUserNames));
         if(result.size() == 0){
@@ -648,28 +654,168 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
 
     /**
      * 公文交换箱系统情况
+     * 1. 统计用户总数、用户登录总次数，不与查询时间关联：查询截至时间为最近一次，的总用户数、用户登录次数作为用户总数、用户登录总次数
+     * 2. 公文交换箱数据，通过人工导入方式，每月1号导入截止上月的数据。
+     *    如果算近1月的数据，需要用本月1号导入的数据减去上月1号导入的数据。依此类推。
+     *     实际处理：1.本月最新一次导入减去上月最后一次导入，主要是防止一个月导入了几次 2. 如果本月没有数据，进一个月数据为空
+     *    如果算近半年的数据，需要用本月1号导入的数据减去向后推6个月后1号导入的数据。依此类推。
+     *      实际处理：1.本月最新一次导入减去当月退后6月最后一次导入，主要是防止一个月导入了几次 2. 如果本月没有数据，下个月最新一次导入减去当月退后6月最后一次导入，以此类推
+     *    如果算近一年的数据，需要用本月1号导入的数据减去向后推12个月后1号导入的数据。依此类推。
+     *      实际处理：1.本月最新一次导入减去当月退后12月最后一次导入，主要是防止一个月导入了几次 2. 如果本月没有数据，下个月最新一次导入减去当月退后12月最后一次导入，以此类推
+     *    如果是所有，获取截至时间为最近一次的数据
+     *    原因是，当前导入数据包括了历史数据
+     *
+     *    获取截至月的数据数据不存在的话，返回数据就是当前月数据
+     *     获取当前月数据，没有的话查询上一个月，以此类推
      * type： month(近一个月)、halfyear(半年)、year(一年)
      * @return Result
      */
     @Override
-    public ExchangeBoxVO exchangeBox(SituationLargeSearchVO searchVO) {
+    public ExchangeBoxVO exchangeBox(SituationLargeSearchVO searchVO) throws ParseException {
         ExchangeBoxVO data = new ExchangeBoxVO();
-        data.setUserTotal(500);
-        data.setUserLoginTotal(600);
-        ExchangeBoxExtendVO vo = new ExchangeBoxExtendVO();
-        vo.setRoamTotal(20);
-        vo.setRegisterTotal(30);
-        data.setReviceFile(vo);
-        vo = new ExchangeBoxExtendVO();
-        vo.setRoamTotal(50);
-        vo.setRegisterTotal(10);
-        data.setSignFile(vo);
-        vo = new ExchangeBoxExtendVO();
-        vo.setRoamTotal(90);
-        vo.setRegisterTotal(80);
-        data.setSecrecyFile(vo);
+        // 查询截至时间为最近一次，的总用户数、用户登录次数作为用户总数、用户登录总次数
+        ZkyExchangeBox zkyExchangeBox = situationLargeScreenDao.getMaxDeadlineData();
+        data.setUserTotal(zkyExchangeBox.getUserTotal()); // 用户总数
+        data.setUserLoginTotal(zkyExchangeBox.getUserLoginCount()); // 用户登录总次数
+        String type = searchVO.getType();
+        // 时间为所有时： 获取截至时间为最近一次的数据
+        if("all".equals(type)){
+            return getExchangeBoxVO(zkyExchangeBox,data);
+        }
+        // 时间为月、半年、年时
+        // 获取时间范围内每个月最大截至时间数据
+        Map<String,Date> timeResult = getStartTimeAndEndTimeByType(type);
+        Date startTime = timeResult.get("startTime");
+        Date endTime = timeResult.get("endTime"); // 就是当前月
+        List<ZkyExchangeBox> boxs = situationLargeScreenDao.getMaxDeadlineZkyExchangeBox(searchVO.getType(),startTime,endTime);
+        // 没有查出数据的情况
+        if(null == boxs || boxs.size() == 0){
+            return data;
+        }
+        // 获取当前月数据，没有的话查询上一个月，以此类推
+        ZkyExchangeBox curretData = getCurrnetMonthData(endTime,boxs,startTime);
+        if(null == curretData){
+            return data;
+        }
+        // 获取截至月的数据
+        ZkyExchangeBox nextData =  getNextData(startTime,boxs);
+        // 如果截至月数据为空，返回数据就是当前月数据
+        if(null == nextData){
+           return getExchangeBoxVO(curretData,data);
+        }
+        // 如果截至月不为空，用当前月减去截至月
+        addExchangeBoxData(data,curretData,nextData);
         return data;
     }
+
+
+    private ZkyExchangeBox getNextData(Date date, List<ZkyExchangeBox> boxs) {
+        String dateStr= DateUtil.format(date,"yyyy-MM");
+        return   getZkyExchangeBox(dateStr,boxs);
+    }
+
+    private ZkyExchangeBox getCurrnetMonthData(Date endTime, List<ZkyExchangeBox> boxs,Date startTime) {
+        String currMonthStr= DateUtil.format(endTime,"yyyy-MM");
+        String startStr= DateUtil.format(startTime,"yyyy-MM");
+        if(startStr.equals(currMonthStr)){
+            return null;
+        }
+        ZkyExchangeBox box =  getZkyExchangeBox(currMonthStr,boxs);
+        if(null != box){
+            return box;
+        }else{
+            Date nextDate = DateUtil.addMouth(endTime,-1);
+            return getCurrnetMonthData(nextDate,boxs,startTime);
+        }
+    }
+
+    private ZkyExchangeBox getZkyExchangeBox(String str,List<ZkyExchangeBox> boxs){
+        for(ZkyExchangeBox box :boxs){
+            Date deaLine = box.getDeadline();
+            String deaLineStr= DateUtil.format(deaLine,"yyyy-MM");
+            if(str.equals(deaLineStr)){
+                return box;
+            }
+        }
+        return null;
+    }
+
+    private Map<String, Date> getStartTimeAndEndTimeByType(String type) throws ParseException {
+        Map<String, Date> result = new HashMap<>();
+        switch (type) {
+            case "month": // 月的话，查询1个月的数据，为了相减用
+                Date date = DateUtil.addMouth(new Date(),-1);
+                timeMap(date,result);
+                break;
+            case "halfyear": // 半年的话，查询6个月的数据，为了相减用
+                Date halfyearDate = DateUtil.addMouth(new Date(),-6);
+                timeMap(halfyearDate,result);
+                break;
+            case "year": // 一年的话，查询12个月的数据，为了相减用
+                Date yearDate = addNYear(-1);
+                timeMap(yearDate,result);
+                break;
+        }
+        return result;
+    }
+
+    private Date addNYear(int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(1, n);
+        return calendar.getTime();
+    }
+
+    private void timeMap(Date date, Map<String, Date> result) throws ParseException {
+        String startTime = DateUtil.format(date,"yyyy-MM");
+        String endTime = DateUtil.format(new Date(),"yyyy-MM");
+        result.put("startTime",DateUtil.parseDate(startTime,"yyyy-MM"));
+        result.put("endTime",DateUtil.parseDate(endTime,"yyyy-MM"));
+    }
+
+    /**
+     * 时间范围为所有时，获取截至时间为最近一次的数据
+     * @param zkyExchangeBox
+     * @param data
+     * @return
+     */
+    private ExchangeBoxVO getExchangeBoxVO(ZkyExchangeBox zkyExchangeBox, ExchangeBoxVO data) {
+        ExchangeBoxExtendVO reviceFile = new ExchangeBoxExtendVO();
+        reviceFile.setRegisterTotal(zkyExchangeBox.getReceiveRegisterTotal());
+        reviceFile.setRoamTotal(zkyExchangeBox.getReceiveRoamTotal());
+        data.setReviceFile(reviceFile);
+        ExchangeBoxExtendVO signFile = new ExchangeBoxExtendVO();
+        signFile.setRegisterTotal(zkyExchangeBox.getSignRegisterTotal());
+        signFile.setRoamTotal(zkyExchangeBox.getSignRoamTotal());
+        data.setSignFile(signFile);
+        ExchangeBoxExtendVO secrecyFile = new ExchangeBoxExtendVO();
+        secrecyFile.setRegisterTotal(zkyExchangeBox.getSecrecyRegisterTotal());
+        secrecyFile.setRoamTotal(zkyExchangeBox.getSecrecyRoamTotal());
+        data.setSecrecyFile(secrecyFile);
+        return data;
+    }
+    private void addExchangeBoxData(ExchangeBoxVO data, ZkyExchangeBox curretData, ZkyExchangeBox nextData) {
+        ExchangeBoxExtendVO reviceFile = new ExchangeBoxExtendVO();
+        reviceFile.setRegisterTotal(dataSub(curretData.getReceiveRegisterTotal(),nextData.getReceiveRegisterTotal()));
+        reviceFile.setRoamTotal(dataSub(curretData.getReceiveRoamTotal(),nextData.getReceiveRoamTotal()));
+        data.setReviceFile(reviceFile);
+        ExchangeBoxExtendVO signFile = new ExchangeBoxExtendVO();
+        signFile.setRegisterTotal(dataSub(curretData.getSignRegisterTotal(),nextData.getSignRegisterTotal()));
+        signFile.setRoamTotal(dataSub(curretData.getSignRoamTotal(),nextData.getSignRoamTotal()));
+        data.setSignFile(signFile);
+        ExchangeBoxExtendVO secrecyFile = new ExchangeBoxExtendVO();
+        secrecyFile.setRegisterTotal(dataSub(curretData.getSecrecyRegisterTotal(),nextData.getSecrecyRegisterTotal()));
+        secrecyFile.setRoamTotal(dataSub(curretData.getSecrecyRoamTotal(),nextData.getSecrecyRoamTotal()));
+        data.setSecrecyFile(secrecyFile);
+    }
+
+    private int dataSub(int dataOne,int dataTwo) {
+        int result = dataOne - dataTwo;
+        if(result >= 0){
+            return result;
+        }
+        return 0;
+    }
+
     /**
      * 本地区/跨地区文件交换占比
      *

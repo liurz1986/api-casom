@@ -1,5 +1,6 @@
 package com.vrv.vap.apicasom.business.meeting.dao.impl;
 
+import com.vrv.vap.apicasom.business.meeting.bean.ZkyExchangeBox;
 import com.vrv.vap.apicasom.business.meeting.dao.SituationLargeScreenDao;
 import com.vrv.vap.apicasom.business.meeting.util.SituationLargeScreenUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,9 +40,9 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
     public List<KeyValueQueryVO> fileSendAndReceiveNumTop10(String searchType,String timeType) {
         String sql="";
         if("1".equals(searchType)){
-            sql="select * from(select org_name,sum(send_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+"  and send_scope='全院' and send_type='发件'  group by org_name)a order by totalNum desc limit 10";
+            sql="select * from(select org_name as orgName,sum(send_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+"  and send_scope='全院' and send_type='发件'  group by org_name)a order by totalNum desc limit 10";
         }else{
-            sql="select * from(select org_name,sum(receive_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+" and  send_scope='全院' and send_type='收件' group by org_name)a order by totalNum desc limit  10";
+            sql="select * from(select  org_name as orgName,sum(receive_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+" and  send_scope='全院' and send_type='收件' group by org_name)a order by totalNum desc limit  10";
         }
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
@@ -50,7 +52,7 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         @Override
         public KeyValueQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             KeyValueQueryVO data = new KeyValueQueryVO();
-            data.setKey(rs.getString("org_name"));
+            data.setKey(rs.getString("orgName"));
             data.setValue(rs.getString("totalNum"));
             return data;
         }
@@ -163,20 +165,8 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         }else{
             sql="select * from (select org_name as orgName,sum(send_num) as totalNum from zky_email where 1=1 "+CommonSql(type,"email_time")+"group by org_name)a order by totalNum desc";
         }
-        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVOMapper());
+        List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
-    }
-
-
-
-    public class KeyValueQueryVOMapper implements RowMapper<KeyValueQueryVO> {
-        @Override
-        public KeyValueQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            KeyValueQueryVO data = new KeyValueQueryVO();
-            data.setKey(rs.getString("orgName"));
-            data.setValue(rs.getString("totalNum"));
-            return data;
-        }
     }
 
     @Override
@@ -248,6 +238,8 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         params.add(city);
         return jdbcTemplate.query(sql,new MapDetailQueryVOMapper(),params.toArray());
     }
+
+
     public class MapDetailQueryVOMapper implements RowMapper<MapDetailQueryVO> {
         @Override
         public MapDetailQueryVO mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -257,6 +249,51 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
             data.setSendType(rs.getString("sendType"));
             data.setReceiveNum(rs.getInt("receiveNum"));
             data.setSendNum(rs.getInt("sendNum"));
+            return data;
+        }
+    }
+
+    /**
+     * 截至时间为最近的一次导入数据记录
+     *
+     * @return
+     */
+    @Override
+    public ZkyExchangeBox getMaxDeadlineData() {
+        String sql="select * from zky_exchange_box where deadline in(select max(deadline) from zky_exchange_box)";
+        List<ZkyExchangeBox> list = jdbcTemplate.query(sql,new ZkyExchangeBoxVOMapper());
+        if(null != list && list.size() > 0){
+            return list.get(0);
+        }
+        return new ZkyExchangeBox();
+    }
+
+    @Override
+    public List<ZkyExchangeBox> getMaxDeadlineZkyExchangeBox(String type, Date startTime, Date endTime) {
+        List<Object> params = new ArrayList<>();
+        String sql="select * from zky_exchange_box where deadline in(select max(deadline) from zky_exchange_box where date_format(deadline,'%Y-%m')>=date_format(?,'%Y-%m') and date_format(deadline,'%Y-%m')<=date_format(?,'%Y-%m')  group by date_format(deadline,'%Y-%m'))";
+        params.add(startTime);
+        params.add(endTime);
+        return jdbcTemplate.query(sql,new ZkyExchangeBoxVOMapper(),params.toArray());
+    }
+
+    public class ZkyExchangeBoxVOMapper implements RowMapper<ZkyExchangeBox> {
+        @Override
+        public ZkyExchangeBox mapRow(ResultSet rs, int rowNum) throws SQLException {
+            ZkyExchangeBox data = new ZkyExchangeBox();
+            data.setGuid(rs.getString("guid"));
+            data.setDeadline(rs.getTimestamp("deadline"));
+            data.setUserTotal(rs.getInt("user_total"));
+            data.setUserLoginCount(rs.getInt("user_login_count"));
+            data.setSecrecyTotal(rs.getInt("secrecy_total"));
+            data.setSecrecyRegisterTotal(rs.getInt("secrecy_register_total"));
+            data.setSecrecyRoamTotal(rs.getInt("secrecy_roam_total"));
+            data.setReceiveTotal(rs.getInt("receive_total"));
+            data.setReceiveRegisterTotal(rs.getInt("receive_register_total"));
+            data.setReceiveRoamTotal(rs.getInt("receive_roam_total"));
+            data.setSignTotal(rs.getInt("sign_total"));
+            data.setSignRegisterTotal(rs.getInt("sign_register_total"));
+            data.setSignRoamTotal(rs.getInt("sign_roam_total"));
             return data;
         }
     }

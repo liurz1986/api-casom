@@ -1,5 +1,6 @@
 package com.vrv.vap.apicasom.business.meeting.dao;
 
+import com.vrv.vap.apicasom.business.meeting.bean.ZkyExchangeBox;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
 
 import java.util.Date;
@@ -55,4 +56,8 @@ public interface SituationLargeScreenDao {
   public List<String> branchMap(String type);
 
   public List<MapDetailQueryVO> getGroupDeatailByCity(String city, String type);
+
+  public ZkyExchangeBox getMaxDeadlineData();
+
+  public List<ZkyExchangeBox> getMaxDeadlineZkyExchangeBox(String type,Date startTime,Date endTime);
 }
