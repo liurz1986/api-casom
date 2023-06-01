@@ -7,6 +7,6 @@ public class MapDetailQueryVO {
     private String  orgName;
     private String sendRegion;
     private String sendType;
-    private int receiveNum;
-    private int sendNum;
+    private long receiveNum;
+    private long sendNum;
 }

@@ -836,13 +836,13 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         Map<String, Object> data = new HashMap<>();
         // send_region,send_type分组统计
         List<Map<String, Object>> groupDatas = situationLargeScreenDao.getGroupBySendRegionAndSendType(searchVO.getType());
-        int localNum = 0;
-        int transRegional =0;
+        long localNum = 0;
+        long transRegional =0;
         for(Map<String, Object> map : groupDatas){
             String sendRegion = String.valueOf(map.get("sendRegion"));
             String sendType = String.valueOf(map.get("sendType"));
-            int receiveNum = map.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(map.get("receiveNum")));
-            int sendNum = map.get("sendNum") == null?0:Integer.parseInt(String.valueOf(map.get("sendNum")));
+            long receiveNum = map.get("receiveNum") == null?0:Long.parseLong(String.valueOf(map.get("receiveNum")));
+            long sendNum = map.get("sendNum") == null?0:Long.parseLong(String.valueOf(map.get("sendNum")));
             // 本地
             if("0".equals(sendRegion)){
                 if("发件".equals(sendType)){
@@ -891,8 +891,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
             String orgName = data.getOrgName();
             String sendRegion =data.getSendRegion();
             String sendType = data.getSendType();
-            int receiveNum = data.getReceiveNum();
-            int sendNum = data.getSendNum();
+            long receiveNum = data.getReceiveNum();
+            long sendNum = data.getSendNum();
             if(handle.containsKey(orgName)){
                 MapDetailVO oldData = handle.get(orgName);
                 addMapDetailVOData(oldData,sendRegion,sendType,receiveNum,sendNum);
@@ -918,7 +918,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
      * @param receiveNum
      * @param sendNum
      */
-    private void addMapDetailVOData(MapDetailVO data, String sendRegion,String sendType , int receiveNum, int sendNum) {
+    private void addMapDetailVOData(MapDetailVO data, String sendRegion,String sendType , long receiveNum, long sendNum) {
         // 本地
         if("0".equals(sendRegion)){
             if("发件".equals(sendType)){

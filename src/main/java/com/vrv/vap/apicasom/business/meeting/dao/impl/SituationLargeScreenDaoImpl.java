@@ -249,8 +249,8 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
             data.setOrgName(rs.getString("orgName"));
             data.setSendRegion(rs.getString("sendRegion"));
             data.setSendType(rs.getString("sendType"));
-            data.setReceiveNum(rs.getInt("receiveNum"));
-            data.setSendNum(rs.getInt("sendNum"));
+            data.setReceiveNum(rs.getLong("receiveNum"));
+            data.setSendNum(rs.getLong("sendNum"));
             return data;
         }
     }
@@ -285,17 +285,17 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
             ZkyExchangeBox data = new ZkyExchangeBox();
             data.setGuid(rs.getString("guid"));
             data.setDeadline(rs.getTimestamp("deadline"));
-            data.setUserTotal(rs.getInt("user_total"));
-            data.setUserLoginCount(rs.getInt("user_login_count"));
-            data.setSecrecyTotal(rs.getInt("secrecy_total"));
-            data.setSecrecyRegisterTotal(rs.getInt("secrecy_register_total"));
-            data.setSecrecyRoamTotal(rs.getInt("secrecy_roam_total"));
-            data.setReceiveTotal(rs.getInt("receive_total"));
-            data.setReceiveRegisterTotal(rs.getInt("receive_register_total"));
-            data.setReceiveRoamTotal(rs.getInt("receive_roam_total"));
-            data.setSignTotal(rs.getInt("sign_total"));
-            data.setSignRegisterTotal(rs.getInt("sign_register_total"));
-            data.setSignRoamTotal(rs.getInt("sign_roam_total"));
+            data.setUserTotal(rs.getLong("user_total"));
+            data.setUserLoginCount(rs.getLong("user_login_count"));
+            data.setSecrecyTotal(rs.getLong("secrecy_total"));
+            data.setSecrecyRegisterTotal(rs.getLong("secrecy_register_total"));
+            data.setSecrecyRoamTotal(rs.getLong("secrecy_roam_total"));
+            data.setReceiveTotal(rs.getLong("receive_total"));
+            data.setReceiveRegisterTotal(rs.getLong("receive_register_total"));
+            data.setReceiveRoamTotal(rs.getLong("receive_roam_total"));
+            data.setSignTotal(rs.getLong("sign_total"));
+            data.setSignRegisterTotal(rs.getLong("sign_register_total"));
+            data.setSignRoamTotal(rs.getLong("sign_roam_total"));
             return data;
         }
     }

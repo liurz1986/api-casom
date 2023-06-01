@@ -9,11 +9,11 @@ import lombok.Data;
 public class MapDetailVO {
     private String name; //研究所
 
-    private int localSendNum; // 本地发件数量
+    private long localSendNum; // 本地发件数量
 
-    private int localReceiveNum;  // 本地收件数量
+    private long localReceiveNum;  // 本地收件数量
 
-    private int transRegionalSendNum; // 跨地区发件数量
+    private long transRegionalSendNum; // 跨地区发件数量
 
-    private int transRegionalReceiveNum;  //跨地区收件数量
+    private long transRegionalReceiveNum;  //跨地区收件数量
 }
