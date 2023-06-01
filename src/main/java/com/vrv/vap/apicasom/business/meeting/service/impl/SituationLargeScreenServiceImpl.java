@@ -577,7 +577,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     }
 
     /**
-     * 根据时间查询ES数据
+     * 根据时间查询ES数据（方法作废）
      * 然后按照usename、op_type分组，分组后求dk_count的和
      * @param type
      * @param timeResult
@@ -818,8 +818,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         data.setSecrecyFile(secrecyFile);
     }
 
-    private int dataSub(int dataOne,int dataTwo) {
-        int result = dataOne - dataTwo;
+    private long dataSub(long dataOne,long dataTwo) {
+        long result = dataOne - dataTwo;
         if(result >= 0){
             return result;
         }
@@ -922,19 +922,19 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         // 本地
         if("0".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setLocalSendNum(sendNum);
+                data.setLocalSendNum(data.getLocalSendNum()+sendNum);
             }
             if("收件".equals(sendType)){
-                data.setLocalReceiveNum(receiveNum);
+                data.setLocalReceiveNum(data.getLocalReceiveNum()+receiveNum);
             }
         }
         // 跨地区
         if("1".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(sendNum);
+                data.setTransRegionalSendNum(data.getTransRegionalSendNum()+sendNum);
             }
             if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(receiveNum);
+                data.setTransRegionalReceiveNum(data.getTransRegionalReceiveNum()+receiveNum);
             }
         }
     }

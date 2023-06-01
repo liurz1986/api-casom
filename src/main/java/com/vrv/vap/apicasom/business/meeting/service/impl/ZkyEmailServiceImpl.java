@@ -164,7 +164,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
         if(StringUtils.isEmpty(receiveNum)){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"收件数不能为空");
         }
-        Result<Integer> receiveNumResult = transferInt(receiveNum);
+        Result<Long> receiveNumResult = transferLong(receiveNum);
         if(ResultCodeEnum.UNKNOW_FAILED.getCode().equals(receiveNumResult.getCode())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"收件数："+receiveNumResult.getMsg());
         }
@@ -174,7 +174,7 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
         if(StringUtils.isEmpty(sendNum)){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"发件数不能为空");
         }
-        Result<Integer> sendNumResult = transferInt(sendNum);
+        Result<Long> sendNumResult = transferLong(sendNum);
         if(ResultCodeEnum.UNKNOW_FAILED.getCode().equals(sendNumResult.getCode())){
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),"发件数："+sendNumResult.getMsg());
         }
@@ -193,12 +193,12 @@ public class ZkyEmailServiceImpl extends BaseServiceImpl<ZkyEmail, String> imple
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),emailTime+"格式不正确");
         }
     }
-    private Result<Integer> transferInt(String str) {
+    private Result<Long> transferLong(String str) {
         try{
-            int intNum = Integer.parseInt(str);
+            Long intNum = Long.parseLong(str);
             return ResultUtil.success(intNum);
         }catch (Exception e){
-            logger.error("解析为int类型失败："+str,e);
+            logger.error("解析为long类型失败："+str,e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),str+"格式不正确");
         }
     }

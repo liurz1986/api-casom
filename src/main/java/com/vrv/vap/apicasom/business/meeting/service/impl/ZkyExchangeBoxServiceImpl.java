@@ -193,7 +193,7 @@ public class ZkyExchangeBoxServiceImpl extends BaseServiceImpl<ZkyExchangeBox,St
             }
             zkyExchangeBox.setDeadline(timeResult.getData());
         }else{
-            Result<Integer> integerResult = transferInt(value);
+            Result<Long> integerResult = transferLong(value);
             if(ResultCodeEnum.UNKNOW_FAILED.getCode().equals(integerResult.getCode())){
                 return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),tempName+":"+integerResult.getMsg());
             }
@@ -202,7 +202,7 @@ public class ZkyExchangeBoxServiceImpl extends BaseServiceImpl<ZkyExchangeBox,St
         return ResultUtil.success("success");
     }
 
-    private void setZkyExchangeBoxValue(String tempName, Integer data,ZkyExchangeBox zkyExchangeBox) {
+    private void setZkyExchangeBoxValue(String tempName, Long data,ZkyExchangeBox zkyExchangeBox) {
         switch (tempName){
             case "收件总数":
                 zkyExchangeBox.setReceiveTotal(data);
@@ -250,12 +250,12 @@ public class ZkyExchangeBoxServiceImpl extends BaseServiceImpl<ZkyExchangeBox,St
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),time+"格式不正确");
         }
     }
-    private Result<Integer> transferInt(String str) {
+    private Result<Long> transferLong(String str) {
         try{
-            int intNum = Integer.parseInt(str);
+            Long intNum = Long.parseLong(str);
             return ResultUtil.success(intNum);
         }catch (Exception e){
-            logger.error("解析为int类型失败："+str,e);
+            logger.error("解析为long类型失败："+str,e);
             return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(),str+"格式不正确");
         }
     }

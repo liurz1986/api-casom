@@ -102,33 +102,33 @@ alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';
 
 -- changeset liangguol:20230523-zky_send-003 labels:"新增字段"
 alter table zky_send add branch varchar (10) DEFAULT NULL COMMENT '分院';
--- changeset liurz:20230529-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
+-- changeset liurz:20230601-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
 CREATE TABLE IF NOT EXISTS `zky_email`  (
     `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
     `email_time` date DEFAULT NULL COMMENT '邮件时间',
     `org_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '部门名称',
-    `receive_num` int(11) DEFAULT NULL COMMENT '收件数',
-    `send_num` int(11) DEFAULT NULL COMMENT '发件数',
+    `receive_num` bigint(20) DEFAULT NULL COMMENT '收件数',
+    `send_num` bigint(20) DEFAULT NULL COMMENT '发件数',
     `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
     PRIMARY KEY (`guid`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件收发';
 
 CREATE TABLE IF NOT EXISTS `zky_exchange_box`  (
-                                     `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-                                     `deadline` date DEFAULT NULL COMMENT '截至时间',
-                                     `receive_total` int(9) DEFAULT NULL COMMENT '收件总数',
-                                     `receive_roam_total` int(9) DEFAULT NULL COMMENT '收件流转总数',
-                                     `receive_register_total` int(9) DEFAULT NULL COMMENT '收件登记总数',
-                                     `sign_total` int(9) DEFAULT NULL COMMENT '签批件总数',
-                                     `sign_roam_total` int(9) DEFAULT NULL COMMENT '签批件流转总数',
-                                     `sign_register_total` int(9) DEFAULT NULL COMMENT '签批件登记总数',
-                                     `secrecy_total` int(9) DEFAULT NULL COMMENT '密刊总数',
-                                     `secrecy_roam_total` int(9) DEFAULT NULL COMMENT '密刊流转总数',
-                                     `secrecy_register_total` int(9) DEFAULT NULL COMMENT '密刊登记总数',
-                                     `user_total` int(9) DEFAULT NULL COMMENT '用户总数',
-                                     `user_login_count` int(255) DEFAULT NULL COMMENT '用户登录次数',
-                                     `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
-                                     PRIMARY KEY (`guid`) USING BTREE
+    `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `deadline` date DEFAULT NULL COMMENT '截至时间',
+    `receive_total` bigint(20) DEFAULT NULL COMMENT '收件总数',
+    `receive_roam_total` bigint(20) DEFAULT NULL COMMENT '收件流转总数',
+    `receive_register_total` bigint(20) DEFAULT NULL COMMENT '收件登记总数',
+    `sign_total` bigint(20) DEFAULT NULL COMMENT '签批件总数',
+    `sign_roam_total` bigint(20) DEFAULT NULL COMMENT '签批件流转总数',
+    `sign_register_total` bigint(20) DEFAULT NULL COMMENT '签批件登记总数',
+    `secrecy_total` bigint(20) DEFAULT NULL COMMENT '密刊总数',
+    `secrecy_roam_total` bigint(20) DEFAULT NULL COMMENT '密刊流转总数',
+    `secrecy_register_total` bigint(20) DEFAULT NULL COMMENT '密刊登记总数',
+    `user_total` bigint(20) DEFAULT NULL COMMENT '用户总数',
+    `user_login_count` bigint(20) DEFAULT NULL COMMENT '用户登录次数',
+    `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
+    PRIMARY KEY (`guid`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='公文交换箱';
 
 CREATE TABLE IF NOT EXISTS `zky_print_user_org`  (

@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class ExchangeBoxVO {
 
-    private int userTotal; // 用户总数
+    private long userTotal; // 用户总数
 
-    private int userLoginTotal; // 用户登录总数
+    private long userLoginTotal; // 用户登录总数
 
     private ExchangeBoxExtendVO reviceFile; // 收文
 

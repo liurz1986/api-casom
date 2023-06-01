@@ -33,11 +33,11 @@ public class ZkyEmail {
 
     @Column(name="receive_num")
     @ApiModelProperty("收件数")
-    private int receiveNum;
+    private long receiveNum;
 
     @Column(name="send_num")
     @ApiModelProperty("发件数")
-    private int sendNum;
+    private long sendNum;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name="import_time")

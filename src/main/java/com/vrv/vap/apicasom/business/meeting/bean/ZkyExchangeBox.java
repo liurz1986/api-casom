@@ -29,47 +29,47 @@ public class ZkyExchangeBox {
 
     @Column(name="receive_total")
     @ApiModelProperty("收件总数")
-    private int receiveTotal;
+    private long receiveTotal;
 
     @Column(name="receive_roam_total")
     @ApiModelProperty("收件流转总数")
-    private int receiveRoamTotal;
+    private long receiveRoamTotal;
 
     @Column(name="receive_register_total")
     @ApiModelProperty("收件登记总数")
-    private int receiveRegisterTotal;
+    private long receiveRegisterTotal;
 
     @Column(name="sign_total")
     @ApiModelProperty("签批件总数")
-    private int signTotal;
+    private long signTotal;
 
     @Column(name="sign_roam_total")
     @ApiModelProperty("签批件流转总数")
-    private int signRoamTotal;
+    private long signRoamTotal;
 
     @Column(name="sign_register_total")
     @ApiModelProperty("签批件登记总数")
-    private int signRegisterTotal;
+    private long signRegisterTotal;
 
     @Column(name="secrecy_total")
     @ApiModelProperty("密刊总数")
-    private int secrecyTotal;
+    private long secrecyTotal;
 
     @Column(name="secrecy_roam_total")
     @ApiModelProperty("密刊流转总数")
-    private int secrecyRoamTotal;
+    private long secrecyRoamTotal;
 
     @Column(name="secrecy_register_total")
     @ApiModelProperty("密刊登记总数")
-    private int secrecyRegisterTotal;
+    private long secrecyRegisterTotal;
 
     @Column(name="user_total")
     @ApiModelProperty("用户总数")
-    private int userTotal;
+    private long userTotal;
 
     @Column(name="user_login_count")
     @ApiModelProperty("用户登录次数")
-    private int userLoginCount;
+    private long userLoginCount;
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name="import_time")
     @ApiModelProperty("导入时间")
