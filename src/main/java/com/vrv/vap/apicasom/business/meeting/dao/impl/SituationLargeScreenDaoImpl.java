@@ -177,7 +177,7 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
     }
 
     /**
-     * 院部机关下org_name、send_region、send_type分组统计
+     * 收发件数量： 院部机关下org_name、send_region、send_type分组统计
      * @param type
      * @return
      */
@@ -196,7 +196,9 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
      */
     @Override
     public List<Map<String, Object>> fileSendAndReceiveBranch(String type) {
-        String sql ="select branch ,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where send_scope='全院' "+CommonSql(type,"start_time") +"group by branch,send_region,send_type";
+        String sql ="select zky_unit.branch ,zky_send.send_region as sendRegion,zky_send.send_type as sendType,sum(zky_send.receive_num) as receiveNum ,sum(zky_send.send_num) as sendNum from zky_send  " +
+                "inner join zky_unit on zky_send.org_name=zky_unit.name " +
+                "where zky_send.send_scope='全院'"+CommonSql(type,"zky_send.start_time") +" group by zky_unit.branch,zky_send.send_region,zky_send.send_type";
         return jdbcTemplate.queryForList(sql);
     }
 

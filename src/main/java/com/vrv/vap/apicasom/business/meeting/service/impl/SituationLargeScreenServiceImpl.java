@@ -331,7 +331,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     }
 
     /**
-     * 各分院统计
+     * 全院：各分院统计
      * @param type
      * @return
      */
@@ -360,6 +360,11 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         return resultDatas;
     }
 
+    /**
+     * 院部机关：orgName分组统计
+     * @param type
+     * @return
+     */
     private List<FileSendAndReceiveVO> groupOrgNameResult(String type) {
         Map<String,FileSendAndReceiveVO> handle = new HashMap<>();
         List<Map<String,Object>> list = situationLargeScreenDao.fileSendAndReceiveOrgName(type);
