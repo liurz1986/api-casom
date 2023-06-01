@@ -12,11 +12,11 @@ import lombok.Data;
  */
 @Data
 public class PrintUserOrgExportVO {
-    @ExportExcelField(title = "用户名", order = 1,width =40*256)
+    @ExportExcelField(title = "用户名", order = 1,width =20*256)
     private String userName;
     @ExportExcelField(title = "分院(地区)", order = 2,width =20*256)
     private String branch;
-    @ExportExcelField(title = "单位/部门", order =3,width =20*256)
+    @ExportExcelField(title = "单位/部门", order =3,width =40*256)
     private String organizationName;
 
 }
