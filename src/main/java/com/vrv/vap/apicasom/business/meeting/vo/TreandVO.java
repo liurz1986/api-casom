@@ -12,5 +12,5 @@ public class TreandVO {
     /**
      * Y轴数据
      */
-    private int dataY;
+    private long dataY;
 }

@@ -87,7 +87,7 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         public TreandVO mapRow(ResultSet rs, int rowNum) throws SQLException {
             TreandVO data = new TreandVO();
             data.setDataX(rs.getString("dataX"));
-            data.setDataY(rs.getInt("dataY"));
+            data.setDataY(rs.getLong("dataY"));
             return data;
         }
     }

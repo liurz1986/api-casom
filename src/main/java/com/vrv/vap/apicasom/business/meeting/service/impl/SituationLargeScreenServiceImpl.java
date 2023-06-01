@@ -135,7 +135,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         return result;
     }
 
-    private int getTrendValue(String x, List<TreandVO> noLocalSends) {
+    private long getTrendValue(String x, List<TreandVO> noLocalSends) {
         if(null == noLocalSends || noLocalSends.size() == 0){
             return 0;
         }
@@ -342,8 +342,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
             String branch = String.valueOf(data.get("branch"));
             String sendRegion = String.valueOf(data.get("sendRegion"));
             String sendType = String.valueOf(data.get("sendType"));
-            int receiveNum = data.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(data.get("receiveNum")));
-            int sendNum = data.get("sendNum") == null?0:Integer.parseInt(String.valueOf(data.get("sendNum")));
+            Long receiveNum = data.get("receiveNum") == null?0:Long.parseLong(String.valueOf(data.get("receiveNum")));
+            Long sendNum = data.get("sendNum") == null?0:Long.parseLong(String.valueOf(data.get("sendNum")));
             if(handle.containsKey(branch)){
                 FileSendAndReceiveVO oldData = handle.get(branch);
                 addData(oldData,sendRegion,sendType,receiveNum,sendNum);
@@ -372,8 +372,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
             String orgName = String.valueOf(data.get("orgName"));
             String sendRegion = String.valueOf(data.get("sendRegion"));
             String sendType = String.valueOf(data.get("sendType"));
-            int receiveNum = data.get("receiveNum") == null?0:Integer.parseInt(String.valueOf(data.get("receiveNum")));
-            int sendNum = data.get("sendNum") == null?0:Integer.parseInt(String.valueOf(data.get("sendNum")));
+            long receiveNum = data.get("receiveNum") == null?0:Long.parseLong(String.valueOf(data.get("receiveNum")));
+            long sendNum = data.get("sendNum") == null?0:Long.parseLong(String.valueOf(data.get("sendNum")));
             if(handle.containsKey(orgName)){
                 FileSendAndReceiveVO oldData = handle.get(orgName);
                 addData(oldData,sendRegion,sendType,receiveNum,sendNum);
@@ -400,23 +400,23 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
      * @param receiveNum
      * @param sendNum
      */
-    private void addData(FileSendAndReceiveVO data, String sendRegion,String sendType , int receiveNum, int sendNum) {
+    private void addData(FileSendAndReceiveVO data, String sendRegion,String sendType , long receiveNum, long sendNum) {
         // 本地
         if("0".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setLocalSendNum(sendNum);
+                data.setLocalSendNum(data.getLocalSendNum()+sendNum);
             }
             if("收件".equals(sendType)){
-                data.setLocalReceiveNum(receiveNum);
+                data.setLocalReceiveNum(data.getLocalReceiveNum()+receiveNum);
             }
         }
         // 跨地区
         if("1".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(sendNum);
+                data.setTransRegionalSendNum(data.getTransRegionalSendNum()+sendNum);
             }
             if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(receiveNum);
+                data.setTransRegionalReceiveNum(data.getTransRegionalReceiveNum()+receiveNum);
             }
         }
     }
