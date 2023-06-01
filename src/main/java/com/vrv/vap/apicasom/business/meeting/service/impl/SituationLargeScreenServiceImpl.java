@@ -233,8 +233,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     public EmailSendAndReceiveNumVO emailSendAndReceiveNum(SituationLargeSearchVO searchVO) {
         EmailSendAndReceiveNumVO result = new EmailSendAndReceiveNumVO();
         Map<String,Object> totals = situationLargeScreenDao.emailSendAndReceiveTotal(searchVO.getType());
-        int receiveNum = totals.get("receiveNum")==null?0:Integer.parseInt(String.valueOf(totals.get("receiveNum")));
-        int sendNum = totals.get("sendNum")==null?0:Integer.parseInt(String.valueOf(totals.get("sendNum")));
+        long receiveNum = totals.get("receiveNum")==null?0:Long.parseLong(String.valueOf(totals.get("receiveNum")));
+        long sendNum = totals.get("sendNum")==null?0:Long.parseLong(String.valueOf(totals.get("sendNum")));
         if(0 == sendNum && 0 == receiveNum){
             result.setReceiveTotal(0);
             result.setSendTotal(0);
@@ -245,11 +245,11 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         return emailDataHandle(receiveGroups,sendGroups,receiveNum,sendNum);
     }
 
-    private EmailSendAndReceiveNumVO emailDataHandle(List<KeyValueQueryVO> receiveGroups, List<KeyValueQueryVO> sendGroups, int receiveNum, int sendNum) {
+    private EmailSendAndReceiveNumVO emailDataHandle(List<KeyValueQueryVO> receiveGroups, List<KeyValueQueryVO> sendGroups, long receiveNum, long sendNum) {
         EmailSendAndReceiveNumVO result = new EmailSendAndReceiveNumVO();
         if(receiveNum > 0){
             Map<String,Object> receives = getTOP2(receiveGroups);
-            int sum =(Integer) receives.get("sum");
+            long sum =Long.parseLong(String.valueOf(receives.get("sum")));
             List<KeyValueQueryVO> list =(List) receives.get("data");
             if(receiveNum > sum){
                 KeyValueQueryVO other = new KeyValueQueryVO();
@@ -262,7 +262,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         }
         if(sendNum > 0){
             Map<String,Object> sends =getTOP2(sendGroups);
-            int sum =(Integer) sends.get("sum");
+            long sum =Long.parseLong(String.valueOf(sends.get("sum")));
             List<KeyValueQueryVO> list =(List) sends.get("data");
             if(sendNum > sum){
                 KeyValueQueryVO other = new KeyValueQueryVO();
@@ -280,7 +280,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         Map<String,Object> tops = new HashMap<>();
         tops.put("sum",0);
         List<KeyValueQueryVO> result = new ArrayList<>();
-        int sum = 0;
+        long sum = 0;
         int size = receiveGroups.size();
         if(size == 0){
             tops.put("data",new ArrayList<>());
@@ -288,7 +288,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         }
         if(size == 1){
             KeyValueQueryVO data = receiveGroups.get(0);
-            sum = data.getValue()==null?0:Integer.parseInt(data.getValue());
+            sum = data.getValue()==null?0:Long.parseLong(data.getValue());
             result.add(data);
             tops.put("data",result);
             tops.put("sum",sum);
@@ -296,9 +296,9 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         }
         if(size > 1){
             KeyValueQueryVO data1 = receiveGroups.get(0);
-            int num1 = data1.getValue()==null?0:Integer.parseInt(data1.getValue());
+            long num1 = data1.getValue()==null?0:Long.parseLong(data1.getValue());
             KeyValueQueryVO data2 = receiveGroups.get(1);
-            int num2 = data2.getValue()==null?0:Integer.parseInt(data2.getValue());
+            long num2 = data2.getValue()==null?0:Long.parseLong(data2.getValue());
             result.add(data1);
             result.add(data2);
             tops.put("data",result);

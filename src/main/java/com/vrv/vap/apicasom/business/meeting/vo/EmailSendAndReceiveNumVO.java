@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 public class EmailSendAndReceiveNumVO {
 
-    private int sendTotal;  //发件总数
-    private int receiveTotal; //收件总数
+    private long sendTotal;  //发件总数
+    private long receiveTotal; //收件总数
     private List<KeyValueQueryVO> sendTop; // 发件详情
     private List<KeyValueQueryVO> receiveTop; // 收件详情
 }
