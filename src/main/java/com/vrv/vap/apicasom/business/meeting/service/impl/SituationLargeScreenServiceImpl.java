@@ -404,19 +404,19 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         // 本地
         if("0".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setLocalSendNum(data.getLocalSendNum()+sendNum);
+                data.setLocalSendNum(sendNum);
             }
             if("收件".equals(sendType)){
-                data.setLocalReceiveNum(data.getLocalReceiveNum()+receiveNum);
+                data.setLocalReceiveNum(receiveNum);
             }
         }
         // 跨地区
         if("1".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(data.getTransRegionalSendNum()+sendNum);
+                data.setTransRegionalSendNum(sendNum);
             }
             if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(data.getTransRegionalReceiveNum()+receiveNum);
+                data.setTransRegionalReceiveNum(receiveNum);
             }
         }
     }
@@ -922,19 +922,19 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         // 本地
         if("0".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setLocalSendNum(data.getLocalSendNum()+sendNum);
+                data.setLocalSendNum(sendNum);
             }
             if("收件".equals(sendType)){
-                data.setLocalReceiveNum(data.getLocalReceiveNum()+receiveNum);
+                data.setLocalReceiveNum(receiveNum);
             }
         }
         // 跨地区
         if("1".equals(sendRegion)){
             if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(data.getTransRegionalSendNum()+sendNum);
+                data.setTransRegionalSendNum(sendNum);
             }
             if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(data.getTransRegionalReceiveNum()+receiveNum);
+                data.setTransRegionalReceiveNum(receiveNum);
             }
         }
     }
