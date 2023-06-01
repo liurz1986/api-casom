@@ -258,6 +258,21 @@ public class SituationLargeScreenConfigController {
     }
 
     /**
+     * 打印用户机构数据导出数据生成
+     * @return Result
+     */
+    @PostMapping(value = "/printUserOrgExportData")
+    @ApiOperation(value = "打印用户机构数据导出数据生成", notes = "")
+    @SysRequestLog(description = "打印用户机构数据导出数据生成", actionType = ActionType.EXPORT)
+    public Result<String> printUserOrgExportData(@RequestBody PrintUserOrgSerachVO printUserOrgSerachVO) {
+        try {
+            return zkyPrintUserOrgService.printUserOrgExportData(printUserOrgSerachVO);
+        } catch (Exception e) {
+            logger.error("打印用户机构数据导出数据生成异常,{}", e);
+            return ResultUtil.error(ResultCodeEnum.UNKNOW_FAILED.getCode(), "打印用户机构数据导出数据生成异常");
+        }
+    }
+    /**
      * 下载导出文件
      * @param fileName
      * @param response

@@ -15,6 +15,7 @@ import com.vrv.vap.exportAndImport.excel.util.DateUtils;
 import com.vrv.vap.jpa.basedao.BaseRepository;
 import com.vrv.vap.jpa.baseservice.impl.BaseServiceImpl;
 import com.vrv.vap.jpa.common.UUIDUtils;
+import com.vrv.vap.jpa.mapper.MapperUtil;
 import com.vrv.vap.jpa.web.Result;
 import com.vrv.vap.jpa.web.ResultCodeEnum;
 import com.vrv.vap.jpa.web.ResultUtil;
@@ -50,6 +51,8 @@ public class ZkyPrintUserOrgServiceImpl extends BaseServiceImpl<ZkyPrintUserOrg,
     private FileConfiguration fileConfiguration;
     @Autowired
     private ZkyPrintUserOrgRepository zkyPrintUserOrgRepository;
+    @Autowired
+    private MapperUtil mapper;
 
     private String zkyPrintUserOrgSheetName="打印用户机构";
     @Override
@@ -263,7 +266,34 @@ public class ZkyPrintUserOrgServiceImpl extends BaseServiceImpl<ZkyPrintUserOrg,
         }
         return cons;
     }
-
+    /**
+     * 打印用户机构数据导出数据生成
+     * @param printUserOrgSerachVO
+     * @return
+     */
+    @Override
+    public Result<String> printUserOrgExportData(PrintUserOrgSerachVO printUserOrgSerachVO) {
+        List<QueryCondition> conditions =  getQueryCondition(printUserOrgSerachVO);
+        List<ZkyPrintUserOrg> userOrgs = this.findAll(conditions);
+        String fileName = "打印用户机构数据" + DateUtils.date2Str(new Date(), "yyyyMMddHHmmss");
+        String rootPath = fileConfiguration.getTemplatePath();
+        File targetFile = new File(rootPath);
+        if (!targetFile.exists()) {
+            targetFile.mkdirs();
+        }
+        List<PrintUserOrgExportVO> datas = null;
+        if(null != userOrgs && userOrgs.size() > 0){
+            datas = mapper.mapList(userOrgs,PrintUserOrgExportVO.class);
+        }
+        String filePath = Paths.get(rootPath, fileName).toString();
+        try {
+            ExportExcelUtils.getInstance().createExcel(datas, PrintUserOrgExportVO.class, zkyPrintUserOrgSheetName,filePath,false);
+            return ResultUtil.success(fileName);
+        } catch (ExcelException | IOException | NoSuchFieldException | IllegalAccessException e) {
+            logger.error("打印用户机构数据导出数据生成Excel异常", e);
+            return ResultUtil.error(-1,"打印用户机构数据导出数据生成Excel异常");
+        }
+    }
     /**
      * 删除
      * @param guid
@@ -309,6 +339,8 @@ public class ZkyPrintUserOrgServiceImpl extends BaseServiceImpl<ZkyPrintUserOrg,
         upDateZkyPrintUserOrgCache();
         return ResultUtil.success("success");
     }
+
+
 
     private boolean isExistUserName(String userName,String guid) {
         List<QueryCondition> conditions = new ArrayList<>();

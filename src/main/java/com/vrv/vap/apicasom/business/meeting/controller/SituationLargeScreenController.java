@@ -190,7 +190,7 @@ public class SituationLargeScreenController {
     }
 
     /**
-     * 地图
+     * 地图:send_scope为全院
      *
      * @return Result
      */
@@ -210,7 +210,7 @@ public class SituationLargeScreenController {
         }
     }
     /**
-     * 地图详情
+     * 地图详情:send_scope为全院
      * 1.根据city和时间范围查询
      * {"type":"month","city":"北京"}
      * @return Result

@@ -16,10 +16,11 @@ public interface ZkyPrintUserOrgService  extends BaseService<ZkyPrintUserOrg, St
 
     public PageRes<ZkyPrintUserOrg> printUserOrgGetPage(PrintUserOrgSerachVO printUserOrgSerachVO);
 
+    public Result<String> printUserOrgExportData(PrintUserOrgSerachVO printUserOrgSerachVO);
+
     public void printUserOrgDel(String guid);
 
     public Result<String> printUserOrgEdit(ZkyPrintUserOrg printUserOrg);
-
 
 
 }
