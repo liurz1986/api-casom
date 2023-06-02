@@ -83,25 +83,23 @@ alter table hw_meeting_alarm add alarm_status varchar(48) DEFAULT NULL COMMENT '
 alter table hw_meeting_participant add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';
 alter table hw_meeting_attendee add participant_code varchar(80) DEFAULT NULL COMMENT '节点名称code';
 
--- changeset liangguol:20230406-zky_send-001 labels:"新增发送接收文件表"
-CREATE TABLE IF NOT EXISTS `zky_send` (
-        `id` varchar(125) NOT NULL COMMENT '记录ID',
-        `org_name` varchar(255) DEFAULT NULL COMMENT '组织机构名称',
-        `org_code` varchar(255) DEFAULT NULL COMMENT '组织机构编码',
-        `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-        `end_time` datetime DEFAULT NULL COMMENT '结束时间',
-        `send_type` varchar(125) DEFAULT NULL COMMENT '类型',
-        `send_scope` varchar(125) DEFAULT NULL COMMENT '单位',
-        `receive_num` int(10) DEFAULT NULL COMMENT '接收数量',
-        `send_num` int(10) DEFAULT NULL COMMENT '发送数量',
-        PRIMARY KEY (`id`) USING BTREE
+-- changeset liangguol:20230531-zky_send-001 labels:"新增发送接收文件表"
+drop table zky_send;
+CREATE TABLE IF NOT EXISTS `zky_send`(
+    `id` varchar(125) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '记录ID',
+    `org_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '组织机构名称',
+    `org_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '组织机构编码',
+    `start_time` datetime(0) DEFAULT NULL COMMENT '开始时间',
+    `end_time` datetime(0) DEFAULT NULL COMMENT '结束时间',
+    `send_type` varchar(125) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '类型',
+    `send_scope` varchar(125) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '单位',
+    `receive_num` int(10) DEFAULT NULL COMMENT '接收数量',
+    `send_num` int(10) DEFAULT NULL COMMENT '发送数量',
+    `send_region` int(2) DEFAULT NULL COMMENT '发送区域',
+    `branch` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '分院',
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- changeset liangguol:20230508-zky_send-002 labels:"新增字段"
-alter table zky_send add send_region int(2) DEFAULT NULL COMMENT '发送区域';
-
--- changeset liangguol:20230523-zky_send-003 labels:"新增字段"
-alter table zky_send add branch varchar (10) DEFAULT NULL COMMENT '分院';
 -- changeset liurz:20230601-zky labels:"增加邮件收发、打印用户机构数据、公文交换箱表"
 CREATE TABLE IF NOT EXISTS `zky_email`  (
     `guid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
