@@ -111,6 +111,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         bean.setId(UUIDUtils.get32UUID());
         bean.setCreateTime(new Date());
         zkyUnitService.save(bean);
+        zkyUnitService.initCity(); // 更新缓存
         return ResultUtil.success("success");
     }
 
@@ -188,6 +189,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         }
         bean.setCreateTime(new Date());
         zkyUnitService.save(bean);
+        zkyUnitService.initCity(); // 更新缓存
         return ResultUtil.success("success");
     }
 
@@ -225,6 +227,7 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
     @Override
     public void delete(String guid) {
         zkyUnitService.delete(guid);
+        zkyUnitService.initCity(); // 更新缓存
     }
 
     @Override
@@ -336,6 +339,8 @@ public class ZkyUnitConfigServiceImpl  implements ZkyUnitConfigService {
         dataUpdateHandle(datas);
         // 数据保存
         zkyUnitService.save(datas);
+        // 更新缓存
+        zkyUnitService.initCity();
         return ResultUtil.success("success");
     }
 
