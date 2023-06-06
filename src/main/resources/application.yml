@@ -156,9 +156,6 @@ feign:
     enabled: true
 
 hw:
-  exchange-box:
-    time: 59 59 23 * * ?
-    url: http://192.168.118.228:9888
   send:
     time: 0 0 1 * * ?
     url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getRemoteNum
