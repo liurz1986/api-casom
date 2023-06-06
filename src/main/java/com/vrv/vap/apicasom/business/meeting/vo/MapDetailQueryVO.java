@@ -6,7 +6,6 @@ import lombok.Data;
 public class MapDetailQueryVO {
     private String  orgName;
     private String sendRegion;
-    private String sendType;
     private long receiveNum;
     private long sendNum;
 }

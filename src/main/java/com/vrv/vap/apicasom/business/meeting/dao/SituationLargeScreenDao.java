@@ -51,7 +51,7 @@ public interface SituationLargeScreenDao {
 
   public List<Map<String, Object>> fileSendAndReceiveBranch(String type);
 
-  public List<Map<String, Object>> getGroupBySendRegionAndSendType(String type);
+  public List<Map<String, Object>> getGroupBySendRegion(String type);
 
   public List<String> branchMap(String type);
 

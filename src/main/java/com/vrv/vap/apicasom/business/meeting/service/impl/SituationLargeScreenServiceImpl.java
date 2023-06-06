@@ -25,12 +25,15 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.ParsedSum;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation.Bucket;
+import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation;
+import org.elasticsearch.search.aggregations.metrics.Stats;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,8 +188,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
                 int month = SituationLargeScreenUtil.monthDiff(startTime,endTime);
                 result.put("startTime",startTime);  ;// 开始时间
                 result.put("endTime",endTime);  ;// 开始时间
-                if(month > 12){
-                    result.put("xstrength","2");  ;// 大于1年按年统计
+                if(month > 24){
+                    result.put("xstrength","2");  ;// 大于2年按年统计
                     return result;
                 }
                 if(month >=1){
@@ -341,16 +344,15 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         for(Map<String,Object> data : list){
             String branch = String.valueOf(data.get("branch"));
             String sendRegion = String.valueOf(data.get("sendRegion"));
-            String sendType = String.valueOf(data.get("sendType"));
             Long receiveNum = data.get("receiveNum") == null?0:Long.parseLong(String.valueOf(data.get("receiveNum")));
             Long sendNum = data.get("sendNum") == null?0:Long.parseLong(String.valueOf(data.get("sendNum")));
             if(handle.containsKey(branch)){
                 FileSendAndReceiveVO oldData = handle.get(branch);
-                addData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                addData(oldData,sendRegion,receiveNum,sendNum);
                 handle.put(branch,oldData);
             }else{
                 FileSendAndReceiveVO vo = new FileSendAndReceiveVO();
-                addData(vo,sendRegion,sendType,receiveNum,sendNum);
+                addData(vo,sendRegion,receiveNum,sendNum);
                 vo.setName(branch);
                 handle.put(branch,vo);
             }
@@ -371,16 +373,15 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         for(Map<String,Object> data : list){
             String orgName = String.valueOf(data.get("orgName"));
             String sendRegion = String.valueOf(data.get("sendRegion"));
-            String sendType = String.valueOf(data.get("sendType"));
             long receiveNum = data.get("receiveNum") == null?0:Long.parseLong(String.valueOf(data.get("receiveNum")));
             long sendNum = data.get("sendNum") == null?0:Long.parseLong(String.valueOf(data.get("sendNum")));
             if(handle.containsKey(orgName)){
                 FileSendAndReceiveVO oldData = handle.get(orgName);
-                addData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                addData(oldData,sendRegion,receiveNum,sendNum);
                 handle.put(orgName,oldData);
             }else{
                 FileSendAndReceiveVO vo = new FileSendAndReceiveVO();
-                addData(vo,sendRegion,sendType,receiveNum,sendNum);
+                addData(vo,sendRegion,receiveNum,sendNum);
                 vo.setName(orgName);
                 handle.put(orgName,vo);
             }
@@ -393,31 +394,21 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     /**
      * 数据组装
      * sendRegion中1表示跨地区、0表示本地
-     * sendType为发件、收件
      * @param data
      * @param sendRegion
-     * @param sendType
      * @param receiveNum
      * @param sendNum
      */
-    private void addData(FileSendAndReceiveVO data, String sendRegion,String sendType , long receiveNum, long sendNum) {
+    private void addData(FileSendAndReceiveVO data, String sendRegion, long receiveNum, long sendNum) {
         // 本地
         if("0".equals(sendRegion)){
-            if("发件".equals(sendType)){
-                data.setLocalSendNum(sendNum);
-            }
-            if("收件".equals(sendType)){
-                data.setLocalReceiveNum(receiveNum);
-            }
+            data.setLocalSendNum(sendNum);
+            data.setLocalReceiveNum(receiveNum);
         }
         // 跨地区
         if("1".equals(sendRegion)){
-            if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(sendNum);
-            }
-            if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(receiveNum);
-            }
+            data.setTransRegionalSendNum(sendNum);
+            data.setTransRegionalReceiveNum(receiveNum);
         }
     }
 
@@ -521,7 +512,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
      * @param timeResult
      * @return
      */
-   private List<PrintingAndBurningNumVO> getDatasByES(String type, Map<String, String> timeResult){
+   private List<PrintingAndBurningNumVO> getDatasByES(String type, Map<String, String> timeResult) throws IOException {
        List<QueryCondition_ES> conditions = new ArrayList<>();
        if(!"all".equals(type)){
            conditions.add(QueryCondition_ES.in("op_type",new String[]{"0","1"}));
@@ -531,6 +522,8 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
        SearchField child2=new SearchField("op_type", FieldType.String, child1);
        SearchField searchField=new SearchField("username", FieldType.String, child2);
        String indexName = "summary-user-dk-count-*";
+       boolean isIndexExist = elasticSearchMapManage.isEsIndexExist(indexName);
+       logger.info("打印刻录索引是否存在："+isIndexExist);
        List<Map<String, Object>> datas  = elasticSearchMapManage.queryStatistics(indexName,conditions,searchField);
        List<PrintingAndBurningNumVO> result = new ArrayList<>();
        PrintingAndBurningNumVO user = null;
@@ -585,7 +578,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
      * @return
      * @throws IOException
      */
-    public Map<String, Object> getEsDatas(String type, Map<String, String> timeResult,String opType) throws IOException {
+    public List<Map<String,Object>>  getEsDatas(String type, Map<String, String> timeResult) throws IOException {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         // username、opType进行分组
         TermsAggregationBuilder groupByUsernameAgg = AggregationBuilders.terms("groupName").field("username");
@@ -612,15 +605,26 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         searchRequest.indices(indexName);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse =restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        Terms aggregation = searchResponse.getAggregations().get("groupName");
-        List<? extends MultiBucketsAggregation.Bucket>  buckets = ((MultiBucketsAggregation) aggregation).getBuckets();
-        Map<String,Object> data =new HashMap<>();
+        // 获取最外层的groupName分组
+        Aggregation aggregation = searchResponse.getAggregations().get("groupName");
+        List<? extends Bucket> buckets = ((MultiBucketsAggregation)aggregation).getBuckets();
+        List<Map<String,Object>> lists =new ArrayList<>();
+        Map<String,Object> data =null;
         for (MultiBucketsAggregation.Bucket bucket : buckets){
+            data =new HashMap<>();
             String userName = bucket.getKeyAsString();
-            ParsedSum sumCounts = bucket.getAggregations().get("opType");
-            data.put(userName,sumCounts.getValue());
+            Aggregation childterms = bucket.getAggregations().get("opType"); // 获取子optType分组
+            List<? extends Bucket> bucketChilds = ((MultiBucketsAggregation)childterms).getBuckets();
+            for (MultiBucketsAggregation.Bucket bucketChild : bucketChilds){
+                String optTypeName = bucketChild.getKeyAsString();
+                Aggregation sumCount = bucketChild.getAggregations().get("sumCount"); // 获取子sumCount
+                String valueAsString = ((NumericMetricsAggregation.SingleValue)sumCount).getValueAsString();
+                data.put(optTypeName,valueAsString);
+            }
+            data.put("userName",userName);
+            lists.add(data);
         }
-        return  data;
+        return  lists;
     }
 
 
@@ -834,32 +838,21 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
     @Override
     public Map<String, Object> fileExchangePer(SituationLargeSearchVO searchVO) {
         Map<String, Object> data = new HashMap<>();
-        // send_region,send_type分组统计
-        List<Map<String, Object>> groupDatas = situationLargeScreenDao.getGroupBySendRegionAndSendType(searchVO.getType());
+        // send_region分组统计
+        List<Map<String, Object>> groupDatas = situationLargeScreenDao.getGroupBySendRegion(searchVO.getType());
         long localNum = 0;
         long transRegional =0;
         for(Map<String, Object> map : groupDatas){
             String sendRegion = String.valueOf(map.get("sendRegion"));
-            String sendType = String.valueOf(map.get("sendType"));
             long receiveNum = map.get("receiveNum") == null?0:Long.parseLong(String.valueOf(map.get("receiveNum")));
             long sendNum = map.get("sendNum") == null?0:Long.parseLong(String.valueOf(map.get("sendNum")));
             // 本地
             if("0".equals(sendRegion)){
-                if("发件".equals(sendType)){
-                    localNum = localNum + sendNum;
-                }
-                if("收件".equals(sendType)){
-                    localNum = localNum + receiveNum;
-                }
+                localNum = sendNum + receiveNum;
             }
             // 跨地区
             if("1".equals(sendRegion)){
-                if("发件".equals(sendType)){
-                    transRegional = transRegional + sendNum;
-                }
-                if("收件".equals(sendType)){
-                    transRegional = transRegional + receiveNum;
-                }
+                transRegional = sendNum +receiveNum;
             }
         }
         data.put("local",localNum);
@@ -890,16 +883,15 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
         for(MapDetailQueryVO data : groupDatas){
             String orgName = data.getOrgName();
             String sendRegion =data.getSendRegion();
-            String sendType = data.getSendType();
             long receiveNum = data.getReceiveNum();
             long sendNum = data.getSendNum();
             if(handle.containsKey(orgName)){
                 MapDetailVO oldData = handle.get(orgName);
-                addMapDetailVOData(oldData,sendRegion,sendType,receiveNum,sendNum);
+                addMapDetailVOData(oldData,sendRegion,receiveNum,sendNum);
                 handle.put(orgName,oldData);
             }else{
                 MapDetailVO vo = new MapDetailVO();
-                addMapDetailVOData(vo,sendRegion,sendType,receiveNum,sendNum);
+                addMapDetailVOData(vo,sendRegion,receiveNum,sendNum);
                 vo.setName(orgName);
                 handle.put(orgName,vo);
             }
@@ -914,28 +906,19 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
      * sendType为发件、收件
      * @param data
      * @param sendRegion
-     * @param sendType
      * @param receiveNum
      * @param sendNum
      */
-    private void addMapDetailVOData(MapDetailVO data, String sendRegion,String sendType , long receiveNum, long sendNum) {
+    private void addMapDetailVOData(MapDetailVO data, String sendRegion, long receiveNum, long sendNum) {
         // 本地
         if("0".equals(sendRegion)){
-            if("发件".equals(sendType)){
-                data.setLocalSendNum(sendNum);
-            }
-            if("收件".equals(sendType)){
-                data.setLocalReceiveNum(receiveNum);
-            }
+            data.setLocalSendNum(sendNum);
+            data.setLocalReceiveNum(receiveNum);
         }
         // 跨地区
         if("1".equals(sendRegion)){
-            if("发件".equals(sendType)){
-                data.setTransRegionalSendNum(sendNum);
-            }
-            if("收件".equals(sendType)){
-                data.setTransRegionalReceiveNum(receiveNum);
-            }
+            data.setTransRegionalSendNum(sendNum);
+            data.setTransRegionalReceiveNum(receiveNum);
         }
     }
 

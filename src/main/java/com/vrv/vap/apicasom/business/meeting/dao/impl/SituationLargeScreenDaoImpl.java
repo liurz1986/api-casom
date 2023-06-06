@@ -40,9 +40,9 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
     public List<KeyValueQueryVO> fileSendAndReceiveNumTop10(String searchType,String timeType) {
         String sql="";
         if("1".equals(searchType)){
-            sql="select * from(select org_name as orgName,sum(send_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+"  and send_scope='全院' and send_type='发件'  group by org_name)a order by totalNum desc limit 10";
+            sql="select * from(select org_name as orgName,sum(send_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+"  and send_scope='全院'   group by org_name)a order by totalNum desc limit 10";
         }else{
-            sql="select * from(select  org_name as orgName,sum(receive_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+" and  send_scope='全院' and send_type='收件' group by org_name)a order by totalNum desc limit  10";
+            sql="select * from(select  org_name as orgName,sum(receive_num) as totalNum from zky_send where "+ SituationLargeScreenUtil.typeSql(timeType,"start_time")+" and  send_scope='全院'  group by org_name)a order by totalNum desc limit  10";
         }
         List<KeyValueQueryVO> details = jdbcTemplate.query(sql,new KeyValueQueryVoMapper());
         return details;
@@ -101,16 +101,16 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
         String sql="";
         switch (filterType){
             case "1":  //本地收件
-                sql= "sum(receive_num) as dataY from zky_send  where send_region='0' and send_type='收件' "+CommonSql(type,"start_time");
+                sql= "sum(receive_num) as dataY from zky_send  where send_region='0'  "+CommonSql(type,"start_time");
                 break;
             case "2":  //本地发件
-                sql= "sum(send_num) as dataY from zky_send  where send_region='0' and send_type='发件' "+CommonSql(type,"start_time");
+                sql= "sum(send_num) as dataY from zky_send  where send_region='0' "+CommonSql(type,"start_time");
                 break;
             case "3":  //跨地区收件
-                sql= "sum(receive_num) as dataY from zky_send  where send_region='1' and send_type='收件' "+CommonSql(type,"start_time");
+                sql= "sum(receive_num) as dataY from zky_send  where send_region='1'  "+CommonSql(type,"start_time");
                 break;
             case "4":  //跨地区发件
-                sql= "sum(send_num) as dataY from zky_send  where send_region='1' and send_type='发件' "+CommonSql(type,"start_time");
+                sql= "sum(send_num) as dataY from zky_send  where send_region='1'  "+CommonSql(type,"start_time");
                 break;
         }
        return sql;
@@ -177,13 +177,13 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
     }
 
     /**
-     * 收发件数量： 院部机关下org_name、send_region、send_type分组统计
+     * 收发件数量： 院部机关下org_name、send_region分组统计
      * @param type
      * @return
      */
     @Override
     public List<Map<String, Object>> fileSendAndReceiveOrgName(String type) {
-        String sql ="select org_name as orgName,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where send_scope='院部机关' "+CommonSql(type,"start_time") +"group by org_name,send_region,send_type";
+        String sql ="select org_name as orgName,send_region as sendRegion,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where send_scope='院部机关' "+CommonSql(type,"start_time") +"group by org_name,send_region";
         return jdbcTemplate.queryForList(sql);
 
     }
@@ -196,21 +196,21 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
      */
     @Override
     public List<Map<String, Object>> fileSendAndReceiveBranch(String type) {
-        String sql ="select zky_unit.branch ,zky_send.send_region as sendRegion,zky_send.send_type as sendType,sum(zky_send.receive_num) as receiveNum ,sum(zky_send.send_num) as sendNum from zky_send  " +
+        String sql ="select zky_unit.branch ,zky_send.send_region as sendRegion,sum(zky_send.receive_num) as receiveNum ,sum(zky_send.send_num) as sendNum from zky_send  " +
                 "inner join zky_unit on zky_send.org_name=zky_unit.name " +
-                "where zky_send.send_scope='全院'"+CommonSql(type,"zky_send.start_time") +" group by zky_unit.branch,zky_send.send_region,zky_send.send_type";
+                "where zky_send.send_scope='全院'"+CommonSql(type,"zky_send.start_time") +" group by zky_unit.branch,zky_send.send_region";
         return jdbcTemplate.queryForList(sql);
     }
 
     /**
-     * send_region,send_type分组统计
+     * send_region分组统计
      *
      * @param type
      * @return
      */
     @Override
-    public List<Map<String, Object>> getGroupBySendRegionAndSendType(String type) {
-        String sql ="select send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where 1=1 "+CommonSql(type,"start_time") +"group by send_region,send_type";
+    public List<Map<String, Object>> getGroupBySendRegion(String type) {
+        String sql ="select send_region as sendRegion,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from zky_send where 1=1 "+CommonSql(type,"start_time") +"group by send_region";
         return jdbcTemplate.queryForList(sql);
     }
 
@@ -235,8 +235,8 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
     @Override
     public List<MapDetailQueryVO> getGroupDeatailByCity(String city, String type) {
         List<String> params = new ArrayList<>();
-        String sql ="select org_name as orgName,send_region as sendRegion,send_type as sendType,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from(" +
-                "select send.*  from zky_send as send inner join zky_unit as unit on send.org_name=unit.name where unit.city=? and send.send_scope='全院' "+CommonSql(type,"send.start_time")+")a group by org_name,send_region,send_type";
+        String sql ="select org_name as orgName,send_region as sendRegion,sum(receive_num) as receiveNum ,sum(send_num) as sendNum from(" +
+                "select send.*  from zky_send as send inner join zky_unit as unit on send.org_name=unit.name where unit.city=? and send.send_scope='全院' "+CommonSql(type,"send.start_time")+")a group by org_name,send_region";
         params.add(city);
         return jdbcTemplate.query(sql,new MapDetailQueryVOMapper(),params.toArray());
     }
@@ -248,7 +248,6 @@ public class SituationLargeScreenDaoImpl implements SituationLargeScreenDao {
             MapDetailQueryVO data = new MapDetailQueryVO();
             data.setOrgName(rs.getString("orgName"));
             data.setSendRegion(rs.getString("sendRegion"));
-            data.setSendType(rs.getString("sendType"));
             data.setReceiveNum(rs.getLong("receiveNum"));
             data.setSendNum(rs.getLong("sendNum"));
             return data;
