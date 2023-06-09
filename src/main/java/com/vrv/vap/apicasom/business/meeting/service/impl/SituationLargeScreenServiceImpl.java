@@ -132,7 +132,7 @@ public class SituationLargeScreenServiceImpl implements SituationLargeScreenServ
             data.setTransRegionalSendNum(getTrendValue(x,noLocalSends));
             data.setTransRegionalReceiveNum(getTrendValue(x,noLocalReceives));
             data.setLocalSendNum(getTrendValue(x,localSends));
-            data.setLocalSendNum(getTrendValue(x,localReceives));
+            data.setLocalReceiveNum(getTrendValue(x,localReceives));
             result.add(data);
         }
         return result;
