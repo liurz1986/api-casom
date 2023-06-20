@@ -10,9 +10,9 @@ import java.util.List;
  * @description:
  */
 public interface ZkySendDataService {
-    /**
-     *
-     */
-    public List<ZkySend> getZkySend(String startTime,String endTime,String sendScope,String url);
+
+
+    public void excZkySend() throws InterruptedException;
+
 
 }
