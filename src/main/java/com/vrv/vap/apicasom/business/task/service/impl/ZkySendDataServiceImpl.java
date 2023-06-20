@@ -11,6 +11,7 @@ import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
 import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
+import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
 
 
     private Map<String,String> zkyCityMap= new HashMap<>();
+
 
 
     /**
@@ -172,19 +174,24 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
         logger.info("中科院文件信息同步失败后处理开始,时间范围："+startTime+"-"+endTime);
         Thread.sleep(10000);
         new Thread(new Runnable() {
+            @SneakyThrows
             @Override
             public void run() {
+                boolean status = false;
                 for(int i =0 ;i < 3; i++){
                     try{
                         dataSyncHandle(endTime,startTime);
-                        logger.info("中科院文件信息同步失败后处理成功");
-                        return;
+                        status = true;
                     }catch(Exception e){
+                        Thread.sleep(10000);
                         dataSyncHandle(endTime,startTime);
-                        logger.error("中科院文件信息同步失败后处理失败:{}",e);
                     }
                 }
-                logger.info("中科院文件信息同步失败后处理失败");
+                if(status){
+                    logger.info("中科院文件信息同步失败后处理成功");
+                }else{
+                    logger.info("中科院文件信息同步失败后处理失败,时间范围："+startTime+"-"+endTime);
+                }
             }
         }).start();
     }
