@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.vrv.vap.apicasom.business.task.bean.ZkySend;
 import com.vrv.vap.apicasom.business.task.bean.ZkyUnitBean;
+import com.vrv.vap.apicasom.business.task.dao.ZkySendDao;
 import com.vrv.vap.apicasom.business.task.service.ZkySendDataService;
 import com.vrv.vap.apicasom.business.task.service.ZkySendService;
 import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
+import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import lombok.SneakyThrows;
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
 public class ZkySendDataServiceImpl implements ZkySendDataService {
 
     // 日志
-    private Logger logger = LoggerFactory.getLogger(MeetingHttpServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(ZkySendDataServiceImpl.class);
 
     /**
      * gson对象
@@ -46,12 +48,17 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
     @Autowired
     private ZkyUnitService zkyUnitService;
 
+    @Autowired
+    private ZkySendDao zkySendDao;
+
     @Value("${hw.send.url}")
     private String zkySendUrl;
 
     @Value("${hw.send.local-url}")
     private String zkySendLocalUrl;
 
+    @Autowired
+    private RedisUtils redisUtils;
 
     private Map<String,String> zkyCityMap= new HashMap<>();
 
@@ -63,12 +70,15 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
      */
     @Override
     public void excZkySend() throws InterruptedException {
+        // 时间范围：前一天的数据 00:00:00--23:59:59
         Date date = new Date();
-        // 时间范围：当前时间向后退一天到当前时间
-        String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
-        String startTime = DateUtil.format(new Date(DateUtil.addDay(date,-1).getTime()),DateUtil.DEFAULT_DATE_PATTERN);
+        String nextDate = DateUtil.format(new Date(DateUtil.addDay(date,-1).getTime()),DateUtil.Year_Mouth_Day);
+        String startTime = nextDate+" 00:00:00";
+        String endTime = nextDate+" 23:59:59";
+        Map<String,String> time= new HashMap<>();
+        time.put("startTime",startTime);
+        time.put("endTime",endTime);
         try{
-            getZkyCityMap();
             dataSyncHandle(endTime,startTime);
         }catch (Exception e){
             logger.error("中科院文件信息同步失败",e);
@@ -94,8 +104,15 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
         return zkySends;
     }
 
-    private void dataSyncHandle(String endTime, String startTime){
-        logger.info("中科院文件信息同步开始，时间范围："+startTime+"-"+endTime);
+    /**
+     * 中科院文件信息同步
+     * @param endTime
+     * @param startTime
+     */
+    @Override
+    public void dataSyncHandle(String endTime, String startTime){
+        logger.warn("中科院文件信息同步开始，时间范围："+startTime+"-"+endTime);
+        getZkyCityMap();
         List<ZkySend> zkySends = new ArrayList<>();
         List<ZkySend> zkySendList = getZkySend(startTime,endTime,"院部机关",zkySendUrl);
         List<ZkySend> zkyList = getZkySend(startTime,endTime,"全院",zkySendUrl);
@@ -147,10 +164,22 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
         logger.info("中科院文件信息同步，本地文件同步，数据量（远程+本地）={}",zkySends.size());
 
         if(CollectionUtils.isNotEmpty(zkySends)){
+            // 数据去重处理，根据时间
+            String dateTime = startTime.split(" ")[0];
+            boolean result = isExist(dateTime);
+            if(result){ // 存在当前时间数据，删除历史数据
+                logger.info("存在当前时间数据，删除历史数据,"+dateTime);
+                zkySendDao.deleteRepeatTimeData(dateTime);
+            }
             zkySendService.save(zkySends);
         }
-        logger.info("中科院文件信息同步，文件信息保存");
+        logger.warn("中科院文件信息同步，文件信息保存");
     }
+
+    private boolean isExist(String dateTime) {
+       return zkySendDao.isRepeat(dateTime);
+    }
+
     /**
      * 获取城市分院对照
      * @return
@@ -183,9 +212,9 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
                         dataSyncHandle(endTime,startTime);
                         status = true;
                     }catch(Exception e){
-                        Thread.sleep(10000);
-                        dataSyncHandle(endTime,startTime);
+                        logger.error("同步失败：{}",e);
                     }
+                    Thread.sleep(10000);
                 }
                 if(status){
                     logger.info("中科院文件信息同步失败后处理成功");

@@ -14,5 +14,7 @@ public interface ZkySendDataService {
 
     public void excZkySend() throws InterruptedException;
 
+    public void dataSyncHandle(String endTime, String startTime);
+
 
 }
