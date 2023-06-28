@@ -80,9 +80,11 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 				if(systemConfig.getConfEnable()==1){
 					return systemConfig.getConfValue();
 				}
+			}else{
+				logger.error("getSysConfigById api-admin /system/config/{confId} data is null:"+confId);
 			}
 		}catch (Exception exception){
-			logger.error("getSysConfigById api-admin /system/config/{confId} is not connect");
+			logger.error("getSysConfigById api-admin /system/config/{confId} is not connect:"+confId);
 		}
 		return null;
 	}

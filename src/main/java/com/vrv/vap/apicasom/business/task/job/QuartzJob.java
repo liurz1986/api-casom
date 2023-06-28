@@ -21,8 +21,8 @@ import java.util.List;
  * 2023-06-20
  * @author vrv
  */
-@Component
-@Order(value = 3)
+// @Component
+// @Order(value = 3)
 public class QuartzJob implements CommandLineRunner {
     // 日志
     private Logger logger = LoggerFactory.getLogger(QuartzJob.class);
@@ -78,6 +78,6 @@ public class QuartzJob implements CommandLineRunner {
         if(CollectionUtils.isNotEmpty(list)){
             return list.get(0).getJobCron();
         }
-        return "0 */10 * * * ?";
+        return "0 */2 * * * ?";
     }
 }
