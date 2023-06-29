@@ -173,7 +173,7 @@ hw:
 logging:
   level:
     com.vrv.vap.apicasom: info
-    root: warn
+    root: info
     org:
       elasticsearch:
         client:
