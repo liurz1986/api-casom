@@ -20,7 +20,7 @@ import java.util.Map;
  * @description: 初始化公共信息（token,分院/城市信息,会议室数量信息）
  */
 @Component
-@EnableScheduling 
+@EnableScheduling
 @EnableAsync
 public class InitCommonDataJob {
     private static Logger logger = LoggerFactory.getLogger(InitCommonDataJob.class);
