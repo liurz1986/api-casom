@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -80,10 +81,58 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
         time.put("endTime",endTime);
         try{
             dataSyncHandle(endTime,startTime);
+            threadCompensation(nextDate); // 异步补偿机制
         }catch (Exception e){
             logger.error("中科院文件信息同步失败",e);
             exceptionHandle(endTime,startTime);
         }
+    }
+
+    /**
+     * 防止服务停止：开机后异步补偿机制开始
+     * @param nextDate
+     */
+    private void threadCompensation(String nextDate) {
+        new Thread(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                try{
+                    logger.info("异步补偿机制开始");
+                    String lastTime =  redisUtils.get("time")==null?"":String.valueOf(redisUtils.get("time"));
+                    redisUtils.set("time",nextDate);
+                    if(StringUtils.isEmpty(lastTime)){
+                        logger.info("redis没有存储上次同步的时间，补偿机制不处理！");
+                        return;
+                    }
+                    logger.info("上次同步的时间为："+lastTime);
+                    Date redisLastDate = DateUtil.parseDate(lastTime,DateUtil.Year_Mouth_Day);
+                    Date nextTime  = new Date(DateUtil.addDay(redisLastDate,1).getTime());
+                    Date curNextDate = DateUtil.parseDate(nextDate,DateUtil.Year_Mouth_Day);
+                    if(!curNextDate.after(nextTime)){
+                        logger.info("不存在遗漏情况不执行补全，redis中上次同步时间："+lastTime);
+                        return;
+                    }
+                    Date currDate = DateUtil.parseDate(nextDate,DateUtil.Year_Mouth_Day);
+                    compensationHandle(redisLastDate,currDate);
+                    logger.info("异步补偿机制结束");
+                }catch (Exception e){
+                    logger.error("异步补偿机制异常：{}",e);
+                }
+            }
+        }).start();
+    }
+
+    private void compensationHandle(Date redisLastDate, Date currDate) throws ParseException {
+        Date nextTime  = new Date(DateUtil.addDay(redisLastDate,1).getTime());
+        String nextTimeStr = DateUtil.format(nextTime,DateUtil.Year_Mouth_Day);
+        if(!currDate.after(nextTime)){
+            return;
+        }
+        String startTime = nextTimeStr+" 00:00:00";
+        String endTime = nextTimeStr+" 23:59:59";
+        dataSyncHandle(endTime,startTime);
+        compensationHandle(nextTime,currDate);
     }
 
     private List<ZkySend> getZkySend(String startTime,String endTime,String sendScope,String url) {
