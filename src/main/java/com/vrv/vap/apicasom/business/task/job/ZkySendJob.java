@@ -1,5 +1,6 @@
 package com.vrv.vap.apicasom.business.task.job;
-import com.vrv.vap.apicasom.business.task.service.*;
+
+import com.vrv.vap.apicasom.business.task.service.ZkySendDataService;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import lombok.SneakyThrows;
 import org.quartz.Job;
@@ -7,11 +8,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * 收发件任务

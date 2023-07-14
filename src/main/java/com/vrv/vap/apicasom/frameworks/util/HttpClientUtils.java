@@ -1,25 +1,18 @@
 package com.vrv.vap.apicasom.frameworks.util;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.vrv.vap.apicasom.business.task.service.impl.SystemConfigServiceImpl;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +20,9 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +41,9 @@ public class HttpClientUtils {
     private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     public static String doGet(String url, Map<String, Object> param,Map<String,String> header){
+        logger.info("GET请求：URL，"+url);
+        logger.info("GET请求：请求参数，"+ (param==null?null:JSON.toJSONString(param)));
+        logger.info("GET请求：请求头，"+(header==null?null:JSON.toJSONString(header)));
         // 创建Httpclient对象
         HttpClient httpclient =wrapClient();
 
@@ -110,6 +100,9 @@ public class HttpClientUtils {
     }
 
     public static String doPost(String url, Map<String, Object> param,Map<String,String> header){
+        logger.info("post请求：URL，"+url);
+        logger.info("post请求：请求参数，"+ (param==null?null:JSON.toJSONString(param)));
+        logger.info("post请求：请求头，"+(header==null?null:JSON.toJSONString(header)));
         // 创建Httpclient对象
         HttpClient httpClient = wrapClient();
         HttpResponse response = null;
