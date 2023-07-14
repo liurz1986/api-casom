@@ -3,6 +3,7 @@ package com.vrv.vap.apicasom.business.task.job;
 import com.vrv.vap.apicasom.business.task.service.ZkySendDataService;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import lombok.SneakyThrows;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
  * 2023-06-20
  * @author vrv
  */
+@DisallowConcurrentExecution // 禁止同一个任务并发执行
 public class ZkySendJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(ZkySendJob.class);
     private ZkySendDataService zkySendDataService= SpringUtil.getBean(ZkySendDataService.class);

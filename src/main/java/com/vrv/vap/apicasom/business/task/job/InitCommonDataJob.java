@@ -6,6 +6,7 @@ import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.spring.SpringUtil;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -19,6 +20,7 @@ import java.util.Map;
  * @since: 2023/2/17 15:12
  * @description: 初始化公共信息（token,分院/城市信息,会议室数量信息）
  */
+@DisallowConcurrentExecution // 禁止同一个任务并发执行
 public class InitCommonDataJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(InitCommonDataJob.class);
 

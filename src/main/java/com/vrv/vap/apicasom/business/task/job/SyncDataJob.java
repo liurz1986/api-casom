@@ -7,6 +7,7 @@ import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.quartz.QuartzFactory;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @since: 2023/2/16 17:04
  * @description:
  */
+@DisallowConcurrentExecution  // 禁止同一个任务并发执行
 public class SyncDataJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(SyncDataJob.class);
     private ReservationHwMeetingDataServiceImpl reservationHwMeetingDataService= SpringUtil.getBean(ReservationHwMeetingDataServiceImpl.class);
