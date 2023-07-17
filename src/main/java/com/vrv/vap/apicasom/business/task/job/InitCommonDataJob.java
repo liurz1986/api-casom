@@ -32,13 +32,11 @@ public class InitCommonDataJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try{
-            logger.info("初始化公共信息（token,分院/城市信息,会议室数量信息）任务执行");
-           /* token = meetingHttpService.getToken(0);
-            hwMeetingService.updateToken(token);*/
+            logger.info("初始化公共信息（分院/城市信息,会议室数量信息）任务执行");
             updateCity();
             initMeetingRooms();
         }catch (Exception e){
-            logger.error("初始化公共信息（token,分院/城市信息,会议室数量信息）任务执行异常:{}",e);
+            logger.error("初始化公共信息（分院/城市信息,会议室数量信息）任务执行异常:{}",e);
         }
 
     }

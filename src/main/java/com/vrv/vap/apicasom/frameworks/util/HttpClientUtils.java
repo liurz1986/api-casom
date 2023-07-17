@@ -87,6 +87,7 @@ public class HttpClientUtils {
                 logger.error("请求接口失败,接口返回statusCode:"+statusCode);
                 HttpEntity entity =  response.getEntity();
                 logger.error("请求接口失败，接口返回entity:"+(entity == null?null: JSON.toJSONString(entity)));
+                throw new RuntimeException("请求接口失败,接口返回statusCode:"+statusCode);
             }
         } catch (Exception e) {
             logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
@@ -143,6 +144,7 @@ public class HttpClientUtils {
                 logger.error("请求接口失败,接口返回statusCode:"+statusCode);
                 HttpEntity entity =  response.getEntity();
                 logger.error("请求接口失败，接口返回entity:"+(entity == null?null: JSON.toJSONString(entity)));
+                throw new RuntimeException("请求接口失败,接口返回statusCode:"+statusCode);
             }
         } catch (Exception e) {
             logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
