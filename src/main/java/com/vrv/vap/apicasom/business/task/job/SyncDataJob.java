@@ -6,6 +6,7 @@ import com.vrv.vap.apicasom.frameworks.util.CronUtil;
 import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.quartz.QuartzFactory;
 import com.vrv.vap.jpa.spring.SpringUtil;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -29,15 +30,18 @@ public class SyncDataJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(SyncDataJob.class);
     private ReservationHwMeetingDataServiceImpl reservationHwMeetingDataService= SpringUtil.getBean(ReservationHwMeetingDataServiceImpl.class);
     private JdbcTemplate jdbcTemplate= SpringUtil.getBean(JdbcTemplate.class);
+    @SneakyThrows
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try{
+            long startTime = System.currentTimeMillis();
             Map<String,String> cronmap = (Map<String,String>)jobExecutionContext.getJobDetail().getJobDataMap().get(QuartzFactory.CUSTOM_DATA_KEY);
             String cron = cronmap.get("cron");
             logger.info("定时执行会议相关数据同步任务开始");
             syncMeetingData(cron);
-            logger.info("定时执行会议相关数据同步任务结束");
+            logger.info("定时执行会议相关数据同步任务结束,总花费的时间："+(System.currentTimeMillis()-startTime)/1000);
         }catch (Exception e){
+            e.printStackTrace();
             logger.error("定时执行会议相关数据同步任务异常:{}",e);
         }
 

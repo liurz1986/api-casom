@@ -3,6 +3,7 @@ package com.vrv.vap.apicasom.frameworks.util;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -78,11 +79,14 @@ public class HttpClientUtils {
             }
             // 执行请求
             response = httpclient.execute(httpGet);
+            int statusCode = response.getStatusLine().getStatusCode();
             // 判断返回状态是否为200
-            if (response.getStatusLine().getStatusCode() == 200) {
+            if (statusCode == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
             }else{
-                logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
+                logger.error("请求接口失败,接口返回statusCode:"+statusCode);
+                HttpEntity entity =  response.getEntity();
+                logger.error("请求接口失败，接口返回entity:"+(entity == null?null: JSON.toJSONString(entity)));
             }
         } catch (Exception e) {
             logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());
@@ -131,12 +135,14 @@ public class HttpClientUtils {
             }
             // 执行http请求
             response = httpClient.execute(httpPost);
-
+           int statusCode = response.getStatusLine().getStatusCode();
             // 判断返回状态是否为200
-            if (response.getStatusLine().getStatusCode() == 200) {
+            if (statusCode == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
             }else{
-                logger.error("{}请求失败！接口返回：{}",url,response.getEntity().toString());
+                logger.error("请求接口失败,接口返回statusCode:"+statusCode);
+                HttpEntity entity =  response.getEntity();
+                logger.error("请求接口失败，接口返回entity:"+(entity == null?null: JSON.toJSONString(entity)));
             }
         } catch (Exception e) {
             logger.error("{}请求失败，msg={}",url,e.getLocalizedMessage());

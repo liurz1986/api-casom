@@ -114,6 +114,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String tokenUrl = url +"/conf-portal" + MeetingUrlConstant.TOKEN_URL;
         Map<String, String> header = new HashMap<>();
         String encode = Base64Utils.encodeBase64(username + ":" + password);
+        logger.warn("获取token的用户名:"+username+"  ,,密码: "+password);
         logger.warn("get token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
         header.put("Content-type","application/json;charset=UTF-8");
