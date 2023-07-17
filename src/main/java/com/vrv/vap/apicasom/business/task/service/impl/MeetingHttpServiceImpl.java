@@ -125,14 +125,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             tokenRes = token.getUuid();
         } catch (Exception ex) {
             logger.error("get token error,msg={}", ex.getLocalizedMessage());
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getToken");
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            throw new RuntimeException("获取token异常");
         }
-
         return tokenRes;
     }
 
@@ -397,18 +391,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
         } catch (Exception ex) {
             logger.error("查询预约会议列表失败，msg={}", ex.getLocalizedMessage());
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getNowMeetingList");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("startTime", startTime);
-            jsonObject.put("endTime", endTime);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            throw new RuntimeException("查询预约会议列表异常");
         }
-
         return ids;
     }
 

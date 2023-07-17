@@ -1,8 +1,11 @@
 package com.vrv.vap.apicasom.business.task.job;
 
 import com.alibaba.fastjson.JSON;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingService;
+import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.impl.ReservationHwMeetingDataServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
+import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.quartz.QuartzFactory;
 import com.vrv.vap.jpa.spring.SpringUtil;
@@ -28,6 +31,9 @@ import java.util.Map;
 @DisallowConcurrentExecution  // 禁止同一个任务并发执行
 public class SyncDataJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(SyncDataJob.class);
+    private HwMeetingService hwMeetingService= SpringUtil.getBean(HwMeetingService.class);
+    private MeetingHttpService meetingHttpService= SpringUtil.getBean(MeetingHttpService.class);
+    private RedisUtils redisUtils= SpringUtil.getBean(RedisUtils.class);
     private ReservationHwMeetingDataServiceImpl reservationHwMeetingDataService= SpringUtil.getBean(ReservationHwMeetingDataServiceImpl.class);
     private JdbcTemplate jdbcTemplate= SpringUtil.getBean(JdbcTemplate.class);
     @SneakyThrows
@@ -41,7 +47,6 @@ public class SyncDataJob implements Job {
             syncMeetingData(cron);
             logger.info("定时执行会议相关数据同步任务结束,总花费的时间："+(System.currentTimeMillis()-startTime)/1000);
         }catch (Exception e){
-            e.printStackTrace();
             logger.error("定时执行会议相关数据同步任务异常:{}",e);
         }
 
@@ -52,9 +57,17 @@ public class SyncDataJob implements Job {
      */
     public void syncMeetingData( String cron){
         logger.info("定时执行会议相关数据同步任务开始,cron:"+cron);
+        String token = meetingHttpService.getToken(0);
+        hwMeetingService.updateToken(token);
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
-        String startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+        Object meetingTimeObj = redisUtils.get("meetingTime");
+        String startTime = null;
+        if(null == meetingTimeObj){
+            startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+        }else{
+            startTime = String.valueOf(meetingTimeObj);
+        }
         logger.warn("预约会议调度，时间是{}~{}",startTime,endTime);
         List<String> ids = reservationHwMeetingDataService.queryMeetingIds(startTime,endTime);
         if(CollectionUtils.isEmpty(ids)){
@@ -67,6 +80,8 @@ public class SyncDataJob implements Job {
         logger.warn("预约会议调度，会议详情保存成功");
         reservationHwMeetingDataService.handleMeetingAlarm(ids);
         logger.warn("预约会议调度，会议告警保存成功");
+        // redis保存同步时间，为了下次同步时开始时间
+        redisUtils.set("meetingTime",endTime);
     }
 
 }

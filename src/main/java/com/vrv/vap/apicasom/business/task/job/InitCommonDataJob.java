@@ -33,8 +33,8 @@ public class InitCommonDataJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try{
             logger.info("初始化公共信息（token,分院/城市信息,会议室数量信息）任务执行");
-            token = meetingHttpService.getToken(0);
-            hwMeetingService.updateToken(token);
+           /* token = meetingHttpService.getToken(0);
+            hwMeetingService.updateToken(token);*/
             updateCity();
             initMeetingRooms();
         }catch (Exception e){
