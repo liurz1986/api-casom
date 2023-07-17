@@ -58,8 +58,8 @@ public class QuartzJob implements CommandLineRunner {
             Map<String,String> params = new HashMap<>();
             params.put("cron",synchTimeCron);
             quartzFactory.addJob(meetingJobName+jobGuid, SyncDataJob.class, synchTimeCron, params);
-            //初始化公共信息（token,分院/城市信息,会议室数量信息）
-            logger.info("初始化公共信息（token,分院/城市信息,会议室数量信息）任务频次:"+meetingToken);
+            //初始化公共信息（分院/城市信息,会议室数量信息）
+            logger.info("初始化公共信息（分院/城市信息,会议室数量信息）任务频次:"+meetingToken);
             jobGuid =  UUIDUtils.get32UUID();
             quartzFactory.addJob(commonMeetingJobName+jobGuid, InitCommonDataJob.class, meetingToken, jobGuid);
         }catch (Exception e){

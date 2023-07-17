@@ -24,11 +24,6 @@ public class ZkyUnitServiceImpl extends BaseServiceImpl<ZkyUnitBean, String> imp
     private ZkyUnitRespository zkyUnitRespository;
 
     @Override
-    public BaseRepository<ZkyUnitBean, String> getRepository() {
-        return zkyUnitRespository;
-    }
-
-    @Override
     public Map<String, ZkyUnitBean> initCity() {
         Map<String, ZkyUnitBean> zkyUnitBeanMap = new ConcurrentHashMap<>();
         List<ZkyUnitBean> zkyUnitBeans = findAll();
@@ -37,5 +32,10 @@ public class ZkyUnitServiceImpl extends BaseServiceImpl<ZkyUnitBean, String> imp
             zkyUnitBeanMap.put(entry.getKey(),entry.getValue().get(0));
         }
         return zkyUnitBeanMap;
+    }
+
+    @Override
+    public BaseRepository<ZkyUnitBean, String> getRepository() {
+        return zkyUnitRespository;
     }
 }
