@@ -15,14 +15,9 @@ import java.util.Map;
 @Service
 public class HwMeetingServiceImpl implements HwMeetingService {
 
-    public static String token = null;
 
     public static Map<String, ZkyUnitBean> zkyUnitBeanMap = new HashMap<>();
 
-    @Override
-    public void updateToken(String newToken) {
-        token = newToken;
-    }
 
 
     @Override

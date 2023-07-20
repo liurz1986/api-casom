@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.vrv.vap.apicasom.business.task.bean.ProcessJob;
 import com.vrv.vap.apicasom.business.task.bean.TimeBean;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
+import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.SystemConfigService;
+import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.jpa.common.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,9 @@ public class InitDataJob implements CommandLineRunner {
 
     @Autowired
     private HwMeetingDataService historyHwMeetingDataService;
+
+    @Autowired
+    private MeetingHttpService meetingHttpService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -119,7 +124,13 @@ public class InitDataJob implements CommandLineRunner {
             }
         }
         logger.warn("补全历史数据开始!开始时间={}，结束时间={}",startTime,endTime);
-
+        String token = meetingHttpService.getToken(0);
+        if(StringUtils.isEmpty(token)){
+            logger.error("获取token为空,请确认！");
+            return;
+        }
+        logger.info("token的值："+token);
+        MeetingUtil.token= token;
         // 处理数据
         List<String> ids = historyHwMeetingDataService.queryMeetingIds(startTime,endTime);
 

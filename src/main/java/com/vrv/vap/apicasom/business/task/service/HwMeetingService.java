@@ -12,13 +12,6 @@ import java.util.Map;
 public interface HwMeetingService {
 
     /**
-     * 更新token
-     * @param newToken
-     */
-    public void updateToken(String newToken);
-
-
-    /**
      * 更新城市信息
      * @param map
      */

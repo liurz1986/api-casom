@@ -5,12 +5,14 @@ import com.vrv.vap.apicasom.business.task.service.HwMeetingService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.impl.ReservationHwMeetingDataServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.CronUtil;
+import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.quartz.QuartzFactory;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -57,7 +59,12 @@ public class SyncDataJob implements Job {
      */
     public void syncMeetingData(String cron){
         String token = meetingHttpService.getToken(0);
-        hwMeetingService.updateToken(token);
+        if(StringUtils.isEmpty(token)){
+            logger.error("获取token为空,请确认！");
+            return;
+        }
+        logger.info("token的值："+token);
+        MeetingUtil.token= token;
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
         Object meetingTimeObj = redisUtils.get("meetingTime");

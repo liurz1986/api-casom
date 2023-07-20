@@ -7,10 +7,7 @@ import com.vrv.vap.apicasom.business.task.bean.*;
 import com.vrv.vap.apicasom.business.task.bean.httpres.hwmeetingbean.*;
 import com.vrv.vap.apicasom.business.task.constant.MeetingUrlConstant;
 import com.vrv.vap.apicasom.business.task.service.*;
-import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
-import com.vrv.vap.apicasom.frameworks.util.CronUtil;
-import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
-import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
+import com.vrv.vap.apicasom.frameworks.util.*;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -80,19 +77,13 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public Map<String, String> getHeader() {
         // 初始化城市
         Map<String,ZkyUnitBean> zkyUnitMap = HwMeetingServiceImpl.zkyUnitBeanMap;
-        String hwToken = HwMeetingServiceImpl.token;
         if (zkyUnitBeanMap.isEmpty() && zkyUnitMap.isEmpty()) {
             zkyUnitBeanMap = zkyUnitService.initCity();
         }else if(zkyUnitBeanMap.isEmpty() && !zkyUnitMap.isEmpty()){
             zkyUnitBeanMap = zkyUnitMap;
         }
         Map<String, String> header = new HashMap<>();
-        if (StringUtils.isBlank(token) && StringUtils.isBlank(hwToken)) {
-            token = getToken(0);
-        }else if(StringUtils.isBlank(token) && StringUtils.isNotBlank(hwToken)){
-            token = hwToken;
-        }
-        header.put("token", token);
+        header.put("token", MeetingUtil.token);
         header.put("Content-type","application/json;charset=UTF-8");
         return header;
     }
