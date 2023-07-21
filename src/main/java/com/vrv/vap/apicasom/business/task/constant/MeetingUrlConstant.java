@@ -31,7 +31,7 @@ public class MeetingUrlConstant {
     public static String NOW_PARTICIPANT_URL="/online/conferences/{0}/participants/conditions";
 
     // 会议室
-    public static String MEETING_ROOMS_URL = "/meetingrooms/condition";
+    public static String MEETING_ROOMS_URL = "/meetingrooms/conditions";
 
     // 交换箱文件数
     public static String EXCHANGE_FILES_URL = "/api/statistics/summary";
