@@ -3,7 +3,11 @@ package com.vrv.vap.apicasom.business.task.service.impl;
 import com.vrv.vap.apicasom.business.task.dao.HwMeetingDao;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
+import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +20,40 @@ import java.util.List;
  */
 @Service("historyHwMeetingDataService")
 public class HistoryHwMeetingDataServiceImpl implements HwMeetingDataService {
-
+    private static Logger logger = LoggerFactory.getLogger(HistoryHwMeetingDataServiceImpl.class);
     @Autowired
     private MeetingHttpService meetingHttpService;
 
     @Autowired
     private HwMeetingDao hwMeetingDao;
 
+    /**
+     * 同步数据
+     * @param startTime
+     * @param endTime
+     *
+     * 2023-7-21
+     */
+    @Override
+    public void syncData(String startTime,String endTime){
+        String token = meetingHttpService.getToken(0);
+        if(StringUtils.isEmpty(token)){
+            logger.error("获取token为空,请确认！");
+            return;
+        }
+        logger.info("token的值："+token);
+        MeetingUtil.token= token;
+        logger.info("历史会议数据同步:历史会议列表");
+        List<String> ids = queryMeetingIds(startTime,endTime);
+        if(CollectionUtils.isEmpty(ids)){
+            logger.warn("历史会议列表id为空,不处理");
+            return;
+        }
+        logger.info("历史会议数据同步:历史会议数据同步");
+        handleMeetingInfo(ids);
+        logger.info("历史会议数据同步:历史会议告警信息数据同步");
+        handleMeetingAlarm(ids);
+    }
     @Override
     public List<String> queryMeetingIds(String startTime, String endTime) {
         List<String> ids = meetingHttpService.getHistoryMeetingList(startTime,endTime,0);

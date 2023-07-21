@@ -164,11 +164,11 @@ hw:
     sys:
       username: admin
       password: admin@1234
-    organizationId:
-    token: 0 */10 * * * ?
+    organizationId: 8ab9e3c4-69ce-04e5-0169-ce058e5d1234
+    token: 0 */2 * * * ?
     url: http://192.168.118.228:9888
     time:  0 */9 * * * ?
-
+    histime:  0 */10 * * * ?
 logging:
   level:
     com.vrv.vap.apicasom: info

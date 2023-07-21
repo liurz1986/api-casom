@@ -58,13 +58,6 @@ public class SyncDataJob implements Job {
      * 同步会议数据
      */
     public void syncMeetingData(String cron){
-        String token = meetingHttpService.getToken(0);
-        if(StringUtils.isEmpty(token)){
-            logger.error("获取token为空,请确认！");
-            return;
-        }
-        logger.info("token的值："+token);
-        MeetingUtil.token= token;
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
         Object meetingTimeObj = redisUtils.get("meetingTime");
@@ -76,17 +69,7 @@ public class SyncDataJob implements Job {
             startTime = String.valueOf(meetingTimeObj);
         }
         logger.warn("预约会议调度，时间是{}~{}",startTime,endTime);
-        List<String> ids = reservationHwMeetingDataService.queryMeetingIds(startTime,endTime);
-        if(CollectionUtils.isEmpty(ids)){
-            logger.warn("获取预约会议调度id为空,不处理");
-            return;
-        }
-        logger.warn("预约会议调度，会议有{}个！",ids.size());
-        logger.info("预约会议调度所有会议id："+(JSON.toJSONString(ids)));
-        reservationHwMeetingDataService.handleMeetingInfo(ids);
-        logger.warn("预约会议调度，会议详情保存成功");
-        reservationHwMeetingDataService.handleMeetingAlarm(ids);
-        logger.warn("预约会议调度，会议告警保存成功");
+        reservationHwMeetingDataService.syncData(startTime,endTime);
         // redis保存同步时间，为了下次同步时开始时间
         redisUtils.set("meetingTime",endTime);
     }

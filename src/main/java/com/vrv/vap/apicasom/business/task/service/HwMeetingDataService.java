@@ -11,6 +11,12 @@ import java.util.List;
  */
 public interface HwMeetingDataService {
     /**
+     * 同步数据
+     * @param startTime
+     * @param endTime
+     */
+    public void syncData(String startTime,String endTime);
+    /**
      * 通过时间  查询会议ID
      * @param startTime
      * @param endTime
