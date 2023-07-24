@@ -54,10 +54,14 @@ public class InitCommonDataJob implements Job {
      * 会议室信息同步
      */
     public void initMeetingRooms(){
-        logger.info("初始会议室信息开始");
-        int total = meetingHttpService.initMeetingRooms();
-        logger.info("会议室数量："+total);
-        redisUtils.set("MeetingRooms",total);
+        try{
+            logger.info("初始会议室信息开始");
+            int total = meetingHttpService.initMeetingRooms();
+            logger.info("会议室数量："+total);
+            redisUtils.set("MeetingRooms",total);
+        }catch (Exception e){
+            logger.error("获取会议室信息异常",e);
+        }
     }
 
 

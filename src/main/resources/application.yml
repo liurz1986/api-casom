@@ -164,11 +164,15 @@ hw:
     sys:
       username: admin
       password: admin@1234
+      register:   # sys-portal会议室获取时需注册
+        sn: 0200040144508844
+        hd: 212612240G0000649
     organizationId: 8ab9e3c4-69ce-04e5-0169-ce058e5d1234
     token: 0 */2 * * * ?
     url: http://192.168.118.228:9888
-    time:  0 */9 * * * ?
-    histime:  0 */10 * * * ?
+    time:  0 */10 * * * ?   #已预约会议数据同步频次
+    histime:  0 */8 * * * ?   #历史会议同步频次
+
 logging:
   level:
     com.vrv.vap.apicasom: info

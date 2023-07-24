@@ -142,8 +142,7 @@ public class HttpClientUtils {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
             }else{
                 logger.error("请求接口失败,接口返回statusCode:"+statusCode);
-                HttpEntity entity =  response.getEntity();
-                logger.error("请求接口失败，接口返回entity:"+(entity == null?null: JSON.toJSONString(entity)));
+                logger.error("请求接口失败，接口返回response"+(response == null?null: JSON.toJSONString(response)));
                 throw new RuntimeException("请求接口失败,接口返回statusCode:"+statusCode);
             }
         } catch (Exception e) {

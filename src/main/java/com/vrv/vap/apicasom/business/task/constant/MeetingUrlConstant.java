@@ -33,9 +33,7 @@ public class MeetingUrlConstant {
     // 会议室
     public static String MEETING_ROOMS_URL = "/meetingrooms/conditions";
 
-    // 交换箱文件数
-    public static String EXCHANGE_FILES_URL = "/api/statistics/summary";
+    // 获取会议室前注册
+    public static String REGISTER = "/noauth/deviceinfo";
 
-    // 交换箱用户数据
-    public static String EXCHANGE_USRS_URL = "/api/statistics/user";
 }

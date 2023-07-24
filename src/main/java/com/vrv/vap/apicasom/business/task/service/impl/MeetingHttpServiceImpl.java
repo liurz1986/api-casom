@@ -47,6 +47,12 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Value("${hw.meeting.sys.password}")
     private String sysPassword;
 
+    @Value("${hw.meeting.sys.register.hd}")
+    private String registerHd;
+
+    @Value("${hw.meeting.sys.register.sn}")
+    private String registerSn;
+
     @Autowired
     private SystemConfigService systemConfigService;
 
@@ -491,8 +497,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 alarm.setAlarmNo(content.getAlarmNo());
                 alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
                 alarm.setAlarmType(content.getName());
-//                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
-//                alarm.setSeverity(content.getSeverity());
                 alarm.setAlarmStatus("current");
                 alarms.add(alarm);
             }
@@ -514,10 +518,14 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
 
     @Override
     public int initMeetingRooms(){
-        if(StringUtils.isBlank(organizationId)){
-            return 0;
-        }
+        // 注册
+        register();
+        // 获取token
         String token = getSysToken();
+        // 获取会议室接口
+        if(StringUtils.isBlank(organizationId)){
+            throw new RuntimeException("获取会议室列表时,组织结构id不能为空");
+        }
         Map<String,String> header = new HashMap<>();
         header.put("token",token);
         Map<String,Object> param = new HashMap<>();
@@ -534,6 +542,29 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         return 0;
     }
 
+    /**
+     * 获取会议室时，首先注册   2023-07-24
+     * curl -k -H "Content-Type:application/json" -X POST -d '{"sn":"0200040144508844","hd":"212612240G0000649"}'
+     * "https://200.1.26.50/cmc-portal/noauth/deviceinfo"
+     */
+    private void register(){
+        Map<String,String> header = new HashMap<>();
+        header.put("Content-Type","application/json");
+        if(StringUtils.isEmpty(registerSn)){
+            logger.error("执行注册时,sn的值不能为空");
+            throw new RuntimeException("执行注册时,sn的值不能为空");
+        }
+        if(StringUtils.isEmpty(registerHd)){
+            logger.error("执行注册时,hd的值不能为空");
+            throw new RuntimeException("执行注册时,hd的值不能为空");
+        }
+        Map<String,Object> param = new HashMap<>();
+        param.put("sn",registerSn);
+        param.put("hd",registerHd);
+        String roomUrl = url+"/cmc-portal"+MeetingUrlConstant.REGISTER;
+        String res = HttpClientUtils.doPost(roomUrl, param, header);
+        logger.info("注册接口反回内容：{}",res);
+    }
     public String getSysToken(){
         String tokenRes = "";
         String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
@@ -556,8 +587,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             tokenRes = token.getUuid();
         } catch (Exception ex) {
             logger.error("get token error,msg={}", ex.getLocalizedMessage());
+            throw new RuntimeException(ex);
         }
-
         return tokenRes;
     }
 }
