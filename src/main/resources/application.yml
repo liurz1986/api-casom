@@ -165,7 +165,7 @@ hw:
       username: admin
       password: admin@1234
       register:   # sys-portal会议室获取时需注册
-        sn: 0200040144508844
+        sn: $0200040144508844$ #后期更换值时，保留前后$
         hd: 212612240G0000649
     organizationId: 8ab9e3c4-69ce-04e5-0169-ce058e5d1234
     token: 0 */2 * * * ?

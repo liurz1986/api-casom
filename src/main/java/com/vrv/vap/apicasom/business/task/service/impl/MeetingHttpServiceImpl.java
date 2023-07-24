@@ -549,12 +549,13 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      * "https://200.1.26.50/cmc-portal/noauth/deviceinfo"
      */
     private void register(){
-        Map<String,String> header = new HashMap<>();
+;       Map<String,String> header = new HashMap<>();
         header.put("Content-Type","application/json");
         if(StringUtils.isEmpty(registerSn)){
             logger.error("执行注册时,sn的值不能为空");
             throw new RuntimeException("执行注册时,sn的值不能为空");
         }
+        registerSn = registerSn.replace("$","");
         if(StringUtils.isEmpty(registerHd)){
             logger.error("执行注册时,hd的值不能为空");
             throw new RuntimeException("执行注册时,hd的值不能为空");
