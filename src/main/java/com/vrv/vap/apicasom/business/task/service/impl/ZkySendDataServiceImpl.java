@@ -83,7 +83,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
             dataSyncHandle(endTime,startTime);
             threadCompensation(nextDate); // 异步补偿机制
         }catch (Exception e){
-            logger.error("中科院文件信息同步失败",e);
+            logger.error("cas文件信息同步失败",e);
             exceptionHandle(endTime,startTime);
         }
     }
@@ -154,13 +154,13 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
     }
 
     /**
-     * 中科院文件信息同步
+     * cas文件信息同步
      * @param endTime
      * @param startTime
      */
     @Override
     public void dataSyncHandle(String endTime, String startTime){
-        logger.warn("中科院文件信息同步开始，时间范围："+startTime+"-"+endTime);
+        logger.warn("cas文件信息同步开始，时间范围："+startTime+"-"+endTime);
         getZkyCityMap();
         List<ZkySend> zkySends = new ArrayList<>();
         List<ZkySend> zkySendList = getZkySend(startTime,endTime,"院部机关",zkySendUrl);
@@ -186,7 +186,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
             });
             zkySends.addAll(zkyList);
         }
-        logger.info("中科院文件信息同步，远程文件同步，数据量={}",zkySends.size());
+        logger.info("cas文件信息同步，远程文件同步，数据量={}",zkySends.size());
         List<ZkySend> zkySendLocalList = getZkySend(startTime,endTime,"院部机关",zkySendLocalUrl);
         List<ZkySend> zkyLocalList = getZkySend(startTime,endTime,"全院",zkySendLocalUrl);
 
@@ -210,7 +210,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
             });
             zkySends.addAll(zkyLocalList);
         }
-        logger.info("中科院文件信息同步，本地文件同步，数据量（远程+本地）={}",zkySends.size());
+        logger.info("cas文件信息同步，本地文件同步，数据量（远程+本地）={}",zkySends.size());
 
         if(CollectionUtils.isNotEmpty(zkySends)){
             // 数据去重处理，根据时间
@@ -222,7 +222,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
             }
             zkySendService.save(zkySends);
         }
-        logger.warn("中科院文件信息同步，文件信息保存");
+        logger.warn("cas文件信息同步，文件信息保存");
     }
 
     private boolean isExist(String dateTime) {
@@ -249,7 +249,7 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
      * @param startTime
      */
     private void exceptionHandle(String endTime, String startTime) throws InterruptedException {
-        logger.info("中科院文件信息同步失败后处理开始,时间范围："+startTime+"-"+endTime);
+        logger.info("cas文件信息同步失败后处理开始,时间范围："+startTime+"-"+endTime);
         Thread.sleep(10000);
         new Thread(new Runnable() {
             @SneakyThrows
@@ -266,9 +266,9 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
                     Thread.sleep(10000);
                 }
                 if(status){
-                    logger.info("中科院文件信息同步失败后处理成功");
+                    logger.info("cas文件信息同步失败后处理成功");
                 }else{
-                    logger.info("中科院文件信息同步失败后处理失败,时间范围："+startTime+"-"+endTime);
+                    logger.info("cas文件信息同步失败后处理失败,时间范围："+startTime+"-"+endTime);
                 }
             }
         }).start();
