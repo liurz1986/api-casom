@@ -577,7 +577,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         if(StringUtils.isNotBlank(sysPassword)){
             throw new RuntimeException("获取token时,用户密码不能为空");
         }
-        logger.info("获取token时(sys-portal),用户名："+sysUserName+"---密码："+sysPassword);
+        logger.info("获取token时(sys-portal),用户名："+sysUserName+" ===密码："+sysPassword);
         String encode = Base64Utils.encodeBase64(sysUserName+":"+sysPassword);
         logger.warn("get sys token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
