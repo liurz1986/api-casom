@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -559,7 +560,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             throw new RuntimeException("执行注册时,hd的值不能为空");
         }
         Map<String,Object> param = new HashMap<>();
-        param.put("sn",registerSn);
+        String sn=new BigDecimal(registerSn).toString();
+        param.put("sn",sn);
         param.put("hd",registerHd);
         String roomUrl = url+"/cmc-portal"+MeetingUrlConstant.REGISTER;
         String res = HttpClientUtils.doPost(roomUrl, param, header);
