@@ -571,14 +571,14 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public String getSysToken(){
         String tokenRes = "";
         String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
+        logger.info("获取token时(sys-portal),用户名："+sysUserName+" ===密码："+sysPassword);
         Map<String, String> header = new HashMap<>();
         if(StringUtils.isEmpty(sysUserName)){
             throw new RuntimeException("获取token时,用户名不能为空");
         }
-        if(StringUtils.isNotBlank(sysPassword)){
+        if(StringUtils.isEmpty(sysPassword)){
             throw new RuntimeException("获取token时,用户密码不能为空");
         }
-        logger.info("获取token时(sys-portal),用户名："+sysUserName+" ===密码："+sysPassword);
         String encode = Base64Utils.encodeBase64(sysUserName+":"+sysPassword);
         logger.warn("get sys token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
