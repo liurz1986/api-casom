@@ -529,6 +529,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
         Map<String,String> header = new HashMap<>();
         header.put("token",token);
+        header.put("Content-type","application/json;charset=UTF-8");
         Map<String,Object> param = new HashMap<>();
         param.put("organizationId",organizationId);
         param.put("searchtree",false);
@@ -561,8 +562,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             throw new RuntimeException("执行注册时,hd的值不能为空");
         }
         Map<String,Object> param = new HashMap<>();
-        String sn=new BigDecimal(registerSn).toString();
-        param.put("sn",sn);
+        param.put("sn",registerSn);
         param.put("hd",registerHd);
         String roomUrl = url+"/cmc-portal"+MeetingUrlConstant.REGISTER;
         String res = HttpClientUtils.doPost(roomUrl, param, header);
