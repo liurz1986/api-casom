@@ -137,3 +137,5 @@ CREATE TABLE IF NOT EXISTS `zky_print_user_org`  (
                                        `import_time` datetime(0) DEFAULT NULL COMMENT '导入时间',
                                        PRIMARY KEY (`user_name`) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COMMENT='用户打印机构数据';
+-- changeset liurz:20230803-zky labels:"修改字段类型"
+ALTER TABLE    `hw_meeting_info` modify  COLUMN `participant_unity` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '参会节点'  ;

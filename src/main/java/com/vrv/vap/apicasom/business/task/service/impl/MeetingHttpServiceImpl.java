@@ -122,7 +122,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
-            logger.error("get token error,msg={}", ex.getLocalizedMessage());
+            logger.error("get token error,msg={}", ex);
             throw new RuntimeException("获取token异常");
         }
         return tokenRes;
@@ -139,21 +139,39 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         param.put("startTime", startTime+" UTC");
         param.put("endTime", endTime+" UTC");
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
+        urlStr.replace("{page}","0");
         try {
             String res = HttpClientUtils.doPost(urlStr, param, header);
             logger.warn("getHistoryMeetingList 接口返回：{}",res);
             HistoryList historyList = gson.fromJson(res, HistoryList.class);
-            List<Content> contentList = new ArrayList<>();
-            if (historyList != null) {
-                contentList.addAll(historyList.getContent());
-            }
-
-            if (CollectionUtils.isNotEmpty(contentList)) {
-                List<String> ids = contentList.stream().map(Content::getId).collect(Collectors.toList());
+            List<String> ids = getMettingIds(historyList);
+            if(CollectionUtils.isNotEmpty(ids)){
                 result.addAll(ids);
             }
+            int total = historyList.getTotalElements();
+            logger.info("历史会议列表总记录数："+total);
+            // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
+            if(MeetingUrlConstant.size >= total ){
+                return result;
+            }
+            int page = total/MeetingUrlConstant.size;
+            if(total >(page*MeetingUrlConstant.size)){
+                page = page+1;
+            }
+            logger.info("历史会议列表总记录数大于每页数量时处理，page为"+page);
+            for(int i = 1;i <= page;i++){
+                urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
+                urlStr =  urlStr.replace("{page}",i+"");
+                res = HttpClientUtils.doPost(urlStr, param, header);
+                logger.warn("getHistoryMeetingList 接口返回：{}",res);
+                HistoryList historyListRe = gson.fromJson(res, HistoryList.class);
+                List<String> idsRe = getMettingIds(historyListRe);
+                if(CollectionUtils.isNotEmpty(idsRe)){
+                    result.addAll(idsRe);
+                }
+            }
         } catch (Exception ex) {
-            logger.error("查询时间段在{}到{}的历史会议记录错误！msg={}", startTime, endTime, ex.getLocalizedMessage());
+            logger.error("查询时间段在{}到{}的历史会议记录错误！msg={}", startTime, endTime, ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getHistoryMeetingList");
@@ -166,6 +184,18 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             QueueUtil.put(meetingQueueVo);
         }
         return result;
+    }
+
+    private List<String> getMettingIds(HistoryList historyList) {
+        List<Content> contentList = new ArrayList<>();
+        if (historyList != null) {
+            contentList.addAll(historyList.getContent());
+        }
+        if (CollectionUtils.isNotEmpty(contentList)) {
+            List<String> ids = contentList.stream().map(Content::getId).collect(Collectors.toList());
+            return ids;
+        }
+        return new ArrayList<>();
     }
 
     /**
@@ -187,7 +217,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             saveMeetingParticipant(meetingInfo);
             logger.warn("历史会议{}会议节点保存成功！",id);
         } catch (Exception ex) {
-            logger.error("获取历史会议-会议ID为{}的会议详情失败！msg={}", id, ex.getLocalizedMessage());
+            logger.error("获取历史会议-会议ID为{}的会议详情失败！msg={}", id, ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getHistoryMeetingInfo");
@@ -326,34 +356,43 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     @Override
     public void getHistoryMeetingAlarm(String id, Integer errorNum) {
+        List<AlarmVo> result = new ArrayList<>();
         Map<String, String> header = getHeader();
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_ALARM_URL;
-        urlStr = urlStr.replace("{0}", id);
+        urlStr = urlStr.replace("{0}", id).replace("{page}", "0");
         try {
             Map<String,Object> param = new HashMap<>();
             String res = HttpClientUtils.doPost(urlStr, param, header);
             logger.warn("getHistoryMeetingAlarm 接口返回：{}",res);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
-            List<HwMeetingAlarm> alarms = new ArrayList<>();
-
-            for (AlarmVo content : contentList) {
-                HwMeetingAlarm alarm = new HwMeetingAlarm();
-                alarm.setId(UUIDUtils.get32UUID());
-                alarm.setMeetingId(id);
-                alarm.setName(content.getName());
-                alarm.setAlarmNo(content.getAlarmNo());
-                alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
-                alarm.setAlarmType(content.getName());
-                alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
-                alarm.setSeverity(content.getSeverity());
-                alarm.setAlarmStatus("history");
-                alarms.add(alarm);
+            if(CollectionUtils.isNotEmpty(contentList)){
+                result.addAll(contentList);
             }
-            hwMeetingAlarmService.save(alarms);
+           // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
+            int total = alarmResBean.getTotalElements();
+            if(MeetingUrlConstant.size < total ){
+                int page = total/MeetingUrlConstant.size;
+                if(total >(page*MeetingUrlConstant.size)){
+                    page = page+1;
+                }
+                logger.info("历史会议告警总记录数大于每页数量时处理，page为"+page);
+                for(int i = 1;i <= page;i++){
+                    urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_ALARM_URL;
+                    urlStr =  urlStr.replace("{0}", id).replace("{page}",i+"");
+                    res = HttpClientUtils.doPost(urlStr, param, header);
+                    logger.warn("getHistoryMeetingAlarm 接口返回：{}",res);
+                    AlarmResBean alarmResBeanRes = gson.fromJson(res, AlarmResBean.class);
+                    List<AlarmVo> contentListRes = alarmResBeanRes.getContent();
+                    if(CollectionUtils.isNotEmpty(contentListRes)){
+                        result.addAll(contentListRes);
+                    }
+                }
+            }
+            saveHistMeetingAlarm(contentList,id);
             logger.warn("保存历史会议-会议ID{}的告警信息成功！",id);
         } catch (Exception ex) {
-            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex.getLocalizedMessage());
+            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getHistoryMeetingAlarm");
@@ -366,32 +405,81 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         }
     }
 
+    private void saveHistMeetingAlarm(List<AlarmVo> contentList,String id) {
+        List<HwMeetingAlarm> alarms = new ArrayList<>();
+        for (AlarmVo content : contentList) {
+            HwMeetingAlarm alarm = new HwMeetingAlarm();
+            alarm.setId(UUIDUtils.get32UUID());
+            alarm.setMeetingId(id);
+            alarm.setName(content.getName());
+            alarm.setAlarmNo(content.getAlarmNo());
+            alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
+            alarm.setAlarmType(content.getName());
+            alarm.setClearedTime(CronUtil.utcToLocal(content.getClearedTime()));
+            alarm.setSeverity(content.getSeverity());
+            alarm.setAlarmStatus("history");
+            alarms.add(alarm);
+        }
+        hwMeetingAlarmService.save(alarms);
+    }
+
     /**
      * 查询预约会议列表
      */
     @Override
     public List<String> getNowMeetingList(String startTime, String endTime, Integer errorNum) {
-        List<String> ids = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         Map<String, String> header = getHeader();
         Map<String, Object> param = new HashMap<>();
         param.put("startTime", startTime+" UTC");
         param.put("endTime", endTime+" UTC");
         param.put("active",true);
         String nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
+        nowMeetingUrl = nowMeetingUrl.replace("{page}","0");
         try {
             String res = HttpClientUtils.doPost(nowMeetingUrl, param, header);
             logger.warn("getNowMeetingList 接口返回：{}",res);
             NowMeetingList meetingList = gson.fromJson(res, NowMeetingList.class);
-            List<ScheduleConfBrief> list = meetingList.getContent();
-            if (CollectionUtils.isNotEmpty(list)) {
-                List<String> confIds = list.stream().map(ScheduleConfBrief::getId).collect(Collectors.toList());
-                ids.addAll(confIds);
+            List<String> ids = getNowMeetingIds(meetingList);
+            if(CollectionUtils.isNotEmpty(ids)){
+                result.addAll(ids);
             }
+            // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
+            int total = meetingList.getTotalElements();
+            logger.info("查询预约会议列表总记录数："+total);
+            if(MeetingUrlConstant.size >= total ){
+                return result;
+            }
+            int page = total/MeetingUrlConstant.size;
+            if(total >(page*MeetingUrlConstant.size)){
+                page = page+1;
+            }
+            logger.info("已预约会议列表总记录数大于每页数量时处理，page为"+page);
+            for(int i = 1;i <= page;i++){
+                nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
+                nowMeetingUrl =  nowMeetingUrl.replace("{page}",i+"");
+                res = HttpClientUtils.doPost(nowMeetingUrl, param, header);
+                logger.warn("getNowMeetingList 接口返回：{}",res);
+                NowMeetingList meetingListRes = gson.fromJson(res, NowMeetingList.class);
+                List<String> idsRe = getNowMeetingIds(meetingListRes);
+                if(CollectionUtils.isNotEmpty(idsRe)){
+                    result.addAll(idsRe);
+                }
+            }
+            return result;
         } catch (Exception ex) {
-            logger.error("查询预约会议列表失败，msg={}", ex.getLocalizedMessage());
+            logger.error("查询预约会议列表失败，msg={}", ex);
             throw new RuntimeException("查询预约会议列表异常");
         }
-        return ids;
+    }
+
+    private List<String> getNowMeetingIds(NowMeetingList meetingList) {
+        List<ScheduleConfBrief> list = meetingList.getContent();
+        if (CollectionUtils.isNotEmpty(list)) {
+            List<String> confIds = list.stream().map(ScheduleConfBrief::getId).collect(Collectors.toList());
+            return confIds;
+        }
+        return new ArrayList<>();
     }
 
     /**
@@ -420,6 +508,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
             logger.warn("保存现有会议节点信息成功！");
         } catch (Exception ex) {
+            logger.error("查询预约会议详情异常：{}",ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getNowMeetingInfo");
@@ -439,71 +528,110 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     @Override
     public void getNowMeetingParticipants(String id, String organizationName, int duration, Date scheduleStartTime) {
+        List<ParticipantDetail> list = new ArrayList<>();
         Map<String, String> header = getHeader();
         String nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
-        nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id);
+        nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id).replace("{page}","0");
         Map<String,Object> param = new HashMap<>();
         try {
             String res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
             logger.warn("getNowMeetingParticipants 接口返回：{}",res);
             OnlineConferencesRes onlineConferencesRes = gson.fromJson(res, OnlineConferencesRes.class);
             List<ParticipantDetail> content = onlineConferencesRes.getContent();
-            if (CollectionUtils.isNotEmpty(content)) {
-                List<HwMeetingParticipant> hwMeetingParticipants = new ArrayList<>();
-                for (ParticipantDetail participantDetail : content) {
-                    if (participantDetail.getState().isOnline()) {
-                        HwMeetingParticipant hwMeetingParticipant = new HwMeetingParticipant();
-                        hwMeetingParticipant.setId(UUIDUtils.get32UUID());
-                        hwMeetingParticipant.setMeetingId(id);
-                        hwMeetingParticipant.setParticipantCode(participantDetail.getGeneralParam().getId());
-                        hwMeetingParticipant.setName(participantDetail.getGeneralParam().getName());
-                        hwMeetingParticipant.setTerminalType(participantDetail.getGeneralParam().getModel());
-                        hwMeetingParticipant.setStage("ONLINE");
-                        hwMeetingParticipant.setBranch(zkyUnitBeanMap.get(organizationName).getBranch());
-                        hwMeetingParticipant.setCity(zkyUnitBeanMap.get(organizationName).getCity());
-                        hwMeetingParticipant.setOrganizationName(organizationName);
-                        hwMeetingParticipant.setDuration(duration);
-                        hwMeetingParticipant.setScheduleStartTime(scheduleStartTime);
-                        hwMeetingParticipant.setOutService("0");
-                        hwMeetingParticipants.add(hwMeetingParticipant);
+            if(CollectionUtils.isNotEmpty(content)){
+                list.addAll(content);
+            }
+            // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
+            int total = onlineConferencesRes.getTotalElements();
+            logger.info("查询预约会议列表总记录数："+total);
+            if(MeetingUrlConstant.size < total ){
+                int page = total/MeetingUrlConstant.size;
+                if(total >(page*MeetingUrlConstant.size)){
+                    page = page+1;
+                }
+                logger.info("查询会场信息总记录数大于每页数量时处理，page为"+page);
+                for(int i= 1;i <= page;i++){
+                    nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
+                    nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id).replace("{page}",i+"");
+                    res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
+                    logger.warn("getNowMeetingParticipants 接口返回：{}",res);
+                    OnlineConferencesRes onlineConferencesResRe = gson.fromJson(res, OnlineConferencesRes.class);
+                    List<ParticipantDetail> contentRe = onlineConferencesResRe.getContent();
+                    if(CollectionUtils.isNotEmpty(contentRe)){
+                        list.addAll(contentRe);
                     }
                 }
-                hwMeetingParticipantService.save(hwMeetingParticipants);
             }
-
+            saveNowMeetingParticipants(content,id,organizationName,duration,scheduleStartTime);
         } catch (Exception ex) {
-            logger.error("保存现有会议节点信息失败，msg={}", ex.getLocalizedMessage());
+            logger.error("保存现有会议节点信息失败，msg={}", ex);
             throw new RuntimeException(ex);
         }
 
     }
 
+    private void saveNowMeetingParticipants(List<ParticipantDetail> content,String id, String organizationName, int duration, Date scheduleStartTime) {
+        if (CollectionUtils.isNotEmpty(content)) {
+            List<HwMeetingParticipant> hwMeetingParticipants = new ArrayList<>();
+            for (ParticipantDetail participantDetail : content) {
+                if (participantDetail.getState().isOnline()) {
+                    HwMeetingParticipant hwMeetingParticipant = new HwMeetingParticipant();
+                    hwMeetingParticipant.setId(UUIDUtils.get32UUID());
+                    hwMeetingParticipant.setMeetingId(id);
+                    hwMeetingParticipant.setParticipantCode(participantDetail.getGeneralParam().getId());
+                    hwMeetingParticipant.setName(participantDetail.getGeneralParam().getName());
+                    hwMeetingParticipant.setTerminalType(participantDetail.getGeneralParam().getModel());
+                    hwMeetingParticipant.setStage("ONLINE");
+                    hwMeetingParticipant.setBranch(zkyUnitBeanMap.get(organizationName).getBranch());
+                    hwMeetingParticipant.setCity(zkyUnitBeanMap.get(organizationName).getCity());
+                    hwMeetingParticipant.setOrganizationName(organizationName);
+                    hwMeetingParticipant.setDuration(duration);
+                    hwMeetingParticipant.setScheduleStartTime(scheduleStartTime);
+                    hwMeetingParticipant.setOutService("0");
+                    hwMeetingParticipants.add(hwMeetingParticipant);
+                }
+            }
+            hwMeetingParticipantService.save(hwMeetingParticipants);
+        }
+    }
+
     @Override
     public void getNowMeetingAlarm(String id, Integer errorNum) {
+        List<AlarmVo> result = new ArrayList<>();
         Map<String, String> header = getHeader();
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
-        urlStr = urlStr.replace("{0}", id);
+        urlStr = urlStr.replace("{0}", id).replace("{page}","0");
         try {
             String res = HttpClientUtils.doGet(urlStr, null, header);
             logger.warn("getNowMeetingAlarm 接口返回：{}",res);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
-            List<HwMeetingAlarm> alarms = new ArrayList<>();
-
-            for (AlarmVo content : contentList) {
-                HwMeetingAlarm alarm = new HwMeetingAlarm();
-                alarm.setId(UUIDUtils.get32UUID());
-                alarm.setMeetingId(content.getConfId());
-                alarm.setName(content.getName());
-                alarm.setAlarmNo(content.getAlarmNo());
-                alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
-                alarm.setAlarmType(content.getName());
-                alarm.setAlarmStatus("current");
-                alarms.add(alarm);
+            if(CollectionUtils.isNotEmpty(contentList)){
+                result.addAll(contentList);
             }
-            hwMeetingAlarmService.save(alarms);
+            // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
+            int total = alarmResBean.getTotalElements();
+            if(MeetingUrlConstant.size < total ){
+                int page = total/MeetingUrlConstant.size;
+                if(total >(page*MeetingUrlConstant.size)){
+                    page = page+1;
+                }
+                logger.info("已预约告警总记录数大于每页数量时处理，page为"+page);
+                for(int i = 1;i <= page;i++){
+                    urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
+                    urlStr = urlStr.replace("{0}", id).replace("{page}",i+"");
+                    res = HttpClientUtils.doGet(urlStr, null, header);
+                    logger.warn("getNowMeetingAlarm 接口返回：{}",res);
+                    AlarmResBean alarmResBeanRes = gson.fromJson(res, AlarmResBean.class);
+                    List<AlarmVo> contentListRes = alarmResBeanRes.getContent();
+                    if(CollectionUtils.isNotEmpty(contentListRes)){
+                        result.addAll(contentListRes);
+                    }
+                }
+            }
+            saveNowMeetingAlarm(result);
         } catch (Exception ex) {
-            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex.getLocalizedMessage());
+            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getHistoryMeetingAlarm");
@@ -514,6 +642,22 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             meetingQueueVo.setErrorNum(errorNum);
             QueueUtil.put(meetingQueueVo);
         }
+    }
+
+    private void saveNowMeetingAlarm(List<AlarmVo> result) {
+        List<HwMeetingAlarm> alarms = new ArrayList<>();
+        for (AlarmVo content : result) {
+            HwMeetingAlarm alarm = new HwMeetingAlarm();
+            alarm.setId(UUIDUtils.get32UUID());
+            alarm.setMeetingId(content.getConfId());
+            alarm.setName(content.getName());
+            alarm.setAlarmNo(content.getAlarmNo());
+            alarm.setAlarmTime(CronUtil.utcToLocal(content.getAlarmTime()));
+            alarm.setAlarmType(content.getName());
+            alarm.setAlarmStatus("current");
+            alarms.add(alarm);
+        }
+        hwMeetingAlarmService.save(alarms);
     }
 
 
@@ -588,7 +732,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
-            logger.error("get token error,msg={}", ex.getLocalizedMessage());
+            logger.error("get token error,msg={}", ex);
             throw new RuntimeException(ex);
         }
         return tokenRes;
