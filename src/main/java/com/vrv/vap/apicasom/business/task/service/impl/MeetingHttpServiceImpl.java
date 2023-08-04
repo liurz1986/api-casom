@@ -139,7 +139,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         param.put("startTime", startTime+" UTC");
         param.put("endTime", endTime+" UTC");
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
-        urlStr.replace("{page}","0");
+        urlStr=  urlStr.replace("{page}","0");
         try {
             String res = HttpClientUtils.doPost(urlStr, param, header);
             logger.warn("getHistoryMeetingList 接口返回：{}",res);
