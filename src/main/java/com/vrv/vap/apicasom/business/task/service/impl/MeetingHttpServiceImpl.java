@@ -498,6 +498,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             logger.warn("getNowMeetingInfo 接口返回：{}",res);
             ConferenceRspVo conferenceRspVo = gson.fromJson(res, ConferenceRspVo.class);
             ConferenceRsp conferenceRsp = conferenceRspVo.getConference();
+            String stage = conferenceRsp.getStage();
             hwMeetingInfo.setMeetingId(conferenceRsp.getId());
             hwMeetingInfo.setStage(conferenceRsp.getStage());
             hwMeetingInfo.setScheduleStartTime(CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
@@ -505,7 +506,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             hwMeetingInfo.setOrganizationName(conferenceRsp.getOrganizationName());
             hwMeetingInfoService.save(hwMeetingInfo);
             logger.warn("保存现有会议信息成功！会议ID={}", id);
-            getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
+            // stage为ONLINE才会有数据 2023-08-08
+            if(stage.equals("ONLINE")){
+                getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
+            }
             logger.warn("保存现有会议节点信息成功！");
         } catch (Exception ex) {
             logger.error("查询预约会议详情异常：{}",ex);
