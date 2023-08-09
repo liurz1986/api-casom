@@ -172,16 +172,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
         } catch (Exception ex) {
             logger.error("查询时间段在{}到{}的历史会议记录错误！msg={}", startTime, endTime, ex);
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getHistoryMeetingList");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("startTime", startTime);
-            jsonObject.put("endTime", endTime);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            throw new RuntimeException("查询历史会议列表异常");
         }
         return result;
     }
@@ -566,7 +557,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     }
                 }
             }
-            saveNowMeetingParticipants(content,id,organizationName,duration,scheduleStartTime);
+            saveNowMeetingParticipants(list,id,organizationName,duration,scheduleStartTime);
         } catch (Exception ex) {
             logger.error("保存现有会议节点信息失败，msg={}", ex);
             throw new RuntimeException(ex);
