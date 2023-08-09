@@ -172,6 +172,9 @@ hw:
     url: http://192.168.118.228:9888
     time:  0 */10 * * * ?   #已预约会议数据同步频次
     histime:  0 */8 * * * ?   #历史会议同步频次
+    synchtype: 1  # 1 可以手动改同步开始时间，默认为2
+    hisstarttime: 2023-08-03 16:40:00
+    onlinestarttime: 2023-07-05 00:00:00
 
 logging:
   level:

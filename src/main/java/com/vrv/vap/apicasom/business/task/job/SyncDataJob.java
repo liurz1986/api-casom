@@ -45,8 +45,12 @@ public class SyncDataJob implements Job {
             long startTime = System.currentTimeMillis();
             Map<String,String> cronmap = (Map<String,String>)jobExecutionContext.getJobDetail().getJobDataMap().get(QuartzFactory.CUSTOM_DATA_KEY);
             String cron = cronmap.get("cron");
-            logger.info("定时执行会议相关数据同步任务开始.cron:"+cron);
-            syncMeetingData(cron);
+            String synchtype = cronmap.get("synchtype");
+            String onlinestarttime = cronmap.get("onlinestarttime");
+            cronmap.put("synchtype","2");
+            jobExecutionContext.getJobDetail().getJobDataMap().put(QuartzFactory.CUSTOM_DATA_KEY,cronmap);
+            logger.info("定时执行会议相关数据同步任务开始.cron:"+cron+";synchtype:"+synchtype);
+            syncMeetingData(cron,synchtype,onlinestarttime);
             logger.info("定时执行会议相关数据同步任务结束,总花费的时间："+(System.currentTimeMillis()-startTime)/1000);
         }catch (Exception e){
             logger.error("定时执行会议相关数据同步任务异常:{}",e);
@@ -57,16 +61,21 @@ public class SyncDataJob implements Job {
     /**
      * 同步会议数据
      */
-    public void syncMeetingData(String cron){
+    public void syncMeetingData(String cron,String synchtype,String onlinestarttime){
         Date date = new Date();
         String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
-        Object meetingTimeObj = redisUtils.get("meetingTime");
-        logger.warn("redis中上次同步的时间为："+meetingTimeObj);
         String startTime = null;
-        if(null == meetingTimeObj){
-            startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+        if("1".equals(synchtype)){
+            startTime= onlinestarttime;
+            logger.warn("采用手动配置的时间为："+startTime);
         }else{
-            startTime = String.valueOf(meetingTimeObj);
+            Object meetingTimeObj = redisUtils.get("meetingTime");
+            logger.warn("redis中上次同步的时间为："+meetingTimeObj);
+            if(null == meetingTimeObj){
+                startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+            }else{
+                startTime = String.valueOf(meetingTimeObj);
+            }
         }
         logger.warn("预约会议调度，时间是{}~{}",startTime,endTime);
         reservationHwMeetingDataService.syncData(startTime,endTime);

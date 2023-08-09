@@ -35,16 +35,25 @@ public class HisMeetingSyncDataJob implements Job {
             logger.info("历史会议数据同步任务执行开始");
             Map<String,String> cronmap = (Map<String,String>)jobExecutionContext.getJobDetail().getJobDataMap().get(QuartzFactory.CUSTOM_DATA_KEY);
             String cron = cronmap.get("cron");
-            Date date = new Date();
-            String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
-            Object hisMeetingTimeObj = redisUtils.get("hisMeetingTime");
-            logger.warn("redis中记录上次历史数据同步的时间为："+hisMeetingTimeObj);
+            String synchtype = cronmap.get("synchtype");
+            String hisstarttime = cronmap.get("hisstarttime");
             String startTime = null;
-            if(null == hisMeetingTimeObj){
-                startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+            Date date = new Date();
+            if("1".equals(synchtype)) {
+                startTime = hisstarttime;
+                logger.warn("采用手动配置的时间为：" + startTime);
+                cronmap.put("synchtype","2");
+                jobExecutionContext.getJobDetail().getJobDataMap().put(QuartzFactory.CUSTOM_DATA_KEY,cronmap);
             }else{
-                startTime = String.valueOf(hisMeetingTimeObj);
+                Object hisMeetingTimeObj = redisUtils.get("hisMeetingTime");
+                logger.warn("redis中记录上次历史数据同步的时间为："+hisMeetingTimeObj);
+                if(null == hisMeetingTimeObj){
+                    startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+                }else{
+                    startTime = String.valueOf(hisMeetingTimeObj);
+                }
             }
+            String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
             // 执行历史数据同步
             historyHwMeetingDataService.syncData(startTime,endTime);
             // redis保存同步时间，为了下次同步时开始时间
