@@ -295,18 +295,18 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 if(CollectionUtils.isNotEmpty(participantRspList)){
                     ParticipantRsp participantRsp = participantRspList.get(0);
                     hwMeetingAttendee.setParticipantCode(participantRsp.getId());
+                    ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
+                    if(null == bean){
+                        logger.error(participantRsp.getId()+"在表zky_unit没有配置");
+                    }else{
+                        hwMeetingAttendee.setBranch(bean.getBranch());
+                        hwMeetingAttendee.setCity(bean.getCity());
+                    }
                 }
                 hwMeetingAttendee.setMeetingId(meetingInfo.getId());
                 hwMeetingAttendee.setDuration(meetingInfo.getDuration());
                 hwMeetingAttendee.setParticipantName(entry.getKey());
                 hwMeetingAttendee.setUserCount(entry.getValue().size());
-                ZkyUnitBean bean=  zkyUnitBeanMap.get(entry.getKey());
-                if(null == bean){
-                    logger.error(entry.getKey()+"在表zky_unit没有配置");
-                }else{
-                    hwMeetingAttendee.setBranch(zkyUnitBeanMap.get(entry.getKey()).getBranch());
-                    hwMeetingAttendee.setCity(zkyUnitBeanMap.get(entry.getKey()).getCity());
-                }
                 hwMeetingAttendees.add(hwMeetingAttendee);
             }
             hwMeetingAttendeeService.save(hwMeetingAttendees);
@@ -330,12 +330,12 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 participant.setDuration(meetingInfo.getDuration());
                 participant.setMeetingId(meetingInfo.getId());
                 participant.setParticipantCode(participantRsp.getId());
-                ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getOrganizationName());
+                ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
                 if(null == bean){
-                    logger.error(participantRsp.getOrganizationName()+"在表zky_unit没有配置");
+                    logger.error(participantRsp.getId()+"在表zky_unit没有配置对应的participant_code");
                 }else{
-                    participant.setCity(zkyUnitBeanMap.get(participantRsp.getOrganizationName()).getCity());
-                    participant.setBranch(zkyUnitBeanMap.get(participantRsp.getOrganizationName()).getBranch());
+                    participant.setCity(bean.getCity());
+                    participant.setBranch(bean.getBranch());
                 }
                 participant.setStage("OFFLINE");
                 participant.setOrganizationName(participantRsp.getOrganizationName());
@@ -587,12 +587,12 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     hwMeetingParticipant.setName(participantDetail.getGeneralParam().getName());
                     hwMeetingParticipant.setTerminalType(participantDetail.getGeneralParam().getModel());
                     hwMeetingParticipant.setStage("ONLINE");
-                    ZkyUnitBean bean=  zkyUnitBeanMap.get(organizationName);
+                    ZkyUnitBean bean=  zkyUnitBeanMap.get(participantDetail.getGeneralParam().getId());
                     if(null == bean){
-                        logger.error(organizationName+"在表zky_unit没有配置");
+                        logger.error(participantDetail.getGeneralParam().getId()+"在表zky_unit没有配置");
                     }else{
-                        hwMeetingParticipant.setBranch(zkyUnitBeanMap.get(organizationName).getBranch());
-                        hwMeetingParticipant.setCity(zkyUnitBeanMap.get(organizationName).getCity());
+                        hwMeetingParticipant.setBranch(bean.getBranch());
+                        hwMeetingParticipant.setCity(bean.getCity());
                     }
                     hwMeetingParticipant.setOrganizationName(organizationName);
                     hwMeetingParticipant.setDuration(duration);

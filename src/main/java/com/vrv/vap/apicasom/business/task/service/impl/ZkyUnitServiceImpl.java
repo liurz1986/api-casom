@@ -27,7 +27,7 @@ public class ZkyUnitServiceImpl extends BaseServiceImpl<ZkyUnitBean, String> imp
     public Map<String, ZkyUnitBean> initCity() {
         Map<String, ZkyUnitBean> zkyUnitBeanMap = new ConcurrentHashMap<>();
         List<ZkyUnitBean> zkyUnitBeans = findAll();
-        Map<String,List<ZkyUnitBean>> zkyUnitMap = zkyUnitBeans.stream().collect(Collectors.groupingBy(ZkyUnitBean::getParticipantName));
+        Map<String,List<ZkyUnitBean>> zkyUnitMap = zkyUnitBeans.stream().collect(Collectors.groupingBy(ZkyUnitBean::getParticipantCode));
         for(Map.Entry<String,List<ZkyUnitBean>> entry : zkyUnitMap.entrySet()){
             zkyUnitBeanMap.put(entry.getKey(),entry.getValue().get(0));
         }
