@@ -601,7 +601,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     hwMeetingParticipants.add(hwMeetingParticipant);
                 }
             }
-            hwMeetingParticipantService.save(hwMeetingParticipants);
+            if(CollectionUtils.isNotEmpty(hwMeetingParticipants)){
+                hwMeetingParticipantService.save(hwMeetingParticipants);
+            }
+
         }
     }
 
