@@ -33,7 +33,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
      */
     @Override
     public int getOnLineNodes() {
-        String sql="select sum(participant_count) as number from hw_meeting_info where stage='ONLINE'";
+        String sql="select count(*) as number from hw_meeting_participant where stage='ONLINE'";
         logger.debug("当前节点在线总数查询sql:"+sql);
         Map<String, Object> runNodes = jdbcTemplate.queryForMap(sql);
         if (null == runNodes || runNodes.size() == 0) {
@@ -324,7 +324,7 @@ public class LargeScreenDaoImpl implements LargeScreenDao {
     public List<LargeDeatailVO> queryOutServiceStatistics(String type) {
         String sql="select * from(select base.participant_name as name ,count(*) as num from hw_meeting_participant as node inner join zky_unit as base " +
                 "on node.participant_code=base.participant_code " +
-                "where node.stage='OFFLINE' and out_service='1' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"node.schedule_start_time")+" GROUP BY base.participant_name)a order by a.num desc limit 0,5";
+                "where node.stage='OFFLINE' and node.out_service='1' and "+MettingCommonUtil.largeScreenVideoAndNodeSql(type,"node.schedule_start_time")+" GROUP BY base.participant_name)a order by a.num desc limit 0,5";
         logger.debug("对外提供服务查询sql:"+sql);
         List<LargeDeatailVO> details = jdbcTemplate.query(sql,new LargeBranchStatisticsVoMapper());
         return details;
