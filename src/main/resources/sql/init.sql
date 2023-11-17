@@ -141,3 +141,6 @@ CREATE TABLE IF NOT EXISTS `zky_print_user_org`  (
 ALTER TABLE    `hw_meeting_info` modify  COLUMN `participant_unity` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '参会节点'  ;
 -- changeset liurz:20230816-zky labels:"修改字段类型"
 ALTER TABLE `hw_meeting_participant` modify  COLUMN `terminal_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '设备型号'  ;
+-- changeset liurz:20231117-zky labels:"修改字段类型"
+ALTER TABLE  `hw_meeting_info` modify  COLUMN `organization_name` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '参会单位'  ;
+ALTER TABLE  `hw_meeting_alarm` modify  COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '异常名称'  ;
