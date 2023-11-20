@@ -28,15 +28,10 @@ import java.util.List;
 @RestController
 @RequestMapping("mettingConfig")
 public class MeettingBaseConfigController {
-    private static Logger logger = LoggerFactory.getLogger(MeettingBaseConfigController.class);
+
     @Autowired
     private MeetingService meetingService;
-    @Autowired
-    private RedisUtils redisUtils;
-    @Autowired
-    private ReservationHwMeetingDataServiceImpl reservationHwMeetingDataService;
-    @Autowired
-    private HistoryHwMeetingDataServiceImpl historyHwMeetingDataService;
+
     /**
      * 节点接入列表中节点名称列表
      * @return
@@ -59,40 +54,6 @@ public class MeettingBaseConfigController {
         return ResultUtil.successList(meetingService.getRegions());
     }
 
-    /**
-     * 清楚redis中数据--测试用的
-     * meetingTime:预约会议，同步时记录的上次同步时间
-     * hisMeetingTime：历史会议，同步时记录的上次同步时间
-     * @return
-     */
-    @GetMapping("clearRedis")
-    public void clearRedis(@RequestParam("key") String key){
-        redisUtils.del(key);
-    }
 
-    /**
-     * 手动同步--测试用
-     * type：1 预约会议 2 历史会议
-     * startTime：开始时间
-     * endTime：历史时间
-     * @param type
-     * @param startTime
-     * @param endTime
-     */
-    @GetMapping("syncData")
-    public void syncData(@RequestParam("type") String type,@RequestParam("startTime") String startTime,@RequestParam("endTime") String endTime){
-        if(StringUtils.isEmpty(type)||StringUtils.isEmpty(startTime)||StringUtils.isEmpty(endTime)){
-            logger.info("手动同步,type、startTime、endTime其中一个为空不执行同步");
-            return;
-        }
-        logger.info("手动执行同步");
-        // 预约会议
-        if("1".equals(type)){
-            reservationHwMeetingDataService.syncData(startTime,endTime);
-        }
-        if("2".equals(type)){
-            historyHwMeetingDataService.syncData(startTime,endTime);
-        }
-    }
 
 }
