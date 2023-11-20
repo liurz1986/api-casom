@@ -38,6 +38,7 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
      */
     @Override
     public void syncData(String startTime,String endTime){
+        logger.info("预约会议数据同步开始");
         String token = meetingHttpService.getToken(0);
         if(StringUtils.isEmpty(token)){
             logger.error("获取token为空,请确认！");
