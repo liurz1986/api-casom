@@ -11,9 +11,11 @@ import java.util.List;
  */
 @Data
 public class AlarmResBean {
+    // 告警列表
     private List<AlarmVo> content;
     private Pageable pageable;
     private boolean last;
+    // 总数
     private int totalElements;
     private int totalPages;
     private int number;

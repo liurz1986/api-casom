@@ -9,8 +9,12 @@ import lombok.Data;
  */
 @Data
 public class ParticipantRsp {
+    // 会场索引
     private String id;
+    // 与会者名称
     private String name;
+    // 终端类型
     private String terminalType;
+    // 组织名称
     private String organizationName;
 }

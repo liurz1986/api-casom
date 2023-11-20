@@ -9,6 +9,8 @@ import lombok.Data;
  */
 @Data
 public class ParticipantDetail {
+    // 会场基本参数
     private ParticipantGeneralParam generalParam;
+    // 会场状态
     private ParticipantState state;
 }

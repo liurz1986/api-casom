@@ -14,11 +14,15 @@ public class NowMeetingList {
     private List<ScheduleConfBrief> content;
     private Pageable pageable;
     private boolean last;
+    // 总条数
     private int totalElements;
+    // 总页数
     private int totalPages;
+    // 当前页码
     private int number;
     private int size;
     private Sort sort;
+    // 当前页条数
     private int numberOfElements;
     private boolean first;
     private boolean empty;

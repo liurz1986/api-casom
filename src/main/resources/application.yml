@@ -156,25 +156,29 @@ feign:
     enabled: true
 
 hw:
-  send:
+  send: #文件交换
     time: 0 0 1 * * ?
     url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getRemoteNum
     local-url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getLocalNum
-  meeting:
-    sys:
+  meeting: # 会议信息
+    sys:  # 会议室数量获取相关配置
       username: admin
       password: admin@1234
       register:   # sys-portal会议室获取时需注册
         sn: $0200040144508844$ #后期更换值时，保留前后$
         hd: 212612240G0000649
-    organizationId: 8ab9e3c4-69ce-04e5-0169-ce058e5d1234
-    token: 0 */2 * * * ?
-    url: http://192.168.118.228:9888
-    time:  0 */10 * * * ?   #已预约会议数据同步频次
-    histime:  0 */8 * * * ?   #历史会议同步频次
-    synchtype: 1  # 1 手动改同步开始时间 默认为2
-    hisstarttime: 2023-08-03 16:40:00 #synchtype为1生效，历史数据同步开始时间
-    onlinestarttime: 2023-07-05 00:00:00 #synchtype为1生效，在线数据同步开始时间
+    data: #预约会议、历史会议等会议数据获取用户和密码配置
+      username: admin
+      password: admin@1234
+    hiscompletion: #手动历史会议补全时间配置
+      status : false  #是否补全
+      starttime: 2023-08-03 16:40:00 #补全开始时间
+      endtime: 2023-08-05 16:40:00 #补全结束时间
+    organizationId: 8ab9e3c4-69ce-04e5-0169-ce058e5d1234 #取会议室列表时,组织结构id
+    token: 0 */9 * * * ?   #token更新频次
+    url: http://192.168.118.228:9888   #调用华为接口ip级端口
+    time:  0 */15 * * * ?   #已预约会议数据同步频次
+    histime:  0 */18 * * * ?   #历史会议同步频次
 
 logging:
   level:

@@ -14,6 +14,7 @@ public class HistoryList {
     private List<Content> content;
     private Pageable pageable;
     private boolean last;
+    // 总数
     private int totalElements;
     private int totalPages;
     private int number;

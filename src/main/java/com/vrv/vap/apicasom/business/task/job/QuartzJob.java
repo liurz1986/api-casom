@@ -35,14 +35,6 @@ public class QuartzJob implements CommandLineRunner {
     @Value("${hw.meeting.histime:0 */10 * * * ?}")
     private String hisMeetingCron;
 
-    @Value("${hw.meeting.synchtype:2}")
-    private String synchtype;
-
-    @Value("${hw.meeting.hisstarttime: 2023-08-03 16:40:00}")
-    private String hisstarttime;
-
-    @Value("${hw.meeting.onlinestarttime:2023-07-05 00:00:00}")
-    private String onlinestarttime;
 
     private String zkySendJobName="ZkySendDataJobName";
 
@@ -51,8 +43,7 @@ public class QuartzJob implements CommandLineRunner {
     private String commonMeetingJobName="CommonMeetingDataJobName";
 
     private String hisMeetingSyncDataJobName="HisMeetingSyncDataJobName";
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+
     /**
      * 触发定时任务
      * @param args
@@ -71,8 +62,6 @@ public class QuartzJob implements CommandLineRunner {
             logger.info("会议数据同步任务频次:"+curMeetingCron);
             Map<String,String> params = new HashMap<>();
             params.put("cron",curMeetingCron);
-            params.put("synchtype",synchtype);
-            params.put("onlinestarttime",onlinestarttime);
             quartzFactory.addJob(meetingJobName+jobGuid, SyncDataJob.class, curMeetingCron, params);
             //初始化公共信息（分院/城市信息,会议室数量信息）
             logger.info("初始化公共信息（分院/城市信息,会议室数量信息）任务频次:"+meetingToken);
@@ -81,8 +70,6 @@ public class QuartzJob implements CommandLineRunner {
             // 历史会议数据同步
             params = new HashMap<>();
             params.put("cron",hisMeetingCron);
-            params.put("synchtype",synchtype);
-            params.put("hisstarttime",hisstarttime);
             logger.info(" 历史会议数据同步任务频次:"+hisMeetingCron);
             quartzFactory.addJob(hisMeetingSyncDataJobName+jobGuid, HisMeetingSyncDataJob.class, hisMeetingCron, params);
         }catch (Exception e){

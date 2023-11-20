@@ -9,7 +9,10 @@ import lombok.Data;
  */
 @Data
 public class ParticipantGeneralParam {
+    // 会场Id
     private String id;
+    // 会场名称
     private String name;
+    // 会场设备类型
     private String model;
 }

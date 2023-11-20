@@ -45,25 +45,16 @@ public class SyncDataJob implements Job {
             long startTimeM = System.currentTimeMillis();
             Map<String,String> cronmap = (Map<String,String>)jobExecutionContext.getJobDetail().getJobDataMap().get(QuartzFactory.CUSTOM_DATA_KEY);
             String cron = cronmap.get("cron");
-            String synchtype = cronmap.get("synchtype");
-            String onlinestarttime = cronmap.get("onlinestarttime");
-            logger.info("定时执行会议相关数据同步任务开始.cron:"+cron+";synchtype:"+synchtype);
+            logger.info("定时执行会议相关数据同步任务开始.cron:"+cron);
             Date date = new Date();
             String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
             String startTime = null;
-            if("1".equals(synchtype)){
-                startTime= onlinestarttime;
-                logger.warn("采用手动配置的时间为："+startTime);
-                cronmap.put("synchtype","2");
-                jobExecutionContext.getJobDetail().getJobDataMap().put(QuartzFactory.CUSTOM_DATA_KEY,cronmap);
+            Object meetingTimeObj = redisUtils.get("meetingTime");
+            logger.warn("redis中上次同步的时间为："+meetingTimeObj);
+            if(null == meetingTimeObj){
+                startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
             }else{
-                Object meetingTimeObj = redisUtils.get("meetingTime");
-                logger.warn("redis中上次同步的时间为："+meetingTimeObj);
-                if(null == meetingTimeObj){
-                    startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
-                }else{
-                    startTime = String.valueOf(meetingTimeObj);
-                }
+                startTime = String.valueOf(meetingTimeObj);
             }
             logger.warn("预约会议调度，时间是{}~{}",startTime,endTime);
             reservationHwMeetingDataService.syncData(startTime,endTime);

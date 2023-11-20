@@ -54,8 +54,12 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Value("${hw.meeting.sys.register.sn}")
     private String registerSn;
 
-    @Autowired
-    private SystemConfigService systemConfigService;
+    // 获取会议数据时用户名
+    @Value("${hw.meeting.data.username}")
+    private String userName;
+    // 获取会议数据时密码
+    @Value("${hw.meeting.data.password}")
+    private String password;
 
     @Autowired
     private HwMeetingInfoService hwMeetingInfoService;
@@ -101,18 +105,14 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     @Override
     public String getToken(Integer errorNum) {
         String tokenRes = null;
-        String configValue = systemConfigService.getSysConfigById("hw_meeting_use");
-        JSONObject jsonObject = JSONObject.parseObject(configValue);
-        if(jsonObject == null){
-            logger.warn("配置项hw_meeting_use未配置！");
-            return tokenRes;
+        if(StringUtils.isEmpty(userName)||StringUtils.isEmpty(password)){
+            logger.error("获取token时，用户名或密码不能为空");
+            throw new RuntimeException("获取token时，用户名或密码不能为空");
         }
-        String username = jsonObject.getString("username");
-        String password = jsonObject.getString("password");
         String tokenUrl = url +"/conf-portal" + MeetingUrlConstant.TOKEN_URL;
         Map<String, String> header = new HashMap<>();
-        String encode = Base64Utils.encodeBase64(username + ":" + password);
-        logger.warn("获取token的用户名:"+username+"  ,,密码: "+password);
+        String encode = Base64Utils.encodeBase64(userName + ":" + password);
+        logger.warn("获取token的用户名:"+userName+"  ,,密码: "+password);
         logger.warn("get token base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
         header.put("Content-type","application/json;charset=UTF-8");
@@ -141,8 +141,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
         urlStr=  urlStr.replace("{page}","0");
         try {
+            logger.info("查询历史会议列表接口开始");
             String res = HttpClientUtils.doPost(urlStr, param, header);
-            logger.warn("getHistoryMeetingList 接口返回：{}",res);
+            logger.info("查询历史会议列表接口返回：{}",res);
             HistoryList historyList = gson.fromJson(res, HistoryList.class);
             List<String> ids = getMettingIds(historyList);
             if(CollectionUtils.isNotEmpty(ids)){
@@ -163,7 +164,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 urlStr = url+"/conf-portal" + MeetingUrlConstant.HISTORY_LIST_URL;
                 urlStr =  urlStr.replace("{page}",i+"");
                 res = HttpClientUtils.doPost(urlStr, param, header);
-                logger.warn("getHistoryMeetingList 接口返回：{}",res);
+                logger.warn("查询历史会议列表接口返回：{}",res);
                 HistoryList historyListRe = gson.fromJson(res, HistoryList.class);
                 List<String> idsRe = getMettingIds(historyListRe);
                 if(CollectionUtils.isNotEmpty(idsRe)){
@@ -198,6 +199,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String infoUrl = url+"/conf-portal" + MeetingUrlConstant.HISTORY_INFO_URL;
         infoUrl = infoUrl.replace("{0}", id);
         try {
+            logger.info("查询历史会议详情接口开始");
             String infoStr = HttpClientUtils.doGet(infoUrl, null, header);
             logger.warn("getHistoryMeetingInfo 接口返回：{}",infoStr);
             MeetingInfo meetingInfo = gson.fromJson(infoStr, MeetingInfo.class);
@@ -283,32 +285,34 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public void saveMeetingAttendee(MeetingInfo meetingInfo) {
         List<HwMeetingAttendee> hwMeetingAttendees = new ArrayList<>();
         List<AttendeeRsp> attendees = meetingInfo.getAttendees();
+        if(null == attendees || attendees.size() == 0){
+            logger.info("attendees数据为空,不执行保存会议与会人信息");
+            return;
+        }
         List<ParticipantRsp> participantRsps = meetingInfo.getParticipants();
-        if (attendees != null) {
-            Map<String, List<AttendeeRsp>> attendeeMap = attendees.stream().collect(Collectors.groupingBy(AttendeeRsp::getParticipantName));
-            for (Map.Entry<String, List<AttendeeRsp>> entry : attendeeMap.entrySet()) {
-                HwMeetingAttendee hwMeetingAttendee = new HwMeetingAttendee();
-                hwMeetingAttendee.setId(UUIDUtils.get32UUID());
-                //TODO
-                // 通过与会人列表中会场名称与会议详情信息中会场信息的会场名称匹配得到会场ID
-                List<ParticipantRsp> participantRspList = participantRsps.stream().filter(item->item.getName().equals(entry.getKey())).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(participantRspList)){
-                    ParticipantRsp participantRsp = participantRspList.get(0);
-                    hwMeetingAttendee.setParticipantCode(participantRsp.getId());
-                    ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
-                    if(null == bean){
-                        logger.error(participantRsp.getId()+"在表zky_unit没有配置");
-                    }else{
-                        hwMeetingAttendee.setBranch(bean.getBranch());
-                        hwMeetingAttendee.setCity(bean.getCity());
-                    }
+        Map<String, List<AttendeeRsp>> attendeeMap = attendees.stream().collect(Collectors.groupingBy(AttendeeRsp::getParticipantName));
+        for (Map.Entry<String, List<AttendeeRsp>> entry : attendeeMap.entrySet()) {
+            HwMeetingAttendee hwMeetingAttendee = new HwMeetingAttendee();
+            hwMeetingAttendee.setId(UUIDUtils.get32UUID());
+            //TODO
+            // 通过与会人列表中会场名称与会议详情信息中会场信息的会场名称匹配得到会场ID
+            List<ParticipantRsp> participantRspList = participantRsps.stream().filter(item->item.getName().equals(entry.getKey())).collect(Collectors.toList());
+            if(CollectionUtils.isNotEmpty(participantRspList)){
+                ParticipantRsp participantRsp = participantRspList.get(0);
+                hwMeetingAttendee.setParticipantCode(participantRsp.getId());
+                ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
+                if(null == bean){
+                    logger.error(participantRsp.getId()+"在表zky_unit没有配置");
+                }else{
+                    hwMeetingAttendee.setBranch(bean.getBranch());
+                    hwMeetingAttendee.setCity(bean.getCity());
                 }
-                hwMeetingAttendee.setMeetingId(meetingInfo.getId());
-                hwMeetingAttendee.setDuration(meetingInfo.getDuration());
-                hwMeetingAttendee.setParticipantName(entry.getKey());
-                hwMeetingAttendee.setUserCount(entry.getValue().size());
-                hwMeetingAttendees.add(hwMeetingAttendee);
             }
+            hwMeetingAttendee.setMeetingId(meetingInfo.getId());
+            hwMeetingAttendee.setDuration(meetingInfo.getDuration());
+            hwMeetingAttendee.setParticipantName(entry.getKey());
+            hwMeetingAttendee.setUserCount(entry.getValue().size());
+            hwMeetingAttendees.add(hwMeetingAttendee);
             hwMeetingAttendeeService.save(hwMeetingAttendees);
         }
         logger.warn("保存会议《{}》与会人信息完成，与会人个数{}", meetingInfo.getId(), hwMeetingAttendees.size());
@@ -332,7 +336,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 participant.setParticipantCode(participantRsp.getId());
                 ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
                 if(null == bean){
-                    logger.error(participantRsp.getId()+"在表zky_unit没有配置对应的participant_code");
+                    logger.error("历史会议==节点中id在表zky_unit没有配置对应的participant_code，当前节点id为："+participantRsp.getId()+" ");
                 }else{
                     participant.setCity(bean.getCity());
                     participant.setBranch(bean.getBranch());
@@ -438,8 +442,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String nowMeetingUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_LIST_URL + "";
         nowMeetingUrl = nowMeetingUrl.replace("{page}","0");
         try {
+            logger.info("查询预约会议列表调用接口开始");
             String res = HttpClientUtils.doPost(nowMeetingUrl, param, header);
-            logger.warn("getNowMeetingList 接口返回：{}",res);
+            logger.warn("查询预约会议列表调用接口返回：{}",res);
             NowMeetingList meetingList = gson.fromJson(res, NowMeetingList.class);
             List<String> ids = getNowMeetingIds(meetingList);
             if(CollectionUtils.isNotEmpty(ids)){
@@ -495,8 +500,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String nowMeetingInfoUrl = url+"/conf-portal" + MeetingUrlConstant.NOW_INFO_URL;
         nowMeetingInfoUrl = nowMeetingInfoUrl.replace("{0}", id);
         try {
+            logger.warn("查询预约会议详情接口URL：{}",nowMeetingInfoUrl);
             String res = HttpClientUtils.doGet(nowMeetingInfoUrl, null, header);
-            logger.warn("getNowMeetingInfo 接口返回：{}",res);
+            logger.warn("查询预约会议详情接口返回：{}",res);
             ConferenceRspVo conferenceRspVo = gson.fromJson(res, ConferenceRspVo.class);
             ConferenceRsp conferenceRsp = conferenceRspVo.getConference();
             String stage = conferenceRsp.getStage();
@@ -539,8 +545,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id).replace("{page}","0");
         Map<String,Object> param = new HashMap<>();
         try {
+            logger.info("预约会议--查询会场信息接口,URL:"+nowMeetingParticipant);
             String res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
-            logger.warn("getNowMeetingParticipants 接口返回：{}",res);
+            logger.warn("预约会议--查询会场信息接口返回：{}",res);
             OnlineConferencesRes onlineConferencesRes = gson.fromJson(res, OnlineConferencesRes.class);
             List<ParticipantDetail> content = onlineConferencesRes.getContent();
             if(CollectionUtils.isNotEmpty(content)){
@@ -548,7 +555,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
             // 对于查询数据超过当前页的情况,重复调用获取所有数据 2023-08-03
             int total = onlineConferencesRes.getTotalElements();
-            logger.info("查询预约会议列表总记录数："+total);
+            logger.info("预约会议--查询会场信息总记录数："+total);
             if(MeetingUrlConstant.size < total ){
                 int page = total/MeetingUrlConstant.size;
                 if(total >(page*MeetingUrlConstant.size)){
@@ -559,7 +566,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     nowMeetingParticipant = url+"/conf-portal" + MeetingUrlConstant.NOW_PARTICIPANT_URL;
                     nowMeetingParticipant = nowMeetingParticipant.replace("{0}", id).replace("{page}",i+"");
                     res = HttpClientUtils.doPost(nowMeetingParticipant, param, header);
-                    logger.warn("getNowMeetingParticipants 接口返回：{}",res);
                     OnlineConferencesRes onlineConferencesResRe = gson.fromJson(res, OnlineConferencesRes.class);
                     List<ParticipantDetail> contentRe = onlineConferencesResRe.getContent();
                     if(CollectionUtils.isNotEmpty(contentRe)){
@@ -589,7 +595,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     hwMeetingParticipant.setStage("ONLINE");
                     ZkyUnitBean bean=  zkyUnitBeanMap.get(participantDetail.getGeneralParam().getId());
                     if(null == bean){
-                        logger.error(participantDetail.getGeneralParam().getId()+"在表zky_unit没有配置");
+                        logger.error("预约会议==节点中id在表zky_unit没有配置对应的participant_code，当前节点id为："+participantDetail.getGeneralParam().getId()+" ");
                     }else{
                         hwMeetingParticipant.setBranch(bean.getBranch());
                         hwMeetingParticipant.setCity(bean.getCity());
@@ -615,8 +621,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
         String urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
         urlStr = urlStr.replace("{0}", id).replace("{page}","0");
         try {
+            logger.info("预约会议告警URL:"+urlStr);
             String res = HttpClientUtils.doGet(urlStr, null, header);
-            logger.warn("getNowMeetingAlarm 接口返回：{}",res);
+            logger.warn("预约会议告警接口返回：{}",res);
             AlarmResBean alarmResBean = gson.fromJson(res, AlarmResBean.class);
             List<AlarmVo> contentList = alarmResBean.getContent();
             if(CollectionUtils.isNotEmpty(contentList)){
