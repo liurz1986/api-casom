@@ -5,18 +5,16 @@ import com.vrv.vap.apicasom.business.task.bean.HwSyncErrorLog;
 import com.vrv.vap.apicasom.business.task.bean.MeetingQueueVo;
 import com.vrv.vap.apicasom.business.task.service.HwSyncErrorLogService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
-import com.vrv.vap.apicasom.business.task.service.impl.MeetingHttpServiceImpl;
+import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.QueueUtil;
 import com.vrv.vap.jpa.common.UUIDUtils;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +33,8 @@ public class FailQueueJob implements CommandLineRunner {
 
     @Autowired
     private HwSyncErrorLogService hwSyncErrorLogService;
+    @Autowired
+    private MeetingHttpService meetingHttpService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -60,6 +60,7 @@ public class FailQueueJob implements CommandLineRunner {
                 try {
                     Class cls = SpringUtil.getBean(MeetingHttpService.class).getClass();
                     if (method.contains("List")) {
+                        updateToken(); //更新token
                         Method m = cls.getDeclaredMethod(method, String.class, String.class,Integer.class);
                         JSONObject json = JSONObject.parseObject(param);
                         String startTime = json.getString("startTime");
@@ -69,6 +70,7 @@ public class FailQueueJob implements CommandLineRunner {
                         Method m = cls.getDeclaredMethod(method,Integer.class);
                         m.invoke(SpringUtil.getBean(MeetingHttpService.class),(errorNum+1));
                     } else {
+                        updateToken(); //更新token
                         Method m = cls.getDeclaredMethod(method, String.class,Integer.class);
                         JSONObject json = JSONObject.parseObject(param);
                         String id = json.getString("id");
@@ -95,5 +97,13 @@ public class FailQueueJob implements CommandLineRunner {
                 e.printStackTrace();
             }
         }
+    }
+    /**
+     * 更新token
+     */
+    private void updateToken() {
+        String token = meetingHttpService.getToken(0);
+        logger.info("更新token的值："+token);
+        MeetingUtil.token= token;
     }
 }

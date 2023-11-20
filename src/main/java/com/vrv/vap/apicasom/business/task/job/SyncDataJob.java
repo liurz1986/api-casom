@@ -11,8 +11,6 @@ import com.vrv.vap.jpa.common.DateUtil;
 import com.vrv.vap.jpa.quartz.QuartzFactory;
 import com.vrv.vap.jpa.spring.SpringUtil;
 import lombok.SneakyThrows;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -20,9 +18,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,8 +29,6 @@ import java.util.Map;
 @DisallowConcurrentExecution  // 禁止同一个任务并发执行
 public class SyncDataJob implements Job {
     private static Logger logger = LoggerFactory.getLogger(SyncDataJob.class);
-    private HwMeetingService hwMeetingService= SpringUtil.getBean(HwMeetingService.class);
-    private MeetingHttpService meetingHttpService= SpringUtil.getBean(MeetingHttpService.class);
     private RedisUtils redisUtils= SpringUtil.getBean(RedisUtils.class);
     private ReservationHwMeetingDataServiceImpl reservationHwMeetingDataService= SpringUtil.getBean(ReservationHwMeetingDataServiceImpl.class);
     private JdbcTemplate jdbcTemplate= SpringUtil.getBean(JdbcTemplate.class);

@@ -4,8 +4,10 @@ import com.vrv.vap.apicasom.business.task.bean.ZkyUnitBean;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
+import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
 import com.vrv.vap.jpa.spring.SpringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -28,11 +30,11 @@ public class InitCommonDataJob implements Job {
     private HwMeetingService hwMeetingService= SpringUtil.getBean(HwMeetingService.class);
     private ZkyUnitService zkyUnitService= SpringUtil.getBean(ZkyUnitService.class);
     private RedisUtils redisUtils= SpringUtil.getBean(RedisUtils.class);
-    public static String token = null;
+
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try{
-            logger.info("初始化公共信息（分院/城市信息,会议室数量信息）任务执行开始");
+            logger.info("更新公共信息（分院/城市信息,会议室数量信息）任务执行开始");
             updateCity();
             initMeetingRooms();
             logger.info("初始化公共信息（分院/城市信息,会议室数量信息）任务执行完成");
@@ -41,13 +43,20 @@ public class InitCommonDataJob implements Job {
         }
 
     }
+
+
     /**
      * 更新城市信息
      */
     public void updateCity(){
-        logger.info("更新城市信息");
-        Map<String,ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
-        hwMeetingService.updateCity(zkyUnitBeanMap);
+        try{
+            logger.info("更新城市信息");
+            Map<String,ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
+            hwMeetingService.updateCity(zkyUnitBeanMap);
+        }catch (Exception e){
+            logger.error("更新城市信息本地缓存异常",e);
+        }
+
     }
 
     /**

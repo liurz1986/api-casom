@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vrv.vap.apicasom.business.task.bean.TimeBean;
+import com.vrv.vap.apicasom.business.task.bean.ZkyUnitBean;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
+import com.vrv.vap.apicasom.business.task.service.HwMeetingService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
+import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.business.task.service.impl.ReservationHwMeetingDataServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
@@ -19,10 +22,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 手动补全历史会议数据
- *
+ *  手动补全历史会议数据
+ *  初始化会议室数量放在redis中
+ *  初始城市信息本地缓存
  * @author: 梁国露
  * @since: 2023/2/16 17:04
  * @description:
@@ -45,7 +50,11 @@ public class InitDataJob implements CommandLineRunner {
 
     @Autowired
     private MeetingHttpService meetingHttpService;
+    @Autowired
+    private HwMeetingService hwMeetingService;
 
+    @Autowired
+    private ZkyUnitService zkyUnitService;
     @Autowired
     private RedisUtils redisUtils;
     @Autowired
@@ -84,6 +93,10 @@ public class InitDataJob implements CommandLineRunner {
     public void initData(){
             // 历史会议数据补全
             hisMeetingHandle();
+            // 初始化会议室数量放在redis中
+            initMeetingRooms();
+            // 初始城市信息本地缓存
+            updateCity();
 
     }
     private void hisMeetingHandle() {
@@ -145,4 +158,32 @@ public class InitDataJob implements CommandLineRunner {
             logger.warn("补全历史数据 会议告警 完成！");
         }
     }
+
+    /**
+     * 初始化会议室数量放在redis中
+     */
+    public void initMeetingRooms(){
+        try{
+            logger.info("初始会议室信息开始");
+            int total = meetingHttpService.initMeetingRooms();
+            logger.info("会议室数量："+total);
+            redisUtils.set("MeetingRooms",total);
+        }catch (Exception e){
+            logger.error("获取会议室信息异常",e);
+        }
+    }
+    /**
+     * 初始城市信息本地缓存
+     */
+    public void updateCity(){
+        try{
+            logger.info("初始城市信息本地缓存");
+            Map<String, ZkyUnitBean> zkyUnitBeanMap = zkyUnitService.initCity();
+            hwMeetingService.updateCity(zkyUnitBeanMap);
+        }catch (Exception e){
+            logger.error("初始城市信息本地缓存异常",e);
+        }
+
+    }
+
 }
