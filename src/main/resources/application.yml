@@ -158,8 +158,8 @@ feign:
 hw:
   send: #文件交换
     time: 0 0 1 * * ?
-    url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getRemoteNum
-    local-url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getLocalNum
+    url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getRemoteNum  #远程文件
+    local-url: http://192.168.118.228:9888/AKOD/rest/api/v1/statFileExchange/getLocalNum #本地文件
   meeting: # 会议信息
     sys:  # 会议室数量获取相关配置
       username: admin

@@ -3,6 +3,7 @@ import com.vrv.vap.apicasom.business.task.constant.MeetingUrlConstant;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
 import com.vrv.vap.apicasom.business.task.service.impl.HistoryHwMeetingDataServiceImpl;
 import com.vrv.vap.apicasom.business.task.service.impl.ReservationHwMeetingDataServiceImpl;
+import com.vrv.vap.apicasom.frameworks.util.Base64Utils;
 import com.vrv.vap.apicasom.frameworks.util.HttpClientUtils;
 import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
@@ -39,6 +40,17 @@ public class SynchDataTestController {
     @Value("${hw.meeting.url}")
     private String url;
 
+    /**
+     * 用户名和密码base64
+     * @param userName
+     * @param password
+     * @return
+     */
+    @GetMapping("base64")
+    public Result<String> base64(@RequestParam("userName") String userName,@RequestParam("password") String password){
+        String encode = Base64Utils.encodeBase64(userName + ":" + password);
+        return ResultUtil.success(encode);
+    }
     /**
      * 清楚redis中数据--测试用的
      * meetingTime:预约会议，同步时记录的上次同步时间
