@@ -39,7 +39,7 @@ public class SyncDataJob implements Job {
             long startTimeM = System.currentTimeMillis();
             Map<String,String> cronmap = (Map<String,String>)jobExecutionContext.getJobDetail().getJobDataMap().get(QuartzFactory.CUSTOM_DATA_KEY);
             String cron = cronmap.get("cron");
-            logger.info("定时执行会议相关数据同步任务开始.cron:"+cron);
+            logger.info("定时执行预约会议相关数据同步任务开始.cron:"+cron);
             Date date = new Date();
             String endTime = DateUtil.format(date,DateUtil.DEFAULT_DATE_PATTERN);
             String startTime = null;
@@ -54,11 +54,10 @@ public class SyncDataJob implements Job {
             reservationHwMeetingDataService.syncData(startTime,endTime);
             // redis保存同步时间，为了下次同步时开始时间
             redisUtils.set("meetingTime",endTime);
-            logger.info("定时执行会议相关数据同步任务结束,总花费的时间："+(System.currentTimeMillis()-startTimeM)/1000);
+            logger.info("定时执行预约会议相关数据同步任务结束,总花费的时间："+(System.currentTimeMillis()-startTimeM)/1000);
         }catch (Exception e){
-            logger.error("定时执行会议相关数据同步任务异常:{}",e);
+            logger.error("定时执行预约会议相关数据同步任务异常:{}",e);
         }
-
 
     }
 

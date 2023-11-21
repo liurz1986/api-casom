@@ -210,7 +210,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             saveMeetingParticipant(meetingInfo);
             logger.warn("历史会议{}会议节点保存成功！",id);
         } catch (Exception ex) {
-            logger.error("获取历史会议-会议ID为{}的会议详情失败！msg={}", id, ex);
+            logger.error("获取历史会议的会议详情失败,-会议ID为{}！msg={}", id, ex);
             MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
             meetingQueueVo.setId(UUIDUtils.get32UUID());
             meetingQueueVo.setMethod("getHistoryMeetingInfo");
@@ -325,6 +325,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
      */
     public void saveMeetingParticipant(MeetingInfo meetingInfo) {
         List<ParticipantRsp> participants = meetingInfo.getParticipants();
+        if(null == participants || participants.size() == 0){
+            logger.info("历史会议详情中没有节点数据，不执行会议节点保存操作,当前会议Id："+meetingInfo.getId());
+        }
         List<HwMeetingParticipant> list = new ArrayList<>();
         if (participants != null) {
             for (ParticipantRsp participantRsp : participants) {
@@ -512,7 +515,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             hwMeetingInfo.setDuration(conferenceRsp.getDuration());
             hwMeetingInfo.setOrganizationName(conferenceRsp.getOrganizationName());
             hwMeetingInfoService.save(hwMeetingInfo);
-            logger.warn("保存现有会议信息成功！会议ID={}", id);
+            logger.warn("保存预约会议会议信息成功！会议ID={}", id);
             // stage为ONLINE才会有数据 2023-08-08
             if(stage.equals("ONLINE")){
                 getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));

@@ -221,6 +221,8 @@ public class ZkySendDataServiceImpl implements ZkySendDataService {
                 zkySendDao.deleteRepeatTimeData(dateTime);
             }
             zkySendService.save(zkySends);
+        }else{
+            logger.info("cas文件信息同步,没有查询到数据");
         }
         logger.warn("cas文件信息同步，文件信息保存");
     }
