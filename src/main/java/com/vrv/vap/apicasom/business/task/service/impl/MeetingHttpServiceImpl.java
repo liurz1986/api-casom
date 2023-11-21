@@ -122,7 +122,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
-            logger.error("get token error,msg={}", ex);
+            logger.error("获取token异常,msg={}", ex);
             throw new RuntimeException("获取token异常");
         }
         return tokenRes;
@@ -738,7 +738,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
     public String getSysToken(){
         String tokenRes = "";
         String tokenUrl = url +"/sys-portal" + MeetingUrlConstant.TOKEN_URL;
-        logger.info("获取token时(sys-portal),用户名："+sysUserName+" ===密码："+sysPassword);
+        logger.info("查询会议室数据获取token时(sys-portal),用户名："+sysUserName+" ===密码："+sysPassword);
         Map<String, String> header = new HashMap<>();
         if(StringUtils.isEmpty(sysUserName)){
             throw new RuntimeException("获取token时,用户名不能为空");
@@ -747,7 +747,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             throw new RuntimeException("获取token时,用户密码不能为空");
         }
         String encode = Base64Utils.encodeBase64(sysUserName+":"+sysPassword);
-        logger.warn("get sys token base64 encode={}", encode);
+        logger.warn("查询会议室数据获取token，用户名和密码base64 encode={}", encode);
         header.put("Authorization", "Basic " + encode);
         try {
             String result = HttpClientUtils.doGet(tokenUrl, null, header);
@@ -755,7 +755,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             Token token = gson.fromJson(result, Token.class);
             tokenRes = token.getUuid();
         } catch (Exception ex) {
-            logger.error("get token error,msg={}", ex);
+            logger.error("查询会议室数据获取token异常,msg={}", ex);
             throw new RuntimeException(ex);
         }
         return tokenRes;
