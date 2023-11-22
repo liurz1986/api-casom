@@ -1,7 +1,6 @@
 package com.vrv.vap.apicasom.business.task.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.vrv.vap.apicasom.business.task.bean.HwMeetingAlarm;
 import com.vrv.vap.apicasom.business.task.dao.HwMeetingDao;
 import com.vrv.vap.apicasom.business.task.service.HwMeetingDataService;
 import com.vrv.vap.apicasom.business.task.service.MeetingHttpService;
@@ -12,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
@@ -36,6 +35,7 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
      *
      * 2023-7-21
      */
+    @Transactional
     @Override
     public void syncData(String startTime,String endTime){
         logger.info("预约会议数据同步开始");
@@ -51,7 +51,6 @@ public class ReservationHwMeetingDataServiceImpl implements HwMeetingDataService
             logger.warn("获取预约会议调度id为空,不处理");
             return;
         }
-        logger.warn("预约会议调度，会议有{}个！",ids.size());
         logger.info("预约会议调度所有会议id："+(JSON.toJSONString(ids)));
         handleMeetingInfo(ids);
         logger.warn("预约会议调度，会议详情保存成功");

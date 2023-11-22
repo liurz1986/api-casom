@@ -522,16 +522,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
             logger.warn("保存现有会议节点信息成功！");
         } catch (Exception ex) {
-            logger.error("查询预约会议详情异常：{}",ex);
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getNowMeetingInfo");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            logger.error("查询预约会议详情异常,会议Id：{}，异常信息：{}",id,ex);
+            throw new RuntimeException("查询预约会议详情异常");
         }
     }
 
@@ -578,7 +570,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
             saveNowMeetingParticipants(list,id,organizationName,duration,scheduleStartTime);
         } catch (Exception ex) {
-            logger.error("保存现有会议节点信息失败，msg={}", ex);
+            logger.error("保存现有会议节点信息失败,会议id：{}，msg={}",id, ex);
             throw new RuntimeException(ex);
         }
 
@@ -644,7 +636,6 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                     urlStr = url+"/conf-portal" + MeetingUrlConstant.NOW_ALARM_URL;
                     urlStr = urlStr.replace("{0}", id).replace("{page}",i+"");
                     res = HttpClientUtils.doGet(urlStr, null, header);
-                    logger.warn("getNowMeetingAlarm 接口返回：{}",res);
                     AlarmResBean alarmResBeanRes = gson.fromJson(res, AlarmResBean.class);
                     List<AlarmVo> contentListRes = alarmResBeanRes.getContent();
                     if(CollectionUtils.isNotEmpty(contentListRes)){
@@ -654,16 +645,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             }
             saveNowMeetingAlarm(result);
         } catch (Exception ex) {
-            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex);
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getHistoryMeetingAlarm");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            logger.error("预约会议告警处理失败,-会议ID{}！信息为={}", id, ex);
+            throw new RuntimeException("预约会议告警处理失败");
         }
     }
 
