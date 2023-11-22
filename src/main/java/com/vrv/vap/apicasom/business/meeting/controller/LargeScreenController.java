@@ -3,16 +3,7 @@ package com.vrv.vap.apicasom.business.meeting.controller;
 import com.vrv.vap.apicasom.business.meeting.service.LargeScreenService;
 import com.vrv.vap.apicasom.business.meeting.util.MettingCommonUtil;
 import com.vrv.vap.apicasom.business.meeting.vo.*;
-import com.vrv.vap.apicasom.business.task.bean.HwMeetingAttendee;
-import com.vrv.vap.apicasom.business.task.bean.HwMeetingInfo;
-import com.vrv.vap.apicasom.business.task.bean.HwMeetingParticipant;
-import com.vrv.vap.apicasom.business.task.service.HwMeetingAlarmService;
-import com.vrv.vap.apicasom.business.task.service.HwMeetingAttendeeService;
-import com.vrv.vap.apicasom.business.task.service.HwMeetingInfoService;
-import com.vrv.vap.apicasom.business.task.service.HwMeetingParticipantService;
 import com.vrv.vap.common.utils.StringUtils;
-import com.vrv.vap.jpa.common.DateUtil;
-import com.vrv.vap.jpa.common.UUIDUtils;
 import com.vrv.vap.jpa.web.Result;
 import com.vrv.vap.jpa.web.ResultCodeEnum;
 import com.vrv.vap.jpa.web.ResultUtil;
@@ -24,14 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
 /**
- * 大屏接口
+ * 中国科学院涉密视频会议系统运行状况大屏接口
  *
  * @author liurz
  * @data 2023-02-22
@@ -43,12 +31,6 @@ public class LargeScreenController {
 
     @Autowired
     private LargeScreenService largeScreenService;
-    @Autowired
-    private HwMeetingInfoService hwMeetingInfoService;
-    @Autowired
-    private HwMeetingParticipantService hwMeetingParticipantService;
-    @Autowired
-    private HwMeetingAttendeeService hwMeetingAttendeeService;
     /**
      * 基本信息：会议视屏节点总数、当前节点在线总数、举办会议次数、参会总人数、会议总时长
      * type:quarter(季)，halfyear(半年)、year(一年)
