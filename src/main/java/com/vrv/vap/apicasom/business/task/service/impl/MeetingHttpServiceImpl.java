@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -172,7 +170,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 }
             }
         } catch (Exception ex) {
-            logger.error("查询时间段在{}到{}的历史会议记录错误！msg={}", startTime, endTime, ex);
+            logger.error("查询历史会议列表异常,查询时间段在{}到{}的历史会议记录错误！msg={}", startTime, endTime, ex);
             throw new RuntimeException("查询历史会议列表异常");
         }
         return result;
