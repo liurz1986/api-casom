@@ -80,6 +80,14 @@ public class HistoryHwMeetingDataServiceImpl implements HwMeetingDataService {
 
     @Override
     public void handleMeetingAlarm(List<String> ids) {
+        // 重新获取token，防止token过期
+        String token = meetingHttpService.getToken(0);
+        if(StringUtils.isEmpty(token)){
+            logger.error("获取token为空,请确认！");
+            return;
+        }
+        logger.info("token的值："+token);
+        MeetingUtil.token= token;
         if(CollectionUtils.isNotEmpty(ids)){
             // 删除会议告警信息
             hwMeetingDao.deleteDbData("hw_meeting_alarm",ids);

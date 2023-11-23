@@ -38,8 +38,8 @@ public class HisMeetingSyncDataJob implements Job {
             Date date = new Date();
             Object hisMeetingTimeObj = redisUtils.get("hisMeetingTime");
             logger.warn("redis中记录上次历史数据同步的时间为："+hisMeetingTimeObj);
-            if(null == hisMeetingTimeObj){
-                startTime = DateUtil.format(CronUtil.getPreviousValidDate(cron,date),DateUtil.DEFAULT_DATE_PATTERN);
+            if(null == hisMeetingTimeObj){// 初次的话，向前推一个星期
+                startTime = getStartTime();
             }else{
                 startTime = String.valueOf(hisMeetingTimeObj);
             }
@@ -52,5 +52,14 @@ public class HisMeetingSyncDataJob implements Job {
         }catch (Exception e){
             logger.error("历史会议数据同步任务执行异常:{}",e);
         }
+
     }
+    // 当前时间向前推一周
+    private String getStartTime(){
+        Date date = new Date();
+        long time = date.getTime()-7*24*60*60*1000;
+        String startTime = DateUtil.format(new Date(time),DateUtil.DEFAULT_DATE_PATTERN);
+        return startTime;
+    }
+
 }

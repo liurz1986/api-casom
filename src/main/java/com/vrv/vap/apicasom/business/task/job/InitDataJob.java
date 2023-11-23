@@ -12,6 +12,7 @@ import com.vrv.vap.apicasom.business.task.service.ZkyUnitService;
 import com.vrv.vap.apicasom.business.task.service.impl.ReservationHwMeetingDataServiceImpl;
 import com.vrv.vap.apicasom.frameworks.util.MeetingUtil;
 import com.vrv.vap.apicasom.frameworks.util.RedisUtils;
+import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -76,6 +77,8 @@ public class InitDataJob implements CommandLineRunner {
     @Value("${hw.meeting.hiscompletion.endtime}")
     private String hisEndtime;
 
+    public static boolean isToken=false;
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -137,26 +140,61 @@ public class InitDataJob implements CommandLineRunner {
      * @param time
      */
     public void hisHandleData(TimeBean time){
-        // 处理数据查询时间
-        String startTime = time.getStartTime();
-        String endTime = time.getEndTime();
-        logger.warn("补全历史数据开始!开始时间={}，结束时间={}",startTime,endTime);
-        String token = meetingHttpService.getToken(0);
-        if(StringUtils.isEmpty(token)){
-            logger.error("获取token为空,请确认！");
-            return;
+        try{
+            long stime = System.currentTimeMillis();
+            // 处理数据查询时间
+            String startTime = time.getStartTime();
+            String endTime = time.getEndTime();
+            logger.warn("手动补全历史数据开始!开始时间={}，结束时间={}",startTime,endTime);
+            String token = meetingHttpService.getToken(0);
+            if(StringUtils.isEmpty(token)){
+                logger.error("获取token为空,请确认！");
+                return;
+            }
+            logger.info("token的值："+token);
+            MeetingUtil.token= token;
+            // 异步循环调用获取token接口，防止token过期
+            tokenHandle();
+            // 处理数据
+            List<String> ids = historyHwMeetingDataService.queryMeetingIds(startTime,endTime);
+            logger.warn("补全历史数据 会议ID有{}个！",ids.size());
+            if(CollectionUtils.isNotEmpty(ids)){
+                historyHwMeetingDataService.handleMeetingInfo(ids);
+                logger.warn("补全历史数据 会议详情 完成！");
+                historyHwMeetingDataService.handleMeetingAlarm(ids);
+                logger.warn("补全历史数据 会议告警 完成！");
+            }
+            logger.info("手动补全历史数据总时间："+(System.currentTimeMillis()-stime));
+            isToken = false;
+        }catch (Exception e){
+            isToken = false;
+            logger.error("手动补全历史数据异常",e);
+            throw new RuntimeException("手动补全历史数据异常");
         }
-        logger.info("token的值："+token);
-        MeetingUtil.token= token;
-        // 处理数据
-        List<String> ids = historyHwMeetingDataService.queryMeetingIds(startTime,endTime);
-        logger.warn("补全历史数据 会议ID有{}个！",ids.size());
-        if(CollectionUtils.isNotEmpty(ids)){
-            historyHwMeetingDataService.handleMeetingInfo(ids);
-            logger.warn("补全历史数据 会议详情 完成！");
-            historyHwMeetingDataService.handleMeetingAlarm(ids);
-            logger.warn("补全历史数据 会议告警 完成！");
-        }
+    }
+
+    private void tokenHandle() {
+        isToken =true;
+        new Thread(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                while(isToken){
+                    try{
+                        Thread.sleep(120000);
+                        String token = meetingHttpService.getToken(0);
+                        if(StringUtils.isEmpty(token)){
+                            logger.error("获取token为空,请确认！");
+                            return;
+                        }
+                        logger.info("token的值："+token);
+                        MeetingUtil.token= token;
+                    }catch (Exception e){
+                        logger.error("手动补全历史数据时，定时获取token异常",e);
+                    }
+                }
+            }
+        }).start();
     }
 
     /**

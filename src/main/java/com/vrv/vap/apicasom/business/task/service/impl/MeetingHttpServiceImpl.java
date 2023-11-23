@@ -209,15 +209,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             logger.warn("历史会议{}会议节点保存成功！",id);
         } catch (Exception ex) {
             logger.error("获取历史会议的会议详情失败,-会议ID为{}！msg={}", id, ex);
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getHistoryMeetingInfo");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            throw new RuntimeException("获取历史会议的会议详情失败");
         }
     }
 
@@ -311,6 +303,8 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             hwMeetingAttendee.setParticipantName(entry.getKey());
             hwMeetingAttendee.setUserCount(entry.getValue().size());
             hwMeetingAttendees.add(hwMeetingAttendee);
+        }
+        if(hwMeetingAttendees.size() > 1){
             hwMeetingAttendeeService.save(hwMeetingAttendees);
         }
         logger.warn("保存会议《{}》与会人信息完成，与会人个数{}", meetingInfo.getId(), hwMeetingAttendees.size());
@@ -327,7 +321,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             logger.info("历史会议详情中没有节点数据，不执行会议节点保存操作,当前会议Id："+meetingInfo.getId());
         }
         List<HwMeetingParticipant> list = new ArrayList<>();
-        if (participants != null) {
+        if (null != participants && participants.size() >0) {
             for (ParticipantRsp participantRsp : participants) {
                 HwMeetingParticipant participant = new HwMeetingParticipant();
                 participant.setId(UUIDUtils.get32UUID());
@@ -350,7 +344,9 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 participant.setOutService(pointIsOutService(meetingInfo));
                 list.add(participant);
             }
-            hwMeetingParticipantService.save(list);
+            if(list.size() > 0){
+                hwMeetingParticipantService.save(list);
+            }
         }
         logger.warn("保存会议《{}》节点信息完成，节点个数{}", meetingInfo.getId(), list.size());
     }
@@ -396,18 +392,10 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 }
             }
             saveHistMeetingAlarm(contentList,id);
-            logger.warn("保存历史会议-会议ID{}的告警信息成功！",id);
+            logger.warn("历史会议告警成功-会议ID{}的告警信息成功！",id);
         } catch (Exception ex) {
-            logger.error("保存历史会议-会议ID{}的告警信息失败！信息为={}", id, ex);
-            MeetingQueueVo meetingQueueVo = new MeetingQueueVo();
-            meetingQueueVo.setId(UUIDUtils.get32UUID());
-            meetingQueueVo.setMethod("getHistoryMeetingAlarm");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            meetingQueueVo.setParam(JSONObject.toJSONString(jsonObject));
-            meetingQueueVo.setErrorMsg(ex.getLocalizedMessage());
-            meetingQueueVo.setErrorNum(errorNum);
-            QueueUtil.put(meetingQueueVo);
+            logger.error("历史会议告警异常-会议ID{},信息为={}", id, ex);
+            throw new RuntimeException("历史会议告警异常");
         }
     }
 
@@ -518,7 +506,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
             if(stage.equals("ONLINE")){
                 getNowMeetingParticipants(conferenceRsp.getId(), conferenceRsp.getOrganizationName(), conferenceRsp.getDuration(), CronUtil.utcToLocal(conferenceRsp.getScheduleStartTime()));
             }
-            logger.warn("保存现有会议节点信息成功！");
+            logger.warn("保存现有会议节点信息成功,会议id：{}",id);
         } catch (Exception ex) {
             logger.error("查询预约会议详情异常,会议Id：{}，异常信息：{}",id,ex);
             throw new RuntimeException("查询预约会议详情异常");
