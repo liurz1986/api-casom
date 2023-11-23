@@ -292,7 +292,7 @@ public class MeetingHttpServiceImpl implements MeetingHttpService {
                 hwMeetingAttendee.setParticipantCode(participantRsp.getId());
                 ZkyUnitBean bean=  zkyUnitBeanMap.get(participantRsp.getId());
                 if(null == bean){
-                    logger.error(participantRsp.getId()+"在表zky_unit没有配置");
+                    logger.error("历史会议,与会人信息:"+participantRsp.getId()+"在表zky_unit没有配置");
                 }else{
                     hwMeetingAttendee.setBranch(bean.getBranch());
                     hwMeetingAttendee.setCity(bean.getCity());
