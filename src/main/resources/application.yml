@@ -98,9 +98,9 @@ vap:
     insert-sql: insert into sys_log (id, request_ip,type, user_id, user_name, organization_name, description, request_url, request_time, request_method, method_name, bean_name, params_value, response_result, login_type, role_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   swagger:
     enabled: true
-    title: api-alarmdeal接口文档
+    title: api-casom接口文档
     description: api-接口文档
-    base-package: com.vrv.vap.alarmdeal
+    base-package: com.vrv.vap.apicasom
     version: 2.5.4
 
 #文件路径配置
